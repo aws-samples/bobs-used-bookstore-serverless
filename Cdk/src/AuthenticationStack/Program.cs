@@ -4,11 +4,9 @@ using AuthenticationStack;
 
 var app = new App();
 
-var postFix = System.Environment.GetEnvironmentVariable("STACK_POSTFIX");
-
 var authenticationStack = new AuthenticationStack.AuthenticationStack(
     app,
-    $"AuthenticationStack{postFix}",
-    new AuthenticationProps($"{postFix}"));
+    $"AuthenticationStack",
+    new AuthenticationProps());
 
 app.Synth();

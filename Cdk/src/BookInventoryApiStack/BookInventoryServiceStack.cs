@@ -7,8 +7,7 @@ using BookInventoryApiStack.Api;
 
 using Construct = Constructs.Construct;
 
-public record BookInventoryServiceStackProps(
-    string Postfix);
+public record BookInventoryServiceStackProps();
 
 public class BookInventoryServiceStack : Stack
 {
@@ -24,7 +23,7 @@ public class BookInventoryServiceStack : Stack
         var searchBooksApi = new SearchBooksApi(
             this,
             "SearchBooksEndpoint",
-            new BookInventoryServiceStackProps(""));
+            new BookInventoryServiceStackProps());
 
         var api = new SharedConstructs.Api(
             this,
@@ -37,11 +36,11 @@ public class BookInventoryServiceStack : Stack
         
         var apiEndpointOutput = new CfnOutput(
             this,
-            $"APIEndpointOutput{apiProps.Postfix}",
+            $"APIEndpointOutput",
             new CfnOutputProps
             {
                 Value = api.Url,
-                ExportName = $"ApiEndpoint{apiProps.Postfix}",
+                ExportName = $"ApiEndpoint",
                 Description = "Endpoint of the Book Inventory API"
             });
     }

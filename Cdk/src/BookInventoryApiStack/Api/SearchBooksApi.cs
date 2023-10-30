@@ -16,14 +16,13 @@ public class SearchBooksApi : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            $"SearchBooksApi{props.Postfix}",
+            $"SearchBooksApi",
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_Search_Generated::Search",
                 Environment = new Dictionary<string, string>(1)
                 {
-                    { "ENV", props.Postfix },
-                    { "POWERTOOLS_SERVICE_NAME", $"SearchBooksApi{props.Postfix}" },
+                    { "POWERTOOLS_SERVICE_NAME", "SearchBooksApi" },
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;

@@ -2,6 +2,8 @@
 
 TODO: Fill this README out!
 
+cdk deploy BookInventoryServiceStack --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+
 Be sure to:
 
 * Change the title in this README
