@@ -20,8 +20,6 @@ public class LambdaFunctionProps : FunctionProps
     public bool IsNativeAot { get; set; }
     
     public string CodePath { get; set; }
-    
-    public string Postfix { get; set; }
 }
 
 public class LambdaFunction : Construct

@@ -7,7 +7,7 @@ using Amazon.CDK.AWS.SQS;
 
 using Constructs;
 
-public record AuthenticationProps(string Postfix);
+public record AuthenticationProps();
 
 public class AuthenticationStack : Stack
 {

@@ -14,9 +14,7 @@ public static class StartupExtensions
 {
    public static IServiceCollection AddSharedServices(this IServiceCollection services, SharedServiceOptions? options = null)
     {
-        AWSSDKHandler.RegisterXRayForAllServices();
-        
-        var postfix = Environment.GetEnvironmentVariable("STACK_POSTFIX");
+        AWSSDKHandler.RegisterXRayForAllServices(); ;
         
         if (options is null)
         {
@@ -25,7 +23,7 @@ public static class StartupExtensions
 
         if (!options.SkipAppConfiguration)
         {
-            services.AddApplicationConfiguration(postfix);
+            services.AddApplicationConfiguration();
         }
 
         if (!options.SkipRepository)
@@ -37,7 +35,7 @@ public static class StartupExtensions
         return services;
     }
 
-    private static IServiceCollection AddApplicationConfiguration(this IServiceCollection services, string postfix)
+    private static IServiceCollection AddApplicationConfiguration(this IServiceCollection services)
     {
         var config = new ConfigurationBuilder()
             .AddEnvironmentVariables()
