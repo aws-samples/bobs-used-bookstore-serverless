@@ -1,12 +1,7 @@
-namespace BookInventory.Repository;
-
 using BookInventory.Models;
 
-public interface IBookInventoryRepository
+namespace BookInventory.Repository;
+
+public interface IBookInventoryRepository : IBaseRepository<Book>
 {
-    Task<IList<Book>> GetAllBooks();
-
-    Task<Book> GetBookById(string id);
-
-    Task<int> AddBook(Book newBook);
 }
