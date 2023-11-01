@@ -3,9 +3,11 @@ using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.APIGatewayEvents;
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Tracing;
+using BookInventory.Api.Extensions;
 using BookInventory.Common;
 using BookInventory.Models;
 using BookInventory.Service;
+using FluentValidation;
 using System.Net;
 
 namespace BookInventory.Api;
@@ -13,10 +15,12 @@ namespace BookInventory.Api;
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
+    private readonly IValidator<CreateBookDto> createBookValidator;
 
-    public Functions(IBookInventoryService bookInventoryService)
+    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator)
     {
         this.bookInventoryService = bookInventoryService;
+        this.createBookValidator = createBookValidator;
     }
 
     [LambdaFunction()]
@@ -41,11 +45,12 @@ public class Functions
     [RestApi(LambdaHttpMethod.Post, "/books")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
     {
-        if (createBookDto is null)
+        var validationResult = createBookValidator.Validate(createBookDto);
+        if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(
                 HttpStatusCode.BadRequest,
-                "Book cannot be null");
+                validationResult.GetErrorMessage());
         }
 
         await this.bookInventoryService.AddBookAsync(createBookDto);
