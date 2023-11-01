@@ -1,11 +1,7 @@
-﻿namespace BookInventory.Service;
-
-using System.Text.Json;
-
-using AWS.Lambda.Powertools.Logging;
-
-using BookInventory.Models;
+﻿using BookInventory.Models;
 using BookInventory.Repository;
+
+namespace BookInventory.Service;
 
 public class BookInventoryService : IBookInventoryService
 {
@@ -15,60 +11,43 @@ public class BookInventoryService : IBookInventoryService
     {
         this.bookInventoryRepository = bookInventoryRepository;
     }
-    
-    public async Task<IList<Book>> GetAllBooks()
+
+    public async Task<BookDto> GetBookById(string id)
     {
-        return await this.bookInventoryRepository.GetAllBooks();
+        var book = await this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, id);
+        var bookDto = new BookDto()
+        {
+            BookId = book.SK,
+            Name = book.Name,
+            Author = book.Author,
+            BookType = book.BookType,
+            Condition = book.Condition,
+            Genre = book.Genre,
+            Publisher = book.Publisher,
+            ISBN = book.ISBN,
+            Summary = book.Summary,
+            Price = book.Price,
+            Quantity = book.Quantity,
+            Year = book.Year,
+            CoverImage = book.CoverImageUrl
+        };
+        return bookDto;
     }
-    
-    public async Task<Book> GetBookById(string id)
+
+    public async Task AddBookAsync(CreateBookDto dto)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            Logger.LogError($"Book id {id} is not valid");
-            throw new Exception("No book found");
-        }
-
-        var book = await this.bookInventoryRepository.GetBookById(id);
-        if (book is null)
-        {
-            Logger.LogError($"Book id {id} is not found");
-            throw new Exception("No book found");
-        }
-        Logger.LogInformation($"Searched book {JsonSerializer.Serialize(book)}");
-        return book;
-    }
-
-    public async Task<string> AddBook(Book newBook)
-    {
-        if (newBook is null || string.IsNullOrWhiteSpace(newBook.Name))
-        {
-            Logger.LogError($"Book is null, cannot add new Book");
-            throw new Exception("New book cannot be added"); 
-        }
-        
-        if (string.IsNullOrWhiteSpace(newBook.Id))
-        {
-            newBook.Id = Guid.NewGuid().ToString();
-        }
-        else
-        {
-            var existingBook = await this.bookInventoryRepository.GetBookById(newBook.Id);
-            if (!string.IsNullOrWhiteSpace(existingBook?.Id))
-            {
-                Logger.LogError($"New book id {newBook.Id} already exists");
-                throw new Exception("New book already exists, cannot be added");
-            }
-        }
-
-        if (await this.bookInventoryRepository.AddBook(newBook) > 0)
-        {
-            return newBook.Id;
-        }
-        else
-        {
-            Logger.LogError($"Error in adding new Book id {newBook.Id}");
-            throw new Exception($"Error in adding new Book id {newBook.Id}");
-        }
+        var book = new Book(
+            dto.Name,
+            dto.Author,
+            dto.ISBN,
+            dto.Publisher,
+            dto.BookType,
+            dto.Genre,
+            dto.Condition,
+            dto.Price,
+            dto.Quantity,
+            dto.Summary,
+            dto.Year);
+        await this.bookInventoryRepository.SaveAsync(book);
     }
 }

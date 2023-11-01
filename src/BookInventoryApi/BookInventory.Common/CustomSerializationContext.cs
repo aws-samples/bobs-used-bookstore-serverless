@@ -1,19 +1,16 @@
 namespace BookInventory.Common;
 
+using Amazon.Lambda.APIGatewayEvents;
+using BookInventory.Models;
+using BookInventory.Models.Common;
 using System.Text.Json.Serialization;
 
-using Amazon.Lambda.APIGatewayEvents;
-
-using BookInventory.Models;
-using BookInventory.Models.Request;
-
-[JsonSerializable(typeof(NewBookRequest))]
-[JsonSerializable(typeof(Book))]
+[JsonSerializable(typeof(CreateBookDto))]
 [JsonSerializable(typeof(APIGatewayProxyRequest))]
 [JsonSerializable(typeof(APIGatewayProxyResponse))]
-[JsonSerializable(typeof(ApiWrapper<String>))]
-[JsonSerializable(typeof(ApiWrapper<Book>))]
-[JsonSerializable(typeof(String))]
+[JsonSerializable(typeof(ApiWrapper<string>))]
+[JsonSerializable(typeof(ApiWrapper<PaginatedResult<BookDto>>))]
+[JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
 public partial class CustomSerializationContext : JsonSerializerContext
 {

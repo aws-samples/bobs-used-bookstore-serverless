@@ -4,9 +4,7 @@ using BookInventory.Models;
 
 public interface IBookInventoryService
 {
-    Task<IList<Book>> GetAllBooks();
+    Task<BookDto> GetBookById(string id);
 
-    Task<Book> GetBookById(string id);
-
-    Task<string> AddBook(Book newBook); 
+    Task AddBookAsync(CreateBookDto dto);
 }
