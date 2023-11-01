@@ -6,23 +6,23 @@ using Constructs;
 
 using SharedConstructs;
 
-public class SearchBooksApi : Construct
+public class AddBooksApi : Construct
 {
     public Function Function { get; }
 
-    public SearchBooksApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public AddBooksApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
         this.Function = new LambdaFunction(
             this,
-            $"SearchBooksApi",
+            $"AddBooksApi",
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
-                Handler = "BookInventory.Api::BookInventory.Api.Functions_Search_Generated::Search",
+                Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
                 Environment = new Dictionary<string, string>(1)
                 {
-                    { "POWERTOOLS_SERVICE_NAME", "SearchBooksApi" },
+                    { "POWERTOOLS_SERVICE_NAME", "AddBooksApi" },
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;
