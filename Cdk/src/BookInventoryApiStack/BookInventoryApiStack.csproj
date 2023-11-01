@@ -15,7 +15,6 @@
 
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\BookInventoryApi\BookInventory.Models\BookInventory.Models.csproj" />
       <ProjectReference Include="..\SharedConstructs\SharedConstructs.csproj" />
     </ItemGroup>
 
