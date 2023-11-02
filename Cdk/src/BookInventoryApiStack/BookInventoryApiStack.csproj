@@ -18,4 +18,9 @@
       <ProjectReference Include="..\SharedConstructs\SharedConstructs.csproj" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <Folder Include="Database\" />
+    </ItemGroup>
+
 </Project>

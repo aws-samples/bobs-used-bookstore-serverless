@@ -1,7 +1,8 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.DynamoDB;
 using BookInventoryApiStack.Api;
-using BookInventoryApiStack.Database;
+using SharedConstructs;
 using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
@@ -20,13 +21,16 @@ public class BookInventoryServiceStack : Stack
         props)
     {
         //Database
-        var bookInventoryDB = new BookInventoryDB(
-            this, "BookInventoryTable", new BookInventoryServiceStackProps());
+        var bookInventory = new DynamoDBTable(
+            this, "BookInventoryTable", new TableProps()
+            {
+                TableName = "BookInventory"
+            });
 
         //Lambda Functions
-        var searchBooksApi = new GetBooksApi(
+        var getBooksApi = new GetBooksApi(
             this,
-            "SearchBooksEndpoint",
+            "GetBooksEndpoint",
             new BookInventoryServiceStackProps());
         var addBooksApi = new AddBooksApi(
             this,
@@ -41,7 +45,7 @@ public class BookInventoryServiceStack : Stack
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Get,
-                searchBooksApi.Function,
+                getBooksApi.Function,
                 false)
             .WithEndpoint(
                 "/books",
@@ -50,8 +54,8 @@ public class BookInventoryServiceStack : Stack
                 false);
 
         //Grant DynamoDB Permission
-        bookInventoryDB.Table.GrantReadData(searchBooksApi.Function.Role);
-        bookInventoryDB.Table.GrantReadWriteData(addBooksApi.Function.Role);
+        bookInventory.Table.GrantReadData(getBooksApi.Function.Role);
+        bookInventory.Table.GrantReadWriteData(addBooksApi.Function.Role);
 
         var apiEndpointOutput = new CfnOutput(
             this,
