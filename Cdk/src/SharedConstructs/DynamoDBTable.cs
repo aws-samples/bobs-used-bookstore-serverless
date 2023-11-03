@@ -15,8 +15,7 @@ namespace SharedConstructs
                 TableName = props.TableName ?? id,
                 PartitionKey = props.PartitionKey ?? new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "PK", Type = AttributeType.STRING },
                 SortKey = props.SortKey ?? new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "SK", Type = AttributeType.STRING },
-                BillingMode = props.BillingMode ?? BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = props.RemovalPolicy ?? Amazon.CDK.RemovalPolicy.DESTROY
+                BillingMode = props.BillingMode ?? BillingMode.PAY_PER_REQUEST
             });
         }
     }
