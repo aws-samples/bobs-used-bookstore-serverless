@@ -54,8 +54,8 @@ public class BookInventoryServiceStack : Stack
                 false);
 
         //Grant DynamoDB Permission
-        bookInventory.Table.GrantReadData(getBooksApi.Function.Role);
-        bookInventory.Table.GrantReadWriteData(addBooksApi.Function.Role);
+        bookInventory.Table.GrantReadData(getBooksApi.Function.Role!);
+        bookInventory.Table.GrantReadWriteData(addBooksApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,

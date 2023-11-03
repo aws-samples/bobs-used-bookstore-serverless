@@ -15,12 +15,12 @@ namespace BookInventory.Api;
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
-    private readonly IValidator<CreateBookDto> createBookValidator;
+    private readonly IValidator<CreateBookDto> bookValidator;
 
-    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator)
+    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> bookValidator)
     {
         this.bookInventoryService = bookInventoryService;
-        this.createBookValidator = createBookValidator;
+        this.bookValidator = bookValidator;
     }
 
     [LambdaFunction()]
@@ -49,7 +49,7 @@ public class Functions
     [RestApi(LambdaHttpMethod.Post, "/books")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
     {
-        var validationResult = createBookValidator.Validate(createBookDto);
+        var validationResult = bookValidator.Validate(createBookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(

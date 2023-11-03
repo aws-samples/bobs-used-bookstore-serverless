@@ -14,14 +14,14 @@ namespace BookInventory.Api.UnitTests;
 public class FunctionsTests
 {
     private readonly IBookInventoryService bookInventoryServiceFake;
-    private readonly IValidator<CreateBookDto> createBookValidator;
+    private readonly IValidator<CreateBookDto> bookValidator;
     private readonly Functions sut;
 
     public FunctionsTests()
     {
         this.bookInventoryServiceFake = A.Fake<IBookInventoryService>();
-        this.createBookValidator = new CreateBookDtoValidator();
-        this.sut = new Functions(this.bookInventoryServiceFake, this.createBookValidator);
+        this.bookValidator = new CreateBookDtoValidator();
+        this.sut = new Functions(this.bookInventoryServiceFake, this.bookValidator);
     }
 
     [Fact]

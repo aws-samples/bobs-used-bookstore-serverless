@@ -13,12 +13,12 @@ namespace BookInventory.Repository
             this.context = context;
         }
 
-        public async Task<TEntity> GetByPrimaryKeyAsync(object partitionKey)
+        public async Task<TEntity?> GetByPrimaryKeyAsync(object partitionKey)
         {
             return await context.LoadAsync<TEntity>(partitionKey);
         }
 
-        public async Task<TEntity> GetByPrimaryKeyAsync(object partitionKey, object sortKey)
+        public async Task<TEntity?> GetByPrimaryKeyAsync(object partitionKey, object sortKey)
         {
             return await context.LoadAsync<TEntity>(partitionKey, sortKey);
         }

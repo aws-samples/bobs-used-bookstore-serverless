@@ -4,9 +4,9 @@ namespace BookInventory.Repository
 {
     public interface IBaseRepository<TEntity> where TEntity : class
     {
-        Task<TEntity> GetByPrimaryKeyAsync(object partitionKey);
+        Task<TEntity?> GetByPrimaryKeyAsync(object partitionKey);
 
-        Task<TEntity> GetByPrimaryKeyAsync(object partitionKey, object sortKey);
+        Task<TEntity?> GetByPrimaryKeyAsync(object partitionKey, object sortKey);
 
         Task<IEnumerable<TEntity>> QueryAsync(object partitionKey);
 
