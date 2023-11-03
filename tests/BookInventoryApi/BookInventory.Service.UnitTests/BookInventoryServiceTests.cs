@@ -30,20 +30,59 @@ public class BookInventoryServiceTests
         // Assert
         response.Should().NotBeNull();
         response.Name.Should().Be("History");
-        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappened(1, Times.Exactly);
+        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task GetBookById_WhenRequestIsInvalid_ShouldRespondNullResult()
+    {
+        // Arrange
+        Book? book = null;
+        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab"))
+            .Returns(book);
+
+        // Act
+        var response = await this.sut.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab");
+
+        // Assert
+        response.Should().BeNull();
+        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public async Task AddBook_WhenRequestIsValid_ShouldSaveData()
     {
         // Arrange
+        CreateBookDto book = new()
+        {
+            Name = "2020: The Apocalypse",
+            Author = "Li Juan",
+            ISBN = "6556784356",
+            BookType = "Hardcover",
+            Condition = "Like New",
+            Genre = "Mystery, Thriller & Suspense",
+            Publisher = "Arcadia Books",
+            Price = 10,
+            Quantity = 1,
+            Summary = "Sample book"
+        };
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._))
             .Returns(Task.CompletedTask);
-        var book = new CreateBookDto() { Author = "Bob", BookType = "Old", Condition = "Like New", ISBN = "42343222", Name = "History", Quantity = 10, Year = 2023 };
         // Act
         await this.sut.AddBookAsync(book);
 
         // Assert
-        A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).MustHaveHappened(1, Times.Exactly);
+        A.CallTo(() => this.bookInventoryRepository.SaveAsync(
+            A<Book>.That.Matches(x => x.Name == book.Name
+            && x.Author == book.Author
+            && x.ISBN == book.ISBN
+            && x.BookType == book.BookType
+            && x.Condition == book.Condition
+            && x.Genre == book.Genre
+            && x.Publisher == book.Publisher
+            && x.Price == book.Price
+            && x.Quantity == book.Quantity
+            && x.Summary == book.Summary
+            ))).MustHaveHappenedOnceExactly();
     }
 }

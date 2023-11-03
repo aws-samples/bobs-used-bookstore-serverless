@@ -32,12 +32,16 @@ public class Functions
 
         if (string.IsNullOrWhiteSpace(id))
         {
-            return ApiGatewayResponseBuilder.Build(
-                HttpStatusCode.BadRequest,
-                "Id cannot be null");
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");
         }
 
         var book = await this.bookInventoryService.GetBookById(id);
+
+        if (book == null)
+        {
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, $"Book not found for id {id}");
+        }
+
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, book);
     }
 
@@ -54,6 +58,6 @@ public class Functions
         }
 
         await this.bookInventoryService.AddBookAsync(createBookDto);
-        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created);
     }
 }

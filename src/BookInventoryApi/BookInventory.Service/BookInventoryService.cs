@@ -12,10 +12,10 @@ public class BookInventoryService : IBookInventoryService
         this.bookInventoryRepository = bookInventoryRepository;
     }
 
-    public async Task<BookDto> GetBookById(string id)
+    public async Task<BookDto?> GetBookById(string id)
     {
         var book = await this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, id);
-        var bookDto = new BookDto()
+        return book == null ? null : new BookDto()
         {
             BookId = book.SK,
             Name = book.Name,
@@ -31,7 +31,6 @@ public class BookInventoryService : IBookInventoryService
             Year = book.Year,
             CoverImage = book.CoverImageUrl
         };
-        return bookDto;
     }
 
     public async Task AddBookAsync(CreateBookDto dto)
