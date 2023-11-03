@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 [JsonSerializable(typeof(APIGatewayProxyRequest))]
 [JsonSerializable(typeof(APIGatewayProxyResponse))]
 [JsonSerializable(typeof(ApiWrapper<string>))]
-[JsonSerializable(typeof(ApiWrapper<PaginatedResult<BookDto>>))]
+[JsonSerializable(typeof(ApiWrapper<BookDto>))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
 public partial class CustomSerializationContext : JsonSerializerContext

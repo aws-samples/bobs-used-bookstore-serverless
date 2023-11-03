@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -7,6 +7,12 @@
         <Nullable>enable</Nullable>
         <RootNamespace>BookInventoryApiStack</RootNamespace>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Database\**" />
+      <EmbeddedResource Remove="Database\**" />
+      <None Remove="Database\**" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Amazon.CDK.Lib" Version="2.96.2" />

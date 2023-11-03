@@ -1,5 +1,5 @@
 {
-  "app": "dotnet run --project cdk/Bookstore.Cdk/Bookstore.Cdk.csproj",
+  "app": "dotnet run --project Cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj",
   "watch": {
     "include": [
       "**"
