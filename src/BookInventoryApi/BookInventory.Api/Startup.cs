@@ -1,14 +1,16 @@
+using BookInventory.Api.Validators;
+using BookInventory.Common;
+using BookInventory.Models;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookInventory.Api;
-
-using BookInventory.Common;
 
 [Amazon.Lambda.Annotations.LambdaStartup]
 public class Startup
 {
     /// <summary>
-    /// Services for Lambda functions can be registered in the services dependency injection container in this method. 
+    /// Services for Lambda functions can be registered in the services dependency injection container in this method.
     ///
     /// The services can be injected into the Lambda function through the containing type's constructor or as a
     /// parameter in the Lambda function using the FromService attribute. Services injected for the constructor have
@@ -19,5 +21,6 @@ public class Startup
     {
         services.AddSharedServices();
         services.AddDynamoDBServices();
+        services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
     }
 }
