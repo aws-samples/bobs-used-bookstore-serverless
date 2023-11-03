@@ -21,7 +21,7 @@ public class BookInventoryServiceTests
     public async Task GetBookById_WhenRequestIsValid_ShouldRespondSearchResult()
     {
         // Arrange
-        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
+        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab"))
             .Returns(new Book() { PK = BookInventoryConstants.BOOK, SK = "8274dcb1-e651-41b4-98c6-d416e8b59fab", Name = "History" });
 
         // Act
@@ -30,7 +30,7 @@ public class BookInventoryServiceTests
         // Assert
         response.Should().NotBeNull();
         response.Name.Should().Be("History");
-        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappened(1, Times.Exactly);
+        A.CallTo(() => this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, "8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappened(1, Times.Exactly);
     }
 
     [Fact]
