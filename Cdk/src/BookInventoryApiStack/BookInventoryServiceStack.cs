@@ -2,7 +2,6 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.DynamoDB;
 using BookInventoryApiStack.Api;
-using SharedConstructs;
 using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
@@ -21,11 +20,13 @@ public class BookInventoryServiceStack : Stack
         props)
     {
         //Database
-        var bookInventory = new DynamoDBTable(
-            this, "BookInventoryTable", new TableProps()
-            {
-                TableName = "BookInventory"
-            });
+        var bookInventory = new Table(this, "BookInventoryTable", new TableProps
+        {
+            TableName = "BookInventory",
+            PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "PK", Type = AttributeType.STRING },
+            SortKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "SK", Type = AttributeType.STRING },
+            BillingMode = BillingMode.PAY_PER_REQUEST
+        });
 
         //Lambda Functions
         var getBooksApi = new GetBooksApi(
@@ -54,8 +55,8 @@ public class BookInventoryServiceStack : Stack
                 false);
 
         //Grant DynamoDB Permission
-        bookInventory.Table.GrantReadData(getBooksApi.Function.Role!);
-        bookInventory.Table.GrantReadWriteData(addBooksApi.Function.Role!);
+        bookInventory.GrantReadData(getBooksApi.Function.Role!);
+        bookInventory.GrantReadWriteData(addBooksApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,
