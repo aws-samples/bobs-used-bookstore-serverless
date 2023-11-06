@@ -14,7 +14,7 @@ public class BookInventoryService : IBookInventoryService
 
     public async Task<BookDto?> GetBookById(string id)
     {
-        var book = await this.bookInventoryRepository.GetByPrimaryKeyAsync(BookInventoryConstants.BOOK, id);
+        var book = await this.bookInventoryRepository.GetByIdAsync(id);
         return book == null ? null : new BookDto()
         {
             BookId = book.SK,

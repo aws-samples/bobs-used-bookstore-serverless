@@ -1,16 +1,24 @@
-﻿using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
+﻿using Amazon.DynamoDBv2.DataModel;
 using BookInventory.Models;
 
 namespace BookInventory.Repository;
 
-public class BookInventoryRepository : BaseRepository<Book>, IBookInventoryRepository
+public class BookInventoryRepository : IBookInventoryRepository
 {
-    private readonly IAmazonDynamoDB client;
+    private readonly IDynamoDBContext context;
 
-    public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
-        : base(context)
+    public BookInventoryRepository(IDynamoDBContext context)
     {
-        this.client = client;
+        this.context = context;
+    }
+
+    public async Task<Book?> GetByIdAsync(string bookId)
+    {
+        return await context.LoadAsync<Book>(BookInventoryConstants.BOOK, bookId);
+    }
+
+    public async Task SaveAsync(Book book)
+    {
+        await context.SaveAsync(book);
     }
 }
