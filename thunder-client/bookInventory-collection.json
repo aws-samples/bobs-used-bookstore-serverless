@@ -1,0 +1,42 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "BookInventory",
+    "dateExported": "2023-10-27T06:34:25.662Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "7516c377-f0d4-4670-9bca-f0eebd5e70e5",
+            "colId": "c1ff8db6-adf9-48eb-af71-52981b6b01ea",
+            "containerId": "",
+            "name": "GetBookById",
+            "url": "{{base_url}}/books/8274dcb1-e651-41b4-98c6-d416e8b59fab",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2023-10-19T09:47:00.859Z",
+            "modified": "2023-10-27T06:33:01.252Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "b28e684b-ad76-4fc7-b93a-458ebc3e1542",
+            "colId": "c1ff8db6-adf9-48eb-af71-52981b6b01ea",
+            "containerId": "",
+            "name": "AddBook",
+            "url": "{{base_url}}/books",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-10-19T09:47:06.683Z",
+            "modified": "2023-10-27T06:33:09.778Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"BobsUsedBook v\",\n  \"author\": \"Bob\",\n  \"bookType\": \"Used\",\n  \"condition\": \"Like New\",\n  \"genre\": \"NA\",\n  \"publisher\": \"AWS\",\n  \"year\": 2023,\n  \"isbn\": \"123456789\",\n  \"summary\": \"Bobs used book serverless\",\n  \"price\": 10,\n  \"quantity\": 10,\n  \"coverImage\": \"No Cover Image\",\n  \"coverImageFileName\": \"No Cover Image File Name\"\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}
