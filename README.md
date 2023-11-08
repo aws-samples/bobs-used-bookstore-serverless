@@ -38,8 +38,9 @@ Bookstore application can be deployed to AWS via the CDK's command-line tooling.
 
 When you have completed working with the sample applications we recommend deleting the resources to avoid possible charges. To do this, either:
 
-* In a terminal window navigate to the solution folder and run the command `cdk destroy --all`. 
+* In a terminal window navigate to the solution folder and run the command `cdk destroy --all`, or
 
+* Navigate to the CloudFormation dashboard in the AWS Management Console and delete all Bob's Used Books Serverless stacks.
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
