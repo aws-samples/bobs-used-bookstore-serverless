@@ -1,4 +1,6 @@
+using Microsoft.OpenApi.Models;
 using Orders.Api.Extensions;
+using System.Reflection;
 
 namespace Orders.Api;
 
@@ -16,6 +18,9 @@ public class Startup
     {
         services.AddControllers();
         services.AddApplicationDependencies();
+        //Configure Swagger
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
@@ -31,6 +36,9 @@ public class Startup
         app.UseRouting();
 
         app.UseAuthorization();
+        //Configure Swagger
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         app.UseEndpoints(endpoints =>
         {

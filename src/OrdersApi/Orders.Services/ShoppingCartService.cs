@@ -17,20 +17,9 @@ namespace Orders.Services
             return await this.shoppingCartRepository.GetAsync(correlationId);
         }
 
-        public async Task<IEnumerable<ShoppingCart>> GetWishListAsync(string correlationId)
-        {
-            return await this.shoppingCartRepository.GetWishListAsync(correlationId);
-        }
-
         public async Task AddToShoppingCartAsync(AddToShoppingCartDto dto)
         {
             var shoppingCart = new ShoppingCart(dto.CorrelationId, dto.BookId, dto.Quantity, true);
-            await this.shoppingCartRepository.SaveAsync(shoppingCart);
-        }
-
-        public async Task AddToWishlistAsync(AddToWishlistDto dto)
-        {
-            var shoppingCart = new ShoppingCart(dto.CorrelationId, dto.BookId, false);
             await this.shoppingCartRepository.SaveAsync(shoppingCart);
         }
     }

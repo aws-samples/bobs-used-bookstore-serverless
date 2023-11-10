@@ -23,25 +23,11 @@ public class ShoppingCartController : ControllerBase
         return await this.shoppingCartService.GetShoppingCartAsync(correlationId);
     }
 
-    [HttpGet("WishList")]
-    public async Task<IEnumerable<ShoppingCart>> GetWishList()
-    {
-        return await this.shoppingCartService.GetWishListAsync(correlationId);
-    }
-
     [HttpPost("ShoppingCart")]
     public async Task<IActionResult> AddToShoppingCart(string bookId)
     {
         var dto = new AddToShoppingCartDto(correlationId, bookId, 1);
         await this.shoppingCartService.AddToShoppingCartAsync(dto);
-        return Ok();
-    }
-
-    [HttpPost("Wishlist")]
-    public async Task<IActionResult> AddToWishlist(string bookId)
-    {
-        var dto = new AddToWishlistDto(correlationId, bookId);
-        await this.shoppingCartService.AddToWishlistAsync(dto);
         return Ok();
     }
 }

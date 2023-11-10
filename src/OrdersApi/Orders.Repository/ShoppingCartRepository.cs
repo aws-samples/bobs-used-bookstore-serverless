@@ -18,30 +18,12 @@ namespace Orders.Repository
             await this.context.SaveAsync(entity);
         }
 
-        public async Task<ShoppingCart> GetAsync(string correlationId, string shoppingCartItemId)
-        {
-            return await this.context.LoadAsync<ShoppingCart>(OrdersConstants.CART, $"{correlationId}{OrdersConstants.DELIMITER}{shoppingCartItemId}");
-        }
-
         public async Task<IEnumerable<ShoppingCart>> GetAsync(string correlationId)
         {
             var filter = new QueryFilter();
             filter.AddCondition(nameof(ShoppingCart.PK), QueryOperator.Equal, OrdersConstants.CART);
             filter.AddCondition(nameof(ShoppingCart.SK), QueryOperator.BeginsWith, correlationId);
             filter.AddCondition(nameof(ShoppingCart.WantToBuy), QueryOperator.Equal, 1);
-            var queryOperationConfig = new QueryOperationConfig
-            {
-                Filter = filter
-            };
-            return await QueryAsync(queryOperationConfig);
-        }
-
-        public async Task<IEnumerable<ShoppingCart>> GetWishListAsync(string correlationId)
-        {
-            var filter = new QueryFilter();
-            filter.AddCondition(nameof(ShoppingCart.PK), QueryOperator.Equal, OrdersConstants.WISH);
-            filter.AddCondition(nameof(ShoppingCart.SK), QueryOperator.BeginsWith, correlationId);
-            filter.AddCondition(nameof(ShoppingCart.WantToBuy), QueryOperator.Equal, 0);
             var queryOperationConfig = new QueryOperationConfig
             {
                 Filter = filter
