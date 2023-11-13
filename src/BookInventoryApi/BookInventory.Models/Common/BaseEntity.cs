@@ -1,5 +1,4 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.Util;
 using BookInventory.Models.Utility;
 
 namespace BookInventory.Models.Common

@@ -22,7 +22,7 @@ namespace BookInventory.Models
         [JsonPropertyName("genre")]
         public string Genre { get; set; }
 
-        [JsonPropertyName("ISBN")]
+        [JsonPropertyName("isbn")]
         public string ISBN { get; set; }
 
         [JsonPropertyName("name")]
