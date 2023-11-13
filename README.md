@@ -2,7 +2,7 @@
 
 
 ## Overview 
-Bob's Used Books serverless is a serverless version of the [Bob's Used Books Sample Application](https://github.com/aws-samples/bobs-used-bookstore-sample).
+Bob's Used BookStore serverless is a serverless version of the [Bob's Used Books Sample Application](https://github.com/aws-samples/bobs-used-bookstore-sample).
 
 ## Prerequisites
 To run and debug the application locally you need the following:
@@ -24,15 +24,10 @@ Bookstore application can be deployed to AWS via the CDK's command-line tooling.
 
 ## How to test
 
-### Setup test environment
-> **Thunder Client** is a lightweight Rest API Client Extension for Visual Studio Code for Testing APIs. 
+The following microservices are used while building BookStore serverless:
 
-1. Install [Visual Studio Code](https://code.visualstudio.com/).
-2. Install [Thunder Client Extension](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client) in Visual Studio Code.
-3. Import [collections](https://github.com/rangav/thunder-client-support#how-to-import-a-collection) and [environment variables](https://github.com/rangav/thunder-client-support#environment-variables) in Thunder Client from `thunder-client` folder.
-4. Right click on the imported environment variables, choose `Set Active`.   
-5. Replace environment variables including `base_url`, `cognito_url` with their actual values after the CDK deployment. Rememebr to save these changes after modification.
-6. You're all set to test APIs.
+- [Book Inventory Api](/src/BookInventoryApi/README.md)
+
 
 ## Deleting the resources
 
@@ -40,7 +35,7 @@ When you have completed working with the sample applications we recommend deleti
 
 * In a terminal window navigate to the solution folder and run the command `cdk destroy --all`, or
 
-* Navigate to the CloudFormation dashboard in the AWS Management Console and delete all Bob's Used Books Serverless stacks.
+* Navigate to the CloudFormation dashboard in the AWS Management Console and delete all Bob's Used BookStore Serverless stacks.
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
