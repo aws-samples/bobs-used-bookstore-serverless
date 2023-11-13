@@ -69,9 +69,10 @@ public class BookInventoryServiceTests
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._))
             .Returns(Task.CompletedTask);
         // Act
-        await this.sut.AddBookAsync(book);
+        var response = await this.sut.AddBookAsync(book);
 
         // Assert
+        response.Should().NotBeNull();
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(
             A<Book>.That.Matches(x => x.Name == book.Name
             && x.Author == book.Author

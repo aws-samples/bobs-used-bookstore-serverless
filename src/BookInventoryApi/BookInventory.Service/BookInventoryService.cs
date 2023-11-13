@@ -33,7 +33,7 @@ public class BookInventoryService : IBookInventoryService
         };
     }
 
-    public async Task AddBookAsync(CreateBookDto dto)
+    public async Task<string> AddBookAsync(CreateBookDto dto)
     {
         var book = new Book(
             dto.Name,
@@ -48,5 +48,6 @@ public class BookInventoryService : IBookInventoryService
             dto.Summary,
             dto.Year);
         await this.bookInventoryRepository.SaveAsync(book);
+        return book.SK;
     }
 }

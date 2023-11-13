@@ -57,7 +57,7 @@ public class Functions
                 validationResult.GetErrorMessage());
         }
 
-        await this.bookInventoryService.AddBookAsync(createBookDto);
-        return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created);
+        var bookId = await this.bookInventoryService.AddBookAsync(createBookDto);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 }
