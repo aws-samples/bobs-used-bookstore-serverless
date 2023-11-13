@@ -1,4 +1,4 @@
-﻿namespace BookInventory.Repository;
+namespace BookInventory.Repository;
 
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -9,17 +9,27 @@ using AWS.Lambda.Powertools.Tracing;
 
 using BookInventory.Models;
 
-public class BookInventoryRepository : BaseRepository<Book>,
-    IBookInventoryRepository
+public class BookInventoryRepository : IBookInventoryRepository
 {
+    private readonly IDynamoDBContext context;
     private readonly IAmazonDynamoDB client;
     private readonly Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
     private const int MAX_MONTHS_TO_CHECK = 3;
 
     public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
-        : base(context)
     {
+        this.context = context;
         this.client = client;
+    }
+
+    public async Task<Book?> GetByIdAsync(string bookId)
+    {
+        return await context.LoadAsync<Book>(BookInventoryConstants.BOOK, bookId);
+    }
+
+    public async Task SaveAsync(Book book)
+    {
+        await context.SaveAsync(book);
     }
 
     /// <inheritdoc/>

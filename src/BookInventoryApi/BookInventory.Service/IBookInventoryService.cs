@@ -6,7 +6,7 @@ public interface IBookInventoryService
 {
     Task<BookQueryResponse> ListAllBooks(int pageCount = 10, string cursor = null);
     
-    Task<BookDto> GetBookById(string id);
+    Task<BookDto?> GetBookById(string id);
 
-    Task AddBookAsync(CreateBookDto dto);
+    Task<string> AddBookAsync(CreateBookDto dto);
 }
