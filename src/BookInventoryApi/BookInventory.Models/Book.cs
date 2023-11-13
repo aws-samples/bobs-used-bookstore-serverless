@@ -2,6 +2,8 @@
 
 namespace BookInventory.Models;
 
+using Amazon.DynamoDBv2.DataModel;
+
 public class Book : BaseEntity
 {
     public const int LowBookThreshold = 5;
@@ -38,6 +40,7 @@ public class Book : BaseEntity
         Year = year;
         Summary = summary;
         CoverImageUrl = coverImageUrl;
+        LastUpdated = DateTime.Now;
     }
 
     public string Name { get; set; }
@@ -63,4 +66,22 @@ public class Book : BaseEntity
     public decimal Price { get; set; }
 
     public int Quantity { get; set; }
+    
+    public DateTime LastUpdated { get; private set; }
+
+    [DynamoDBGlobalSecondaryIndexHashKey(IndexNames = new[] { "GSI1" }, AttributeName = "GSI1PK")]
+    public string LastUpdatedString {
+        get => this.LastUpdated.ToString("yyyyMM");
+        set
+        {
+        }
+    }
+    
+    [DynamoDBGlobalSecondaryIndexRangeKey(IndexNames = new[] { "GSI1" }, AttributeName = "GSI1SK")]
+    public string BookId {
+        get => this.PK;
+        set
+        {
+        }
+    }
 }
