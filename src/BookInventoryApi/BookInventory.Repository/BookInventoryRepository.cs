@@ -14,7 +14,7 @@ public class BookInventoryRepository : IBookInventoryRepository
     private readonly IDynamoDBContext context;
     private readonly IAmazonDynamoDB client;
     private readonly Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
-    private const int MAX_MONTHS_TO_CHECK = 3;
+    private const int MAX_MONTHS_TO_CHECK = 1;
 
     public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
     {
@@ -33,23 +33,24 @@ public class BookInventoryRepository : IBookInventoryRepository
     }
 
     /// <inheritdoc/>
-    public async Task<ListResponse> List(int page = 10, string cursor = null)
+    public async Task<ListResponse> List(int pageSize = 10, string cursor = null)
     {
         var bookResponse = new ListResponse(cursor);
 
         // Execute the initial query.
-        var queryResponse = await this.ExecuteQuery(bookResponse, page);
-        bookResponse.Metadata.LastEvaluatedKey = queryResponse.LastEvaluatedKey;
+        var queryResponse = await this.ExecuteQuery(bookResponse, pageSize);
 
-        this.ProcessResults(ref bookResponse, queryResponse, page);
+        bookResponse.Metadata.AddPartitions(queryResponse);
 
-        if (bookResponse.Books.Count == page)
+        this.ProcessResults(ref bookResponse, queryResponse, pageSize);
+
+        if (bookResponse.Books.Count == pageSize)
         {
             Logger.LogInformation("Page size reached, returning");
             
             // If they are equal, and there is no last evaluated key, increment the months before to allow for queries into the next month.
             // For example, if the page size is 1 and there are no other items in that month then move the cursor to the next month
-            if (queryResponse.Count == page && queryResponse.LastEvaluatedKey == null)
+            if (queryResponse.Count == pageSize && queryResponse.LastEvaluatedKey == null)
             {
                 bookResponse.Metadata.LastCheckedMonth++;
             }
@@ -59,23 +60,44 @@ public class BookInventoryRepository : IBookInventoryRepository
 
         for (var currentMonth = bookResponse.Metadata.LastCheckedMonth; currentMonth <= MAX_MONTHS_TO_CHECK; currentMonth++)
         {
-            Logger.LogInformation($"Page size not met for current query, attempting query in {currentMonth}(s) previous. Page size is currently at {bookResponse.Books.Count}.");
+            bookResponse = await this.ListBooksInPreviousMonths(
+                pageSize,
+                currentMonth,
+                bookResponse);
             
-            bookResponse.Metadata.LastCheckedMonth = currentMonth;
-            
-            bookResponse.Metadata.LastDate = bookResponse.Metadata.LastDate.AddMonths(-currentMonth);
-
-            queryResponse = await this.ExecuteQuery(bookResponse, page);
-            bookResponse.Metadata.LastEvaluatedKey = queryResponse.LastEvaluatedKey;
-
-            // Build the list of books.
-            this.ProcessResults(ref bookResponse, queryResponse, page);
-
-            if (bookResponse.Books.Count == page)
+            if (bookResponse.Books.Count == pageSize)
             {
                 return bookResponse;
             }
         }
+
+        return bookResponse;
+    }
+
+    [Tracing]
+    private async Task<ListResponse> ListBooksInPreviousMonths(
+        int page,
+        int currentMonth,
+        ListResponse bookResponse)
+    {
+        QueryResponse queryResponse;
+        
+        Logger.LogInformation($"Page size not met for current query, attempting query in {currentMonth}(s) previous. Page size is currently at {bookResponse.Books.Count}.");
+
+        // When moving to a different partition (in this case by looking at a different month), the last evaluated key needs to be reset.
+        bookResponse.Metadata.ResetPartitions(currentMonth);
+
+        queryResponse = await this.ExecuteQuery(
+            bookResponse,
+            page);
+
+        bookResponse.Metadata.AddPartitions(queryResponse);
+
+            // Build the list of books.
+        this.ProcessResults(
+            ref bookResponse,
+            queryResponse,
+            page);
 
         return bookResponse;
     }
@@ -121,6 +143,19 @@ public class BookInventoryRepository : IBookInventoryRepository
             ":gsi1pk",
             new AttributeValue(bookResponse.Metadata.LastDate.ToString("yyyyMM")));
 
+        Dictionary<string, AttributeValue> startKey = null;
+        
+        if (!string.IsNullOrEmpty(bookResponse.Metadata.LastPartition))
+        {
+            startKey = new Dictionary<string, AttributeValue>()
+            {
+                { "PK", new AttributeValue(bookResponse.Metadata.LastPartition) },
+                { "SK", new AttributeValue(bookResponse.Metadata.LastKey) },
+                { "GSI1PK", new AttributeValue(bookResponse.Metadata.LastGsiPartition) },
+                { "GSI1SK", new AttributeValue(bookResponse.Metadata.LastGsiKey) }
+            };
+        }
+
         var queryRequest = new QueryRequest
         {
             TableName = BookInventoryConstants.TABLE_NAME,
@@ -128,7 +163,8 @@ public class BookInventoryRepository : IBookInventoryRepository
             ExpressionAttributeNames = this.listAttributeNames,
             ExpressionAttributeValues = attributeValues,
             IndexName = "GSI1",
-            Limit = pageSize
+            Limit = pageSize,
+            ExclusiveStartKey = startKey
         };
 
         var queryResponse = await this.client.QueryAsync(queryRequest);
