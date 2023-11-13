@@ -1,6 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using BookInventory.Repository;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookInventory.Common
@@ -10,7 +9,15 @@ namespace BookInventory.Common
         public static IServiceCollection AddDynamoDBServices(this IServiceCollection services)
         {
             services.AddAWSService<IAmazonDynamoDB>();
-            services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
+            services.AddSingleton<IDynamoDBContext, DynamoDBContext>((sp) =>
+            {
+                IAmazonDynamoDB dynamoDBClient = sp.GetRequiredService<IAmazonDynamoDB>();
+                var config = new DynamoDBContextConfig
+                {
+                    DisableFetchingTableMetadata = true
+                };
+                return new DynamoDBContext(dynamoDBClient, config);
+            });
 
             return services;
         }
