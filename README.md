@@ -1,4 +1,4 @@
-## Bob's Used Books Serverless
+## Bob's Used BookStore Serverless
 
 
 ## Overview 
