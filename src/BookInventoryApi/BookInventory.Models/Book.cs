@@ -79,7 +79,7 @@ public class Book : BaseEntity
     
     [DynamoDBGlobalSecondaryIndexRangeKey(IndexNames = new[] { "GSI1" }, AttributeName = "GSI1SK")]
     public string BookId {
-        get => this.PK;
+        get => this.SK;
         set
         {
         }
