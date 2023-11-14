@@ -2,6 +2,27 @@
 {
     public class BookDto
     {
+        public BookDto()
+        {
+        }
+
+        public BookDto(Book book)
+        {
+            this.Author = book.Author;
+            this.BookId = book.PK;
+            this.BookType = book.BookType;
+            this.Condition = book.Condition;
+            this.CoverImage = book.CoverImageUrl;
+            this.Genre = book.Genre;
+            this.ISBN = book.ISBN;
+            this.Name = book.Name;
+            this.Price = book.Price;
+            this.Publisher = book.Publisher;
+            this.Quantity = book.Quantity;
+            this.Summary = book.Summary;
+            this.Year = book.Year;
+        }
+        
         public string Author { get; set; }
         public string BookId { get; set; }
         public string BookType { get; set; }

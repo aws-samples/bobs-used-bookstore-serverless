@@ -31,6 +31,20 @@ public class BookInventoryServiceStack : Stack
             SortKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "SK", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST
         });
+        bookInventory.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps()
+        {
+            IndexName = "GSI1",
+            PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute()
+            {
+                Name = "GSI1PK",
+                Type = AttributeType.STRING
+            },
+            SortKey = new Amazon.CDK.AWS.DynamoDB.Attribute()
+            {
+                Name = "GSI1SK",
+                Type = AttributeType.STRING
+            }, 
+        });
         
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
@@ -49,14 +63,22 @@ public class BookInventoryServiceStack : Stack
             });
 
         //Lambda Functions
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
+        
         var getBooksApi = new GetBooksApi(
             this,
             "GetBooksEndpoint",
-            new BookInventoryServiceStackProps());
+            bookInventoryServiceStackProps);
+        
         var addBooksApi = new AddBooksApi(
             this,
             "AddBooksEndpoint",
-            new BookInventoryServiceStackProps());
+            bookInventoryServiceStackProps);
+        
+        var listBooks = new ListBooksApi(
+            this,
+            "ListBooksEndpoint",
+            bookInventoryServiceStackProps);
 
         //Api
         
@@ -78,11 +100,17 @@ public class BookInventoryServiceStack : Stack
             .WithEndpoint(
                 "/books",
                 HttpMethod.Post,
-                addBooksApi.Function);
+                addBooksApi.Function)
+            .WithEndpoint(
+                "/books",
+                HttpMethod.Get,
+                listBooks.Function,
+                false);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
-        bookInventory.GrantReadWriteData(addBooksApi.Function.Role!);
+        bookInventory.GrantReadData(listBooks.Function.Role!);
+        bookInventory.GrantWriteData(addBooksApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,
