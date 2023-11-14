@@ -6,6 +6,10 @@ using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
 
+using Amazon.CDK.AWS.Cognito;
+using Amazon.CDK.AWS.Logs;
+using Amazon.CDK.AWS.SSM;
+
 public record BookInventoryServiceStackProps();
 
 public class BookInventoryServiceStack : Stack
@@ -27,6 +31,22 @@ public class BookInventoryServiceStack : Stack
             SortKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "SK", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST
         });
+        
+        // Retrieve user pool info from ssm
+        var userPoolParameterValue =
+            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
+
+        var userPool = UserPool.FromUserPoolArn(this, "UserPool", userPoolParameterValue);
+        
+        new CfnOutput(
+            this,
+            $"User Pool Id",
+            new CfnOutputProps
+            {
+                Value = userPool.UserPoolId,
+                ExportName = "UserPool",
+                Description = "UserPool"
+            });
 
         //Lambda Functions
         var getBooksApi = new GetBooksApi(
@@ -39,10 +59,17 @@ public class BookInventoryServiceStack : Stack
             new BookInventoryServiceStackProps());
 
         //Api
+        
         var api = new SharedConstructs.Api(
-            this,
-            "BookInventoryApi",
-            new RestApiProps { RestApiName = "BookInventoryApi" })
+                this,
+                "BookInventoryApi",
+                new RestApiProps { RestApiName = "BookInventoryApi", DeployOptions = new StageOptions {
+                    AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
+                    AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
+                    TracingEnabled = true,
+                    LoggingLevel = MethodLoggingLevel.ERROR
+                }})
+            .WithCognito(userPool)
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Get,
@@ -51,8 +78,7 @@ public class BookInventoryServiceStack : Stack
             .WithEndpoint(
                 "/books",
                 HttpMethod.Post,
-                addBooksApi.Function,
-                false);
+                addBooksApi.Function);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
