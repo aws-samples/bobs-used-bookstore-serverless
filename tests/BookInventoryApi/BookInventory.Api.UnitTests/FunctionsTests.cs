@@ -14,7 +14,7 @@ namespace BookInventory.Api.UnitTests;
 public class FunctionsTests
 {
     private readonly IBookInventoryService bookInventoryService;
-    private readonly IValidator<CreateBookDto> bookValidator;
+    private readonly IValidator<CreateUpdateBookDto> bookValidator;
     private readonly Functions sut;
 
     public FunctionsTests()
@@ -82,7 +82,7 @@ public class FunctionsTests
     {
         // Arrange
         string bookId = Guid.NewGuid().ToString();
-        CreateBookDto book = new()
+        CreateUpdateBookDto book = new()
         {
             Name = "2020: The Apocalypse",
             Author = "Li Juan",
@@ -109,7 +109,7 @@ public class FunctionsTests
         apiWrapperResponse!.Data.Should().NotBeNull();
         apiWrapperResponse.Data.Should().Be(bookId);
         A.CallTo(() => this.bookInventoryService.AddBookAsync(
-            A<CreateBookDto>.That.Matches(x => x.Name == book.Name
+            A<CreateUpdateBookDto>.That.Matches(x => x.Name == book.Name
             && x.Author == book.Author
             && x.ISBN == book.ISBN
             && x.BookType == book.BookType
@@ -126,7 +126,7 @@ public class FunctionsTests
     public async Task AddBook_WhenRequestIsInvalid_ShouldRespondBadRequest()
     {
         // Arrange
-        CreateBookDto createBookDto = new();
+        CreateUpdateBookDto createBookDto = new();
 
         // Act
         var response = await this.sut.AddBook(createBookDto);
@@ -134,6 +134,62 @@ public class FunctionsTests
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
-        A.CallTo(() => this.bookInventoryService.AddBookAsync(A<CreateBookDto>.Ignored)).MustNotHaveHappened();
+        A.CallTo(() => this.bookInventoryService.AddBookAsync(A<CreateUpdateBookDto>.Ignored)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task UpdateBook_WhenRequestIsValid_ShouldUpdateBook()
+    {
+        // Arrange
+        string bookId = Guid.NewGuid().ToString();
+        CreateUpdateBookDto book = new()
+        {
+            Name = "2020: The Apocalypse",
+            Author = "Li Juan",
+            ISBN = "6556784356",
+            BookType = "Hardcover",
+            Condition = "Like New",
+            Genre = "Mystery, Thriller & Suspense",
+            Publisher = "Arcadia Books",
+            Price = 10,
+            Quantity = 1,
+            Summary = "Sample book"
+        };
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Returns(Task.CompletedTask);
+
+        // Act
+        var response = await this.sut.UpdateBook(bookId, book);
+
+        // Assert
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be((int)HttpStatusCode.NoContent);
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId,
+            A<CreateUpdateBookDto>.That.Matches(x => x.Name == book.Name
+            && x.Author == book.Author
+            && x.ISBN == book.ISBN
+            && x.BookType == book.BookType
+            && x.Condition == book.Condition
+            && x.Genre == book.Genre
+            && x.Publisher == book.Publisher
+            && x.Price == book.Price
+            && x.Quantity == book.Quantity
+            && x.Summary == book.Summary
+            ))).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task UpdateBook_WhenRequestIsInvalid_ShouldRespondBadRequest()
+    {
+        // Arrange
+        string bookId = Guid.NewGuid().ToString();
+        CreateUpdateBookDto book = new();
+
+        // Act
+        var response = await this.sut.UpdateBook(bookId, book);
+
+        // Assert
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
+        A.CallTo(() => this.bookInventoryService.AddBookAsync(A<CreateUpdateBookDto>.Ignored)).MustNotHaveHappened();
     }
 }

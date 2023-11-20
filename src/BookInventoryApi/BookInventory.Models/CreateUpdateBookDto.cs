@@ -2,7 +2,7 @@
 
 namespace BookInventory.Models
 {
-    public class CreateBookDto
+    public class CreateUpdateBookDto
     {
         [JsonPropertyName("author")]
         public string Author { get; set; }

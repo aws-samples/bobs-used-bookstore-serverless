@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BookInventory.Api.Validators
 {
-    public class CreateBookDtoValidator : AbstractValidator<CreateBookDto>
+    public class CreateBookDtoValidator : AbstractValidator<CreateUpdateBookDto>
     {
         public CreateBookDtoValidator()
         {

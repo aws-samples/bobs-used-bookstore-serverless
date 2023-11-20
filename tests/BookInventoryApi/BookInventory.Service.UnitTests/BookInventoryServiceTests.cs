@@ -53,7 +53,7 @@ public class BookInventoryServiceTests
     public async Task AddBook_WhenRequestIsValid_ShouldSaveData()
     {
         // Arrange
-        CreateBookDto book = new()
+        CreateUpdateBookDto book = new()
         {
             Name = "2020: The Apocalypse",
             Author = "Li Juan",
@@ -75,6 +75,45 @@ public class BookInventoryServiceTests
         response.Should().NotBeNull();
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(
             A<Book>.That.Matches(x => x.Name == book.Name
+            && x.Author == book.Author
+            && x.ISBN == book.ISBN
+            && x.BookType == book.BookType
+            && x.Condition == book.Condition
+            && x.Genre == book.Genre
+            && x.Publisher == book.Publisher
+            && x.Price == book.Price
+            && x.Quantity == book.Quantity
+            && x.Summary == book.Summary
+            ))).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task UpdateBook_WhenRequestIsValid_ShouldSaveData()
+    {
+        // Arrange
+        string bookId = Guid.NewGuid().ToString();
+        CreateUpdateBookDto book = new()
+        {
+            Name = "2022: The Apocalypse",
+            Author = "Li Juan",
+            ISBN = "6556784356",
+            BookType = "Hardcover",
+            Condition = "Like New",
+            Genre = "Mystery, Thriller & Suspense",
+            Publisher = "Arcadia Books",
+            Price = 10,
+            Quantity = 1,
+            Summary = "Sample book"
+        };
+        A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).Returns(Task.CompletedTask);
+
+        // Act
+        await this.sut.UpdateBookAsync(bookId, book);
+
+        // Assert
+        A.CallTo(() => this.bookInventoryRepository.SaveAsync(
+            A<Book>.That.Matches(x => x.BookId == bookId
+            && x.Name == book.Name
             && x.Author == book.Author
             && x.ISBN == book.ISBN
             && x.BookType == book.BookType

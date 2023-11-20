@@ -8,5 +8,7 @@ public interface IBookInventoryService
     
     Task<BookDto?> GetBookById(string id);
 
-    Task<string> AddBookAsync(CreateBookDto dto);
+    Task<string> AddBookAsync(CreateUpdateBookDto dto);
+
+    Task UpdateBookAsync(string bookId, CreateUpdateBookDto dto);
 }

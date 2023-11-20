@@ -15,9 +15,9 @@ namespace BookInventory.Api;
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
-    private readonly IValidator<CreateBookDto> bookValidator;
+    private readonly IValidator<CreateUpdateBookDto> bookValidator;
 
-    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> bookValidator)
+    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateUpdateBookDto> bookValidator)
     {
         this.bookInventoryService = bookInventoryService;
         this.bookValidator = bookValidator;
@@ -56,9 +56,9 @@ public class Functions
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Post, "/books")]
-    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
+    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateUpdateBookDto bookDto)
     {
-        var validationResult = bookValidator.Validate(createBookDto);
+        var validationResult = bookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(
@@ -66,7 +66,23 @@ public class Functions
                 validationResult.GetErrorMessage());
         }
 
-        var bookId = await this.bookInventoryService.AddBookAsync(createBookDto);
+        var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
+    }
+
+    [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
+    public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] CreateUpdateBookDto bookDto)
+    {
+        var validationResult = bookValidator.Validate(bookDto);
+        if (!validationResult.IsValid)
+        {
+            return ApiGatewayResponseBuilder.Build(
+                HttpStatusCode.BadRequest,
+                validationResult.GetErrorMessage());
+        }
+
+        await this.bookInventoryService.UpdateBookAsync(id, bookDto);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.NoContent);
     }
 }

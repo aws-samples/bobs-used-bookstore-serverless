@@ -53,7 +53,7 @@ public class BookInventoryService : IBookInventoryService
         };
     }
 
-    public async Task<string> AddBookAsync(CreateBookDto dto)
+    public async Task<string> AddBookAsync(CreateUpdateBookDto dto)
     {
         var book = new Book(
             dto.Name,
@@ -69,5 +69,25 @@ public class BookInventoryService : IBookInventoryService
             dto.Year);
         await this.bookInventoryRepository.SaveAsync(book);
         return book.SK;
+    }
+
+    public async Task UpdateBookAsync(string bookId, CreateUpdateBookDto dto)
+    {
+        var book = new Book(
+            dto.Name,
+            dto.Author,
+            dto.ISBN,
+            dto.Publisher,
+            dto.BookType,
+            dto.Genre,
+            dto.Condition,
+            dto.Price,
+            dto.Quantity,
+            dto.Summary,
+            dto.Year)
+        {
+            SK = bookId
+        };
+        await this.bookInventoryRepository.SaveAsync(book);
     }
 }
