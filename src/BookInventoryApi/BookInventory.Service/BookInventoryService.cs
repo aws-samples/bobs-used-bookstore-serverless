@@ -31,7 +31,32 @@ public class BookInventoryService : IBookInventoryService
 
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
-    
+
+    public async Task<PaginatedResult<BookDto>> GetBooksAsync(int pageSize, string? pageKey)
+    {
+        var result = await this.bookInventoryRepository.ListAsync(pageSize, pageKey);
+        return new PaginatedResult<BookDto>
+        {
+            NextPageKey = result.NextPageKey,
+            Books = result.Books?.Select(book => new BookDto()
+            {
+                BookId = book.SK,
+                Name = book.Name,
+                Author = book.Author,
+                BookType = book.BookType,
+                Condition = book.Condition,
+                Genre = book.Genre,
+                Publisher = book.Publisher,
+                ISBN = book.ISBN,
+                Summary = book.Summary,
+                Price = book.Price,
+                Quantity = book.Quantity,
+                Year = book.Year,
+                CoverImage = book.CoverImageUrl
+            }).ToList()
+        };
+    }
+
     public async Task<BookDto?> GetBookById(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);

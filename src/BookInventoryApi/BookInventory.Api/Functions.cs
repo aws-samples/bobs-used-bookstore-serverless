@@ -34,6 +34,15 @@ public class Functions
 
     [LambdaFunction()]
     [Tracing]
+    [RestApi(LambdaHttpMethod.Get, "/booksNew")]
+    public async Task<APIGatewayProxyResponse> GetBooksNew([FromQuery] int pageSize = 10, [FromQuery] string pageKey = null)
+    {
+        var books = await this.bookInventoryService.GetBooksAsync(pageSize, pageKey);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, books);
+    }
+
+    [LambdaFunction()]
+    [Tracing]
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {

@@ -13,7 +13,8 @@ using BookInventory.Service;
 [JsonSerializable(typeof(ApiWrapper<string>))]
 [JsonSerializable(typeof(ApiWrapper<BookDto>))]
 [JsonSerializable(typeof(ApiWrapper<List<BookDto>>))]
-[JsonSerializable(typeof(ApiWrapper<BookQueryResponse>))]
+//[JsonSerializable(typeof(ApiWrapper<BookQueryResponse>))]
+[JsonSerializable(typeof(ApiWrapper<PaginatedResult<BookDto>>))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
 public partial class CustomSerializationContext : JsonSerializerContext

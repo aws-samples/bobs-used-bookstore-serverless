@@ -1,13 +1,20 @@
 namespace BookInventory.Repository;
 
+using Amazon.Auth.AccessControlPolicy;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Tracing;
 
 using BookInventory.Models;
+using BookInventory.Models.Common;
+using BookInventory.Repository.Extensions;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text.Json;
 
 public class BookInventoryRepository : IBookInventoryRepository
 {
@@ -30,6 +37,57 @@ public class BookInventoryRepository : IBookInventoryRepository
     public async Task SaveAsync(Book book)
     {
         await context.SaveAsync(book);
+    }
+
+    public async Task<PaginatedResult<Book>> ListAsync(int pageSize, string? pageKey)
+    {
+        var response = await GetBooks(pageSize, pageKey);
+        var items = response.Items.Select(x => ConvertToObject<Book>(x)).ToList();
+        var newPageKey = response.LastEvaluatedKey.SerializePageKey();
+
+        while(items?.Count < pageSize && !string.IsNullOrEmpty(newPageKey))
+        {
+            var newPageSize = pageSize = items.Count;
+            (var books, newPageKey) = await GetBookList(newPageSize, newPageKey);
+            if (books != null)
+                items.AddRange(books);
+
+            if (items.Count == pageSize || string.IsNullOrEmpty(newPageKey))
+                break;
+        }
+
+        return new PaginatedResult<Book>
+        {
+            Books = items,
+            NextPageKey = newPageKey
+        };
+    }
+    
+    public async Task<(List<Book>? books, string? pageKey)> GetBookList(int pageSize, string? pageKey)
+    {
+        var response = await GetBooks(pageSize, pageKey);
+        var items = response.Items.Select(x => ConvertToObject<Book>(x)).ToList();
+        pageKey = response.LastEvaluatedKey.SerializePageKey();
+        return (items, pageKey);
+    }
+
+    public async Task<ScanResponse> GetBooks(int limit, string? pageKey)
+    {
+        var exclusiveStartKey = string.IsNullOrEmpty(pageKey) ? null : pageKey.DeserializePageKey();
+        var request = new ScanRequest
+        {
+            TableName = BookInventoryConstants.TABLE_NAME,
+            ReturnConsumedCapacity = ReturnConsumedCapacity.TOTAL,
+            ExclusiveStartKey = exclusiveStartKey,
+            Limit = limit
+        };
+        return await client.ScanAsync(request);
+    }
+
+    public T ConvertToObject<T>(Dictionary<string, AttributeValue> dynamoDbObject)
+    {
+        var dynamoDbDocument = Document.FromAttributeMap(dynamoDbObject);
+        return context.FromDocument<T>(dynamoDbDocument);
     }
 
     /// <inheritdoc/>

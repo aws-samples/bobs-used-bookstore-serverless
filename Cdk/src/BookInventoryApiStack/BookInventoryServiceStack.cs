@@ -60,6 +60,11 @@ public class BookInventoryServiceStack : Stack
             "ListBooksEndpoint",
             bookInventoryServiceStackProps);
 
+        var listBooksNew = new ListBooksNewApi(
+            this,
+            "ListBooksNewEndpoint",
+            bookInventoryServiceStackProps);
+
         //Api
         var api = new SharedConstructs.Api(
                 this,
@@ -79,11 +84,17 @@ public class BookInventoryServiceStack : Stack
                 "/books",
                 HttpMethod.Get,
                 listBooks.Function,
+                false)
+            .WithEndpoint(
+                "/booksNew",
+                HttpMethod.Get,
+                listBooksNew.Function,
                 false);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
+        bookInventory.GrantReadData(listBooksNew.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
