@@ -28,7 +28,7 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books")]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        var books = await this.bookInventoryService.ListAllBooks(pageSize, cursor);
+        var books = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, books);
     }
 
@@ -44,7 +44,7 @@ public class Functions
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");
         }
 
-        var book = await this.bookInventoryService.GetBookById(id);
+        var book = await this.bookInventoryService.GetBookByIdAsync(id);
 
         if (book == null)
         {
@@ -84,7 +84,7 @@ public class Functions
         {
             await this.bookInventoryService.UpdateBookAsync(id, bookDto);
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException ex)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, ex.Message);
         }

@@ -13,7 +13,7 @@ public class BookInventoryService : IBookInventoryService
     }
 
     /// <inheritdoc />
-    public async Task<BookQueryResponse> ListAllBooks(int pageCount = 10, string cursor = null)
+    public async Task<BookQueryResponse> ListAllBooksAsync(int pageCount = 10, string cursor = null)
     {
         var books = await this.bookInventoryRepository.List(pageCount, cursor);
 
@@ -32,7 +32,7 @@ public class BookInventoryService : IBookInventoryService
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
 
-    public async Task<BookDto?> GetBookById(string id)
+    public async Task<BookDto?> GetBookByIdAsync(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
         return book == null ? null : new BookDto()
@@ -73,7 +73,7 @@ public class BookInventoryService : IBookInventoryService
 
     public async Task UpdateBookAsync(string bookId, CreateUpdateBookDto dto)
     {
-        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ArgumentException($"Book not found for id {bookId}");
+        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new KeyNotFoundException($"Book not found for id {bookId}");
         book.Name = dto.Name;
         book.Author = dto.Author;
         book.ISBN = dto.ISBN;

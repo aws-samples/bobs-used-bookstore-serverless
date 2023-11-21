@@ -25,7 +25,7 @@ public class BookInventoryServiceTests
             .Returns(new Book() { PK = BookInventoryConstants.BOOK, SK = "8274dcb1-e651-41b4-98c6-d416e8b59fab", Name = "History" });
 
         // Act
-        var response = await this.sut.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab");
+        var response = await this.sut.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab");
 
         // Assert
         response.Should().NotBeNull();
@@ -42,7 +42,7 @@ public class BookInventoryServiceTests
             .Returns(book);
 
         // Act
-        var response = await this.sut.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab");
+        var response = await this.sut.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab");
 
         // Assert
         response.Should().BeNull();

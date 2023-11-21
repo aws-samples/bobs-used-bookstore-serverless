@@ -28,7 +28,7 @@ public class FunctionsTests
     public async Task GetBook_WhenRequestIsValid_ShouldRespondSearchResult()
     {
         // Arrange
-        A.CallTo(() => this.bookInventoryService.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
+        A.CallTo(() => this.bookInventoryService.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
             .Returns(new BookDto() { BookId = "8274dcb1-e651-41b4-98c6-d416e8b59fab", Name = "History", Author = "Bob", BookType = "Old", Condition = "Like New" });
 
         // Act
@@ -42,7 +42,7 @@ public class FunctionsTests
         apiWrapperResponse.Should().NotBeNull();
         apiWrapperResponse!.Data.Should().NotBeNull();
         apiWrapperResponse.Data.Name.Should().Be("History");
-        A.CallTo(() => this.bookInventoryService.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this.bookInventoryService.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
     }
 
     [Theory]
@@ -57,7 +57,7 @@ public class FunctionsTests
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
-        A.CallTo(() => this.bookInventoryService.GetBookById(A.Dummy<string>())).MustNotHaveHappened();
+        A.CallTo(() => this.bookInventoryService.GetBookByIdAsync(A.Dummy<string>())).MustNotHaveHappened();
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class FunctionsTests
     {
         // Arrange
         BookDto? bookDto = null;
-        A.CallTo(() => this.bookInventoryService.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
+        A.CallTo(() => this.bookInventoryService.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
             .Returns(bookDto);
 
         // Act
@@ -74,7 +74,7 @@ public class FunctionsTests
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
-        A.CallTo(() => this.bookInventoryService.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this.bookInventoryService.GetBookByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab")).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
