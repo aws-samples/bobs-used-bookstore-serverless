@@ -95,7 +95,7 @@ public class BookInventoryServiceStack : Stack
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
-        bookInventory.GrantWriteData(updateBooksApi.Function.Role!);
+        bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,

@@ -31,7 +31,7 @@ public class BookInventoryService : IBookInventoryService
 
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
-    
+
     public async Task<BookDto?> GetBookById(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
@@ -73,21 +73,18 @@ public class BookInventoryService : IBookInventoryService
 
     public async Task UpdateBookAsync(string bookId, CreateUpdateBookDto dto)
     {
-        var book = new Book(
-            dto.Name,
-            dto.Author,
-            dto.ISBN,
-            dto.Publisher,
-            dto.BookType,
-            dto.Genre,
-            dto.Condition,
-            dto.Price,
-            dto.Quantity,
-            dto.Summary,
-            dto.Year)
-        {
-            SK = bookId
-        };
+        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ArgumentException($"Book not found for id {bookId}");
+        book.Name = dto.Name;
+        book.Author = dto.Author;
+        book.ISBN = dto.ISBN;
+        book.Publisher = dto.Publisher;
+        book.Quantity = dto.Quantity;
+        book.Summary = dto.Summary;
+        book.Genre = dto.Genre;
+        book.Condition = dto.Condition;
+        book.Price = dto.Price;
+        book.Year = dto.Year;
+        book.BookType = dto.BookType;
         await this.bookInventoryRepository.SaveAsync(book);
     }
 }

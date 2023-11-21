@@ -77,12 +77,17 @@ public class Functions
         var validationResult = bookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
-            return ApiGatewayResponseBuilder.Build(
-                HttpStatusCode.BadRequest,
-                validationResult.GetErrorMessage());
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
 
-        await this.bookInventoryService.UpdateBookAsync(id, bookDto);
+        try
+        {
+            await this.bookInventoryService.UpdateBookAsync(id, bookDto);
+        }
+        catch (Exception ex)
+        {
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, ex.Message);
+        }
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.NoContent);
     }
 }

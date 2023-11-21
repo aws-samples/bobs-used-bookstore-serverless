@@ -190,6 +190,35 @@ public class FunctionsTests
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
-        A.CallTo(() => this.bookInventoryService.AddBookAsync(A<CreateUpdateBookDto>.Ignored)).MustNotHaveHappened();
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(A<string>._, A<CreateUpdateBookDto>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task UpdateBook_WhenRequestIsInvalid_ShouldRespondNotFound()
+    {
+        // Arrange
+        string bookId = Guid.NewGuid().ToString();        
+        CreateUpdateBookDto book = new()
+        {
+            Name = "2020: The Apocalypse",
+            Author = "Li Juan",
+            ISBN = "6556784356",
+            BookType = "Hardcover",
+            Condition = "Like New",
+            Genre = "Mystery, Thriller & Suspense",
+            Publisher = "Arcadia Books",
+            Price = 10,
+            Quantity = 1,
+            Summary = "Sample book"
+        };
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Throws(new ArgumentException($"Book not found for id {bookId}"));
+
+        // Act
+        var response = await this.sut.UpdateBook(bookId, book);
+
+        // Assert
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(A<string>._, A<CreateUpdateBookDto>._)).MustHaveHappenedOnceExactly();
     }
 }

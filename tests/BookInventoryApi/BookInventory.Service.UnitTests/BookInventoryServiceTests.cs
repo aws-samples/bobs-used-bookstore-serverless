@@ -92,7 +92,13 @@ public class BookInventoryServiceTests
     {
         // Arrange
         string bookId = Guid.NewGuid().ToString();
-        CreateUpdateBookDto book = new()
+        Book book = new Book()
+        {
+            SK = bookId,
+            Name = "The Apocalypse",
+        };
+        A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).Returns(book);
+        CreateUpdateBookDto updateBook = new()
         {
             Name = "2022: The Apocalypse",
             Author = "Li Juan",
@@ -108,21 +114,49 @@ public class BookInventoryServiceTests
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).Returns(Task.CompletedTask);
 
         // Act
-        await this.sut.UpdateBookAsync(bookId, book);
+        await this.sut.UpdateBookAsync(bookId, updateBook);
 
         // Assert
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(
-            A<Book>.That.Matches(x => x.BookId == bookId
-            && x.Name == book.Name
-            && x.Author == book.Author
-            && x.ISBN == book.ISBN
-            && x.BookType == book.BookType
-            && x.Condition == book.Condition
-            && x.Genre == book.Genre
-            && x.Publisher == book.Publisher
-            && x.Price == book.Price
-            && x.Quantity == book.Quantity
-            && x.Summary == book.Summary
+            A<Book>.That.Matches(x => 
+            //x.BookId == bookId
+             x.Name == updateBook.Name
+            && x.Author == updateBook.Author
+            && x.ISBN == updateBook.ISBN
+            && x.BookType == updateBook.BookType
+            && x.Condition == updateBook.Condition
+            && x.Genre == updateBook.Genre
+            && x.Publisher == updateBook.Publisher
+            && x.Price == updateBook.Price
+            && x.Quantity == updateBook.Quantity
+            && x.Summary == updateBook.Summary
             ))).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void UpdateBook_WhenRequestIsInvalid_ShouldThrowException()
+    {
+        // Arrange
+        string bookId = Guid.NewGuid().ToString();
+        Book? book = null;
+        A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).Returns(book);
+        CreateUpdateBookDto updateBook = new()
+        {
+            Name = "2022: The Apocalypse",
+            Author = "Li Juan",
+            ISBN = "6556784356",
+            BookType = "Hardcover",
+            Condition = "Like New",
+            Genre = "Mystery, Thriller & Suspense",
+            Publisher = "Arcadia Books",
+            Price = 10,
+            Quantity = 1,
+            Summary = "Sample book"
+        };
+
+        // Act Assert
+        var response = Assert.ThrowsAsync<ArgumentException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
+        A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).MustNotHaveHappened();
     }
 }
