@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 using BookInventory.Service;
 
-[JsonSerializable(typeof(CreateUpdateBookDto))]
+[JsonSerializable(typeof(CreateBookDto))]
 [JsonSerializable(typeof(APIGatewayProxyRequest))]
 [JsonSerializable(typeof(APIGatewayProxyResponse))]
 [JsonSerializable(typeof(ApiWrapper<string>))]

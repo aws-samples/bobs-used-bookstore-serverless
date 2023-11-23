@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace BookInventory.Api.Validators
 {
-    public class CreateBookDtoValidator : AbstractValidator<CreateBookDto>
+    public class UpdateBookDtoValidator : AbstractValidator<UpdateBookDto>
     {
-        public CreateBookDtoValidator()
+        public UpdateBookDtoValidator()
         {
             RuleFor(x => x.Author).NotEmpty();
             RuleFor(x => x.BookType).NotEmpty();

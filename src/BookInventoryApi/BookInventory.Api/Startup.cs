@@ -21,6 +21,7 @@ public class Startup
     {
         services.AddSharedServices();
         services.AddDynamoDBServices();
-        services.AddScoped<IValidator<CreateUpdateBookDto>, CreateBookDtoValidator>();
+        services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
+        services.AddScoped<IValidator<UpdateBookDto>, UpdateBookDtoValidator>();
     }
 }

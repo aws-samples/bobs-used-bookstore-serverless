@@ -53,7 +53,7 @@ public class BookInventoryServiceTests
     public async Task AddBook_WhenRequestIsValid_ShouldSaveData()
     {
         // Arrange
-        CreateUpdateBookDto book = new()
+        CreateBookDto book = new()
         {
             Name = "2020: The Apocalypse",
             Author = "Li Juan",
@@ -98,7 +98,7 @@ public class BookInventoryServiceTests
             Name = "The Apocalypse",
         };
         A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).Returns(book);
-        CreateUpdateBookDto updateBook = new()
+        UpdateBookDto updateBook = new()
         {
             Name = "2022: The Apocalypse",
             Author = "Li Juan",
@@ -141,7 +141,7 @@ public class BookInventoryServiceTests
         string bookId = Guid.NewGuid().ToString();
         Book? book = null;
         A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).Returns(book);
-        CreateUpdateBookDto updateBook = new()
+        UpdateBookDto updateBook = new()
         {
             Name = "2022: The Apocalypse",
             Author = "Li Juan",

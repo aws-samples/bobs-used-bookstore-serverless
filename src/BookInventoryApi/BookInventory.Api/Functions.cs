@@ -15,12 +15,14 @@ namespace BookInventory.Api;
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
-    private readonly IValidator<CreateUpdateBookDto> bookValidator;
+    private readonly IValidator<CreateBookDto> createBookValidator;
+    private readonly IValidator<UpdateBookDto> updateBookValidator;
 
-    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateUpdateBookDto> bookValidator)
+    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator)
     {
         this.bookInventoryService = bookInventoryService;
-        this.bookValidator = bookValidator;
+        this.createBookValidator = createBookValidator;
+        this.updateBookValidator = updateBookValidator;
     }
 
     [LambdaFunction()]
@@ -56,9 +58,9 @@ public class Functions
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Post, "/books")]
-    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateUpdateBookDto bookDto)
+    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
-        var validationResult = bookValidator.Validate(bookDto);
+        var validationResult = createBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(
@@ -72,9 +74,9 @@ public class Functions
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
-    public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] CreateUpdateBookDto bookDto)
+    public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
     {
-        var validationResult = bookValidator.Validate(bookDto);
+        var validationResult = updateBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
@@ -84,7 +86,7 @@ public class Functions
         {
             await this.bookInventoryService.UpdateBookAsync(id, bookDto);
         }
-        catch (KeyNotFoundException ex)
+        catch (NullReferenceException ex)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, ex.Message);
         }

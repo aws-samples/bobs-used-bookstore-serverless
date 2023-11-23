@@ -53,7 +53,7 @@ public class BookInventoryService : IBookInventoryService
         };
     }
 
-    public async Task<string> AddBookAsync(CreateUpdateBookDto dto)
+    public async Task<string> AddBookAsync(CreateBookDto dto)
     {
         var book = new Book(
             dto.Name,
@@ -71,9 +71,9 @@ public class BookInventoryService : IBookInventoryService
         return book.SK;
     }
 
-    public async Task UpdateBookAsync(string bookId, CreateUpdateBookDto dto)
+    public async Task UpdateBookAsync(string bookId, UpdateBookDto dto)
     {
-        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new KeyNotFoundException($"Book not found for id {bookId}");
+        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new NullReferenceException($"Book not found for id {bookId}");
         book.Name = dto.Name;
         book.Author = dto.Author;
         book.ISBN = dto.ISBN;
