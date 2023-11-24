@@ -1,5 +1,6 @@
 ﻿using BookInventory.Models;
 using BookInventory.Repository;
+using BookInventory.Service.Exceptions;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
@@ -156,7 +157,7 @@ public class BookInventoryServiceTests
         };
 
         // Act Assert
-        var response = Assert.ThrowsAsync<ArgumentException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
+        var response = Assert.ThrowsAsync<ProductNotFoundException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).MustNotHaveHappened();
     }
 }

@@ -2,6 +2,7 @@ using BookInventory.Api.Validators;
 using BookInventory.Common;
 using BookInventory.Models;
 using BookInventory.Service;
+using BookInventory.Service.Exceptions;
 using FakeItEasy;
 using FluentAssertions;
 using FluentValidation;
@@ -213,7 +214,7 @@ public class FunctionsTests
             Quantity = 1,
             Summary = "Sample book"
         };
-        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Throws(new NullReferenceException($"Book not found for id {bookId}"));
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Throws(new ProductNotFoundException($"Book not found for id {bookId}"));
 
         // Act
         var response = await this.sut.UpdateBook(bookId, book);

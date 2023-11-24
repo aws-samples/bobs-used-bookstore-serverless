@@ -7,6 +7,7 @@ using BookInventory.Api.Extensions;
 using BookInventory.Common;
 using BookInventory.Models;
 using BookInventory.Service;
+using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
 
@@ -86,7 +87,7 @@ public class Functions
         {
             await this.bookInventoryService.UpdateBookAsync(id, bookDto);
         }
-        catch (NullReferenceException ex)
+        catch (ProductNotFoundException ex)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, ex.Message);
         }
