@@ -2,6 +2,7 @@ using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.APIGatewayEvents;
 using AWS.Lambda.Powertools.Logging;
+using AWS.Lambda.Powertools.Metrics;
 using AWS.Lambda.Powertools.Tracing;
 using BookInventory.Api.Extensions;
 using BookInventory.Common;
@@ -25,6 +26,8 @@ public class Functions
 
     [LambdaFunction()]
     [Tracing]
+    [Logging]
+    [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Get, "/books")]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
@@ -34,6 +37,8 @@ public class Functions
 
     [LambdaFunction()]
     [Tracing]
+    [Logging]
+    [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
@@ -55,6 +60,9 @@ public class Functions
     }
 
     [LambdaFunction()]
+    [Tracing]
+    [Logging]
+    [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Post, "/books")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
     {
