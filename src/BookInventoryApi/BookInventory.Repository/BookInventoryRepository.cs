@@ -24,7 +24,7 @@ public class BookInventoryRepository : IBookInventoryRepository
 
     public async Task<Book?> GetByIdAsync(string bookId)
     {
-        return await context.LoadAsync<Book>(BookInventoryConstants.BOOK, bookId);
+        return await context.LoadAsync<Book>(bookId);
     }
 
     public async Task SaveAsync(Book book)
