@@ -61,7 +61,7 @@ public class Functions
 
     [LambdaFunction()]
     [Tracing]
-    [Logging]
+    [Logging(LogEvent = true)]
     [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Post, "/books")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
