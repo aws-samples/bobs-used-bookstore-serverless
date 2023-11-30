@@ -1,13 +1,11 @@
-namespace BookInventory.Repository;
-
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
-
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Tracing;
-
 using BookInventory.Models;
+
+namespace BookInventory.Repository;
 
 public class BookInventoryRepository : IBookInventoryRepository
 {
@@ -47,14 +45,14 @@ public class BookInventoryRepository : IBookInventoryRepository
         if (bookResponse.Books.Count == pageSize)
         {
             Logger.LogInformation("Page size reached, returning");
-            
+
             // If they are equal, and there is no last evaluated key, increment the months before to allow for queries into the next month.
             // For example, if the page size is 1 and there are no other items in that month then move the cursor to the next month
             if (queryResponse.Count == pageSize && queryResponse.LastEvaluatedKey == null)
             {
                 bookResponse.Metadata.LastCheckedMonth++;
             }
-            
+
             return bookResponse;
         }
 
@@ -64,7 +62,7 @@ public class BookInventoryRepository : IBookInventoryRepository
                 pageSize,
                 currentMonth,
                 bookResponse);
-            
+
             if (bookResponse.Books.Count == pageSize)
             {
                 return bookResponse;
@@ -81,7 +79,7 @@ public class BookInventoryRepository : IBookInventoryRepository
         ListResponse bookResponse)
     {
         QueryResponse queryResponse;
-        
+
         Logger.LogInformation($"Page size not met for current query, attempting query in {currentMonth}(s) previous. Page size is currently at {bookResponse.Books.Count}.");
 
         // When moving to a different partition (in this case by looking at a different month), the last evaluated key needs to be reset.
@@ -93,7 +91,7 @@ public class BookInventoryRepository : IBookInventoryRepository
 
         bookResponse.Metadata.AddPartitions(queryResponse);
 
-            // Build the list of books.
+        // Build the list of books.
         this.ProcessResults(
             ref bookResponse,
             queryResponse,
@@ -106,7 +104,7 @@ public class BookInventoryRepository : IBookInventoryRepository
     private void ProcessResults(ref ListResponse bookResponse, QueryResponse queryResponse, int pageSize)
     {
         Logger.LogInformation($"Processing results, QueryResponse contains {pageSize} item(s)");
-        
+
         // Build the list of books.
         foreach (var item in queryResponse.Items)
         {
@@ -126,9 +124,9 @@ public class BookInventoryRepository : IBookInventoryRepository
                     item.AsString("CoverImageUrl")));
 
             if (bookResponse.Books.Count != pageSize) continue;
-            
+
             Logger.LogInformation("Page size reached, returning");
-                
+
             break;
         }
     }
@@ -137,14 +135,14 @@ public class BookInventoryRepository : IBookInventoryRepository
     private async Task<QueryResponse> ExecuteQuery(ListResponse bookResponse, int pageSize)
     {
         Logger.LogInformation($"Executing query for listing books, using date of {(bookResponse.Metadata.LastDate.ToString("yyyyMM"))} and page size of {pageSize}");
-        
+
         var attributeValues = new Dictionary<string, AttributeValue>(1);
         attributeValues.Add(
             ":gsi1pk",
             new AttributeValue(bookResponse.Metadata.LastDate.ToString("yyyyMM")));
 
         Dictionary<string, AttributeValue> startKey = null;
-        
+
         if (!string.IsNullOrEmpty(bookResponse.Metadata.LastPartition))
         {
             startKey = new Dictionary<string, AttributeValue>()
