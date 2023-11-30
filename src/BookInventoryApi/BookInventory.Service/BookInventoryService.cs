@@ -1,4 +1,5 @@
-﻿using BookInventory.Models;
+﻿using AWS.Lambda.Powertools.Tracing;
+using BookInventory.Models;
 using BookInventory.Repository;
 
 namespace BookInventory.Service;
@@ -12,7 +13,6 @@ public class BookInventoryService : IBookInventoryService
         this.bookInventoryRepository = bookInventoryRepository;
     }
 
-    /// <inheritdoc />
     public async Task<BookQueryResponse> ListAllBooks(int pageCount = 10, string cursor = null)
     {
         var books = await this.bookInventoryRepository.List(pageCount, cursor);

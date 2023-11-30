@@ -23,7 +23,8 @@ public class AddBooksApi : Construct
                 Environment = new Dictionary<string, string>(2)
                 {
                     { "POWERTOOLS_SERVICE_NAME", "BookInventory" },
-                    { "POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics"}
+                    { "POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics"},
+                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;

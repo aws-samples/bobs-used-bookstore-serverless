@@ -31,8 +31,9 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books")]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        var books = await this.bookInventoryService.ListAllBooks(pageSize, cursor);
-        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, books);
+        var response = await this.bookInventoryService.ListAllBooks(pageSize, cursor);
+        Metrics.AddMetric("GetBooks", response.Books.Count, MetricUnit.Count);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
     }
 
     [LambdaFunction()]
@@ -61,7 +62,7 @@ public class Functions
 
     [LambdaFunction()]
     [Tracing]
-    [Logging(LogEvent = true)]
+    [Logging]
     [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Post, "/books")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
@@ -69,9 +70,7 @@ public class Functions
         var validationResult = bookValidator.Validate(createBookDto);
         if (!validationResult.IsValid)
         {
-            return ApiGatewayResponseBuilder.Build(
-                HttpStatusCode.BadRequest,
-                validationResult.GetErrorMessage());
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(createBookDto);
