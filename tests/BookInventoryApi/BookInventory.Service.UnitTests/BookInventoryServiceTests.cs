@@ -22,7 +22,7 @@ public class BookInventoryServiceTests
     {
         // Arrange
         A.CallTo(() => this.bookInventoryRepository.GetByIdAsync("8274dcb1-e651-41b4-98c6-d416e8b59fab"))
-            .Returns(new Book() { PK = BookInventoryConstants.BOOK, SK = "8274dcb1-e651-41b4-98c6-d416e8b59fab", Name = "History" });
+            .Returns(new Book() { BookId = "8274dcb1-e651-41b4-98c6-d416e8b59fab", Name = "History" });
 
         // Act
         var response = await this.sut.GetBookById("8274dcb1-e651-41b4-98c6-d416e8b59fab");
