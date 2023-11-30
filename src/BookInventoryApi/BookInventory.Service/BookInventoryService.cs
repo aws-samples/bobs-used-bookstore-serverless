@@ -38,7 +38,7 @@ public class BookInventoryService : IBookInventoryService
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
         return book == null ? null : new BookDto()
         {
-            BookId = book.SK,
+            BookId = book.BookId,
             Name = book.Name,
             Author = book.Author,
             BookType = book.BookType,
@@ -69,7 +69,7 @@ public class BookInventoryService : IBookInventoryService
             dto.Summary,
             dto.Year);
         await this.bookInventoryRepository.SaveAsync(book);
-        return book.SK;
+        return book.BookId;
     }
 
     public async Task UpdateBookAsync(string bookId, UpdateBookDto dto)

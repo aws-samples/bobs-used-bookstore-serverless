@@ -1,10 +1,10 @@
-﻿using BookInventory.Models.Common;
+﻿using Amazon.DynamoDBv2.DataModel;
+using Amazon.Util;
 
 namespace BookInventory.Models;
 
-using Amazon.DynamoDBv2.DataModel;
-
-public class Book : BaseEntity
+[DynamoDBTable("BookInventory")]
+public class Book
 {
     public const int LowBookThreshold = 5;
 
@@ -23,11 +23,10 @@ public class Book : BaseEntity
            decimal price,
            int quantity,
            string summary,
-           int? year = null,           
+           int? year = null,
            string? coverImageUrl = null)
     {
-        PK = BookInventoryConstants.BOOK;
-        SK = Guid.NewGuid().ToString();
+        BookId = Guid.NewGuid().ToString();
         Name = name;
         Author = author;
         this.ISBN = ISBN;
@@ -42,6 +41,9 @@ public class Book : BaseEntity
         CoverImageUrl = coverImageUrl;
         LastUpdated = DateTime.Now;
     }
+
+    [DynamoDBHashKey]
+    public string BookId { get; set; }
 
     public string Name { get; set; }
 
@@ -64,22 +66,27 @@ public class Book : BaseEntity
     public string Summary { get; set; }
 
     public decimal Price { get; set; }
+    public string CreatedBy { get; set; } = "System";
+
+    public string CreatedOn { get; set; } = DateTime.UtcNow.ToString(AWSSDKUtils.ISO8601DateFormat);
 
     public int Quantity { get; set; }
-    
+
     public DateTime LastUpdated { get; private set; }
 
     [DynamoDBGlobalSecondaryIndexHashKey(IndexNames = new[] { "GSI1" }, AttributeName = "GSI1PK")]
-    public string LastUpdatedString {
+    public string LastUpdatedString
+    {
         get => this.LastUpdated.ToString("yyyyMM");
         set
         {
         }
     }
-    
+
     [DynamoDBGlobalSecondaryIndexRangeKey(IndexNames = new[] { "GSI1" }, AttributeName = "GSI1SK")]
-    public string BookId {
-        get => this.SK;
+    public string GSI1SK
+    {
+        get => this.BookId;
         set
         {
         }

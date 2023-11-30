@@ -27,8 +27,7 @@ public class BookInventoryServiceStack : Stack
         var bookInventory = new Table(this, "BookInventoryTable", new TableProps
         {
             TableName = "BookInventory",
-            PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "PK", Type = AttributeType.STRING },
-            SortKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "SK", Type = AttributeType.STRING },
+            PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "BookId", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST
         });
         bookInventory.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps()

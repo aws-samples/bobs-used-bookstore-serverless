@@ -2,10 +2,8 @@ namespace BookInventory.Common;
 
 using Amazon.Lambda.APIGatewayEvents;
 using BookInventory.Models;
-using BookInventory.Models.Common;
-using System.Text.Json.Serialization;
-
 using BookInventory.Service;
+using System.Text.Json.Serialization;
 
 [JsonSerializable(typeof(CreateBookDto))]
 [JsonSerializable(typeof(APIGatewayProxyRequest))]
