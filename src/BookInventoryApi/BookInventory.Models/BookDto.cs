@@ -9,7 +9,7 @@
         public BookDto(Book book)
         {
             this.Author = book.Author;
-            this.BookId = book.PK;
+            this.BookId = book.BookId;
             this.BookType = book.BookType;
             this.Condition = book.Condition;
             this.CoverImage = book.CoverImageUrl;
