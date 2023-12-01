@@ -1,12 +1,11 @@
-﻿using AWS.Lambda.Powertools.Tracing;
-using BookInventory.Models;
+﻿using BookInventory.Models;
 using BookInventory.Repository;
 
 namespace BookInventory.Service;
 
 public class BookInventoryService : IBookInventoryService
 {
-    private IBookInventoryRepository bookInventoryRepository;
+    private readonly IBookInventoryRepository bookInventoryRepository;
 
     public BookInventoryService(IBookInventoryRepository bookInventoryRepository)
     {
@@ -31,7 +30,7 @@ public class BookInventoryService : IBookInventoryService
 
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
-    
+
     public async Task<BookDto?> GetBookById(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
