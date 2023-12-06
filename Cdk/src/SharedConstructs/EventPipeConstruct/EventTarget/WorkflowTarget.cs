@@ -1,4 +1,4 @@
-namespace SharedConstructs.EventTarget;
+namespace SharedConstructs.EventPipeConstruct.EventTarget;
 
 using Amazon.CDK.AWS.Pipes;
 using Amazon.CDK.AWS.StepFunctions;

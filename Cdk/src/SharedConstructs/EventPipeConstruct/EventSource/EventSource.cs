@@ -1,4 +1,4 @@
-namespace SharedConstructs.EventSource;
+namespace SharedConstructs.EventPipeConstruct.EventSource;
 
 using Amazon.CDK.AWS.Pipes;
 

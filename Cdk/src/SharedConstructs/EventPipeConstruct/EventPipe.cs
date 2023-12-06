@@ -1,11 +1,11 @@
-namespace SharedConstructs;
+namespace SharedConstructs.EventPipeConstruct;
 
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Pipes;
 
 using Constructs;
 
-using SharedConstructs.EventTarget;
+using SharedConstructs.EventPipeConstruct.EventTarget;
 
 public class EventPipe : Construct
 {
