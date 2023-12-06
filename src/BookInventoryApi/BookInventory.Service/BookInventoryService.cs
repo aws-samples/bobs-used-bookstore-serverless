@@ -74,7 +74,7 @@ public class BookInventoryService : IBookInventoryService
 
     public async Task UpdateBookAsync(string bookId, UpdateBookDto dto)
     {
-        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ProductNotFoundException($"Book not found for id {bookId}");
+        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ProductNotFoundException($"Book not found.", bookId);
         book.Name = dto.Name;
         book.Author = dto.Author;
         book.ISBN = dto.ISBN;

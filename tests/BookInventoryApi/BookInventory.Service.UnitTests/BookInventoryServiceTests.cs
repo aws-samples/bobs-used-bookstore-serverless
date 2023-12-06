@@ -95,7 +95,7 @@ public class BookInventoryServiceTests
         string bookId = Guid.NewGuid().ToString();
         Book book = new Book()
         {
-            SK = bookId,
+            BookId = bookId,
             Name = "The Apocalypse",
         };
         A.CallTo(() => this.bookInventoryRepository.GetByIdAsync(bookId)).Returns(book);
