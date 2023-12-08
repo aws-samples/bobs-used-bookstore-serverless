@@ -9,7 +9,6 @@ using BookInventory.Models;
 using BookInventory.Service;
 using FluentValidation;
 using System.Net;
-
 namespace BookInventory.Api;
 
 public class Functions
@@ -68,5 +67,30 @@ public class Functions
 
         var bookId = await this.bookInventoryService.AddBookAsync(createBookDto);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
+    }
+
+    [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Get, "/api-docs")]
+    public APIGatewayProxyResponse GetApiDocs()
+    {
+        string spec = GetInlineApiSpecs(Environment.GetEnvironmentVariable("BookInventoryApiUrl")!);
+        string html = File.ReadAllText("./ApiSpecs/swaggerui.html");
+       
+        return new APIGatewayProxyResponse
+        {
+            StatusCode = 200,
+            Headers = new Dictionary<string, string>(1)
+            {
+                { "Content-Type", "text/html" },
+                { "Access-Control-Allow-Origin", "*" }
+            },
+            Body = html.Replace("#spec", spec)
+        };
+    }
+
+    private string GetInlineApiSpecs(string apiUrl)
+    {
+        string spec = File.ReadAllText("./ApiSpecs/openapi.json");
+        return spec.Replace("BookInventoryApiUrl", apiUrl);
     }
 }

@@ -1,0 +1,411 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "BookInventoryApi",
+    "version" : "2023-12-07T09:36:35Z"
+  },
+  "servers" : [ {
+    "url" : "https://4y29sack34.execute-api.us-east-1.amazonaws.com/{basePath}",
+    "variables" : {
+      "basePath" : {
+        "default" : "prod"
+      }
+    }
+  } ],
+  "paths" : {
+    "/books" : {
+      "get" : {
+        "responses" : {
+          "404" : {
+            "description" : "404 response",
+            "content" : { }
+          },
+          "200" : {
+            "description" : "200 response",
+            "content" : { }
+          },
+          "400" : {
+            "description" : "400 response",
+            "content" : { }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:ListBooksApi/invocations",
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws_proxy"
+        }
+      },
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BookInCreatJXzxldOpTJiG"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "404 response",
+            "content" : { }
+          },
+          "200" : {
+            "description" : "200 response",
+            "content" : { }
+          },
+          "400" : {
+            "description" : "400 response",
+            "content" : { }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:AddBooksApi/invocations",
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws_proxy"
+        }
+      },
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Credentials" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Credentials" : "'true'",
+                "method.response.header.Access-Control-Allow-Methods" : "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Headers" : "'*'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/books/{id}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "404 response",
+            "content" : { }
+          },
+          "200" : {
+            "description" : "200 response",
+            "content" : { }
+          },
+          "400" : {
+            "description" : "400 response",
+            "content" : { }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:GetBooksApi/invocations",
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws_proxy"
+        }
+      },
+      "options" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Credentials" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Credentials" : "'true'",
+                "method.response.header.Access-Control-Allow-Methods" : "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Headers" : "'*'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/api-docs" : {
+      "get" : {
+        "responses" : {
+          "404" : {
+            "description" : "404 response",
+            "content" : { }
+          },
+          "200" : {
+            "description" : "200 response",
+            "content" : { }
+          },
+          "400" : {
+            "description" : "400 response",
+            "content" : { }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:GetApiDocs/invocations",
+          "passthroughBehavior" : "when_no_match",
+          "type" : "aws_proxy"
+        }
+      },
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Credentials" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Credentials" : "'true'",
+                "method.response.header.Access-Control-Allow-Methods" : "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Headers" : "'*'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/" : {
+      "options" : {
+        "responses" : {
+          "204" : {
+            "description" : "204 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Credentials" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "204",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Credentials" : "'true'",
+                "method.response.header.Access-Control-Allow-Methods" : "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Headers" : "'*'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ statusCode: 200 }"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "BookInCreatJXzxldOpTJiG" : {
+        "type" : "object",
+        "properties" : {
+          "Condition" : {
+            "type" : "string"
+          },
+          "CoverImage" : {
+            "type" : "string"
+          },
+          "Publisher" : {
+            "type" : "string"
+          },
+          "Qunatity" : {
+            "type" : "integer"
+          },
+          "Name" : {
+            "type" : "string"
+          },
+          "CoverImageFileName" : {
+            "type" : "string"
+          },
+          "BookType" : {
+            "type" : "string"
+          },
+          "ISBN" : {
+            "type" : "string"
+          },
+          "Year" : {
+            "type" : "integer"
+          },
+          "Price" : {
+            "type" : "number"
+          },
+          "Author" : {
+            "type" : "string"
+          },
+          "Summary" : {
+            "type" : "string"
+          },
+          "Genre" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "x-amazon-apigateway-gateway-responses" : {
+    "DEFAULT_4XX" : {
+      "responseParameters" : {
+        "gatewayresponse.header.Access-Control-Allow-Methods" : "'GET,OPTIONS'",
+        "gatewayresponse.header.Access-Control-Allow-Origin" : "'*'",
+        "gatewayresponse.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      }
+    },
+    "DEFAULT_5XX" : {
+      "responseParameters" : {
+        "gatewayresponse.header.Access-Control-Allow-Methods" : "'GET,OPTIONS'",
+        "gatewayresponse.header.Access-Control-Allow-Origin" : "'*'",
+        "gatewayresponse.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      }
+    }
+  }
+}

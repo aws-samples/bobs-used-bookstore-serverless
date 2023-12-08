@@ -1,0 +1,204 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "BookInventoryApi",
+    "version": "2023-12-01T12:48:48Z"
+  },
+  "servers": [
+    {
+      "url": "BookInventoryApiUrl/{basePath}",
+      "variables": {
+        "basePath": {
+          "default": "prod"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/books": {
+      "get": {
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "404 response",
+            "content": {}
+          },
+          "200": {
+            "description": "200 response",
+            "content": {}
+          },
+          "400": {
+            "description": "400 response",
+            "content": {}
+          },
+          "500": {
+            "description": "500 response",
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:ListBooksApi/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookInCreatJXzxldOpTJiG"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "404 response",
+            "content": {}
+          },
+          "200": {
+            "description": "200 response",
+            "content": {}
+          },
+          "400": {
+            "description": "400 response",
+            "content": {}
+          },
+          "500": {
+            "description": "500 response",
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:AddBooksApi/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "404 response",
+            "content": {}
+          },
+          "200": {
+            "description": "200 response",
+            "content": {}
+          },
+          "400": {
+            "description": "400 response",
+            "content": {}
+          },
+          "500": {
+            "description": "500 response",
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:965044485876:function:GetBooksApi/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BookInCreatJXzxldOpTJiG": {
+        "required": [ "author", "bookType", "isbn" ],
+        "type": "object",
+        "properties": {
+          "condition": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "qunatity": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "coverImageFileName": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "isbn": {
+            "type": "string"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          },
+          "author": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "genre": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "x-amazon-apigateway-gateway-responses": {
+    "DEFAULT_5XX": {
+      "responseParameters": {
+        "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+        "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+        "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      }
+    },
+    "DEFAULT_4XX": {
+      "responseParameters": {
+        "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+        "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+        "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      }
+    }
+  }
+}

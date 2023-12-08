@@ -27,4 +27,12 @@
     <ItemGroup>
       <Folder Include="Properties\" />
     </ItemGroup>
+    <ItemGroup>
+      <None Update="ApiSpecs\openapi.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ApiSpecs\swaggerui.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

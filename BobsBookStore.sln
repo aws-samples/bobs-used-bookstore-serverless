@@ -1,24 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationStack", "cdk\src\AuthenticationStack\AuthenticationStack.csproj", "{FEDDA406-200B-4D4A-8E36-702A66B654AD}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationStack", "cdk\src\AuthenticationStack\AuthenticationStack.csproj", "{FEDDA406-200B-4D4A-8E36-702A66B654AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Api", "src\BookInventoryApi\BookInventory.Api\BookInventory.Api.csproj", "{59BDA541-C2E8-4CEC-A756-6D3582126E27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Api", "src\BookInventoryApi\BookInventory.Api\BookInventory.Api.csproj", "{59BDA541-C2E8-4CEC-A756-6D3582126E27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Models", "src\BookInventoryApi\BookInventory.Models\BookInventory.Models.csproj", "{12EE8EBF-1FBE-44C2-9709-3E962AE752CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Models", "src\BookInventoryApi\BookInventory.Models\BookInventory.Models.csproj", "{12EE8EBF-1FBE-44C2-9709-3E962AE752CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Common", "src\BookInventoryApi\BookInventory.Common\BookInventory.Common.csproj", "{27BAC925-4476-4984-93CE-D01383F4F7FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Common", "src\BookInventoryApi\BookInventory.Common\BookInventory.Common.csproj", "{27BAC925-4476-4984-93CE-D01383F4F7FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Service", "src\BookInventoryApi\BookInventory.Service\BookInventory.Service.csproj", "{2C1B7D74-610F-4C6C-AC02-1D9445781540}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Service", "src\BookInventoryApi\BookInventory.Service\BookInventory.Service.csproj", "{2C1B7D74-610F-4C6C-AC02-1D9445781540}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Repository", "src\BookInventoryApi\BookInventory.Repository\BookInventory.Repository.csproj", "{205513B6-4051-407A-9E59-9C4F8490C2D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Repository", "src\BookInventoryApi\BookInventory.Repository\BookInventory.Repository.csproj", "{205513B6-4051-407A-9E59-9C4F8490C2D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventoryApiStack", "cdk\src\BookInventoryApiStack\BookInventoryApiStack.csproj", "{1A4A5993-3839-448F-B82D-05474EAD5720}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventoryApiStack", "cdk\src\BookInventoryApiStack\BookInventoryApiStack.csproj", "{1A4A5993-3839-448F-B82D-05474EAD5720}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedConstructs", "cdk\src\SharedConstructs\SharedConstructs.csproj", "{2F090BCB-6AE5-4746-9A4A-E13B5F64EBCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedConstructs", "cdk\src\SharedConstructs\SharedConstructs.csproj", "{2F090BCB-6AE5-4746-9A4A-E13B5F64EBCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Api.UnitTests", "tests\BookInventoryApi\BookInventory.Api.UnitTests\BookInventory.Api.UnitTests.csproj", "{2264CC4F-519F-426F-A8DC-D99D45DEFDDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Api.UnitTests", "tests\BookInventoryApi\BookInventory.Api.UnitTests\BookInventory.Api.UnitTests.csproj", "{2264CC4F-519F-426F-A8DC-D99D45DEFDDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Service.UnitTests", "tests\BookInventoryApi\BookInventory.Service.UnitTests\BookInventory.Service.UnitTests.csproj", "{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookInventory.Service.UnitTests", "tests\BookInventoryApi\BookInventory.Service.UnitTests\BookInventory.Service.UnitTests.csproj", "{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,5 +69,11 @@ Global
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E9409E8-0AC6-4D2C-927D-196B64E4399B}
 	EndGlobalSection
 EndGlobal
