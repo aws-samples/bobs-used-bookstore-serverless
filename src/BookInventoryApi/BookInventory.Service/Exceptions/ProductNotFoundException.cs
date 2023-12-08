@@ -8,10 +8,6 @@
         {
         }
 
-        public ProductNotFoundException(string message) : base(message)
-        {
-        }
-
         public ProductNotFoundException(string message, string productId) : base(message)
         {
             ProductId = productId;
