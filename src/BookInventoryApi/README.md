@@ -29,10 +29,33 @@ Body
     "coverImageFileName": "/Content/Images/coverimages/apocalypse.png"
     }
 
+**Update Book** - Update existing book by bookId
+
+Url 
+    
+    PUT https://{{api_gateway_url}}/books/{bookId}
+
+Body
+
+    {
+    "name": "2020: The Apocalypse",
+    "author": "Li Juan",
+    "bookType": "Hardcover",
+    "condition": "Like New",
+    "genre": "Mystery, Thriller & Suspense",
+    "publisher": "Astral Publishing",
+    "year": 2023,
+    "isbn": "6556784356",
+    "summary": "Bobs used book serverless",
+    "price": 5,
+    "quantity": 10,
+    "coverImage": null,
+    "coverImageFileName": "/Content/Images/coverimages/apocalypse.png"
+    }
 
 **Get Book** - Get Book detail by bookId.
 
 Url 
     
-    GET {{api_gateway_url}}/books/177577e4-883f-4f72-a6c8-9e977e05ccfb
+    GET {{api_gateway_url}}/books/{bookId}
 

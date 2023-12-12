@@ -8,6 +8,7 @@ using BookInventory.Api.Extensions;
 using BookInventory.Common;
 using BookInventory.Models;
 using BookInventory.Service;
+using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
 
@@ -16,12 +17,14 @@ namespace BookInventory.Api;
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
-    private readonly IValidator<CreateBookDto> bookValidator;
+    private readonly IValidator<CreateBookDto> createBookValidator;
+    private readonly IValidator<UpdateBookDto> updateBookValidator;
 
-    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> bookValidator)
+    public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator)
     {
         this.bookInventoryService = bookInventoryService;
-        this.bookValidator = bookValidator;
+        this.createBookValidator = createBookValidator;
+        this.updateBookValidator = updateBookValidator;
     }
 
     [LambdaFunction()]
@@ -31,7 +34,7 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books")]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        var response = await this.bookInventoryService.ListAllBooks(pageSize, cursor);
+        var response = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
         Metrics.AddMetric("GetBooks", response.Books.Count, MetricUnit.Count);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
     }
@@ -50,7 +53,7 @@ public class Functions
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");
         }
 
-        var book = await this.bookInventoryService.GetBookById(id);
+        var book = await this.bookInventoryService.GetBookByIdAsync(id);
 
         if (book == null)
         {
@@ -65,15 +68,36 @@ public class Functions
     [Logging]
     [Metrics(CaptureColdStart = true)]
     [RestApi(LambdaHttpMethod.Post, "/books")]
-    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto createBookDto)
+    public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
-        var validationResult = bookValidator.Validate(createBookDto);
+        var validationResult = createBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
 
-        var bookId = await this.bookInventoryService.AddBookAsync(createBookDto);
+        var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
+    }
+
+    [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
+    public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
+    {
+        var validationResult = updateBookValidator.Validate(bookDto);
+        if (!validationResult.IsValid)
+        {
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
+        }
+
+        try
+        {
+            await this.bookInventoryService.UpdateBookAsync(id, bookDto);
+        }
+        catch (ProductNotFoundException ex)
+        {
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.NotFound, ex.Message);
+        }
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.NoContent);
     }
 }
