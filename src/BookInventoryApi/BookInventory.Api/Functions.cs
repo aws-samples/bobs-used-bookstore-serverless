@@ -43,11 +43,10 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
     [Tracing]
     [Logging]
-    [Metrics]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
+        Logger.AppendKey("bookId", id);
         Logger.LogInformation($"Book search for id {id}");
-
         if (string.IsNullOrWhiteSpace(id))
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");

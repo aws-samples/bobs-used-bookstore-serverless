@@ -22,8 +22,8 @@ public class AddBooksApi : Construct
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
                 Environment = new Dictionary<string, string>(3)
                 {
-                    { "POWERTOOLS_SERVICE_NAME", "BookInventory" },
-                    { "POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics"},
+                    { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
+                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}
                 },
                 IsNativeAot = false //dotnet 6 runtime
