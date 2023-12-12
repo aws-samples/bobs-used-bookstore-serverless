@@ -31,11 +31,9 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books")]
     [Tracing]
     [Logging]
-    [Metrics]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
         var response = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
-        Metrics.AddMetric("Book_Returned", response.Books.Count, MetricUnit.Count);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
     }
 
