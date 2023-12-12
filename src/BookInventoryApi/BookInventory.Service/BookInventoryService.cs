@@ -1,5 +1,6 @@
 ﻿using BookInventory.Models;
 using BookInventory.Repository;
+using BookInventory.Service.Exceptions;
 
 namespace BookInventory.Service;
 
@@ -13,7 +14,7 @@ public class BookInventoryService : IBookInventoryService
     }
 
     /// <inheritdoc />
-    public async Task<BookQueryResponse> ListAllBooks(int pageCount = 10, string cursor = null)
+    public async Task<BookQueryResponse> ListAllBooksAsync(int pageCount = 10, string cursor = null)
     {
         var books = await this.bookInventoryRepository.List(pageCount, cursor);
 
@@ -31,8 +32,8 @@ public class BookInventoryService : IBookInventoryService
 
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
-    
-    public async Task<BookDto?> GetBookById(string id)
+
+    public async Task<BookDto?> GetBookByIdAsync(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
         return book == null ? null : new BookDto()
@@ -69,5 +70,22 @@ public class BookInventoryService : IBookInventoryService
             dto.Year);
         await this.bookInventoryRepository.SaveAsync(book);
         return book.BookId;
+    }
+
+    public async Task UpdateBookAsync(string bookId, UpdateBookDto dto)
+    {
+        var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ProductNotFoundException($"Book not found.", bookId);
+        book.Name = dto.Name;
+        book.Author = dto.Author;
+        book.ISBN = dto.ISBN;
+        book.Publisher = dto.Publisher;
+        book.Quantity = dto.Quantity;
+        book.Summary = dto.Summary;
+        book.Genre = dto.Genre;
+        book.Condition = dto.Condition;
+        book.Price = dto.Price;
+        book.Year = dto.Year;
+        book.BookType = dto.BookType;
+        await this.bookInventoryRepository.SaveAsync(book);
     }
 }
