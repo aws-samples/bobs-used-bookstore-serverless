@@ -20,7 +20,7 @@ public class AddBooksApi : Construct
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
-                Environment = new Dictionary<string, string>(2)
+                Environment = new Dictionary<string, string>(3)
                 {
                     { "POWERTOOLS_SERVICE_NAME", "BookInventory" },
                     { "POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics"},

@@ -28,22 +28,22 @@ public class Functions
     }
 
     [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Get, "/books")]
     [Tracing]
     [Logging]
-    [Metrics(CaptureColdStart = true)]
-    [RestApi(LambdaHttpMethod.Get, "/books")]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
         var response = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
-        Metrics.AddMetric("GetBooks", response.Books.Count, MetricUnit.Count);
+        Metrics.AddMetric("Book_Returned", response.Books.Count, MetricUnit.Count);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
     }
 
     [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
     [Tracing]
     [Logging]
-    [Metrics(CaptureColdStart = true)]
-    [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
         Logger.LogInformation($"Book search for id {id}");
@@ -64,10 +64,10 @@ public class Functions
     }
 
     [LambdaFunction()]
+    [RestApi(LambdaHttpMethod.Post, "/books")]
     [Tracing]
     [Logging]
-    [Metrics(CaptureColdStart = true)]
-    [RestApi(LambdaHttpMethod.Post, "/books")]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
         var validationResult = createBookValidator.Validate(bookDto);
@@ -77,11 +77,16 @@ public class Functions
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
+        Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
+        Metrics.AddMetadata("BookId", bookId);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
+    [Tracing]
+    [Logging]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
     {
         var validationResult = updateBookValidator.Validate(bookDto);
