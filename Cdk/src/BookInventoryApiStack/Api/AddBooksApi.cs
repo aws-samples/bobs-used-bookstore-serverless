@@ -24,7 +24,7 @@ public class AddBooksApi : Construct
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
-                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}
+                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}//TODO:Enable LogEvent for debugging in non-production environments
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;
