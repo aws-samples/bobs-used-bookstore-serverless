@@ -74,8 +74,9 @@ public class Functions
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
-        Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
         Metrics.AddMetadata("BookId", bookId);
+        Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
+        Tracing.AddAnnotation("BookId", bookId);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 
