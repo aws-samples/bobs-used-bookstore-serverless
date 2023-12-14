@@ -43,7 +43,7 @@ public class Functions
     [Logging]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
-        Logger.AppendKey("bookId", id);
+        id.AddObservabilityTag("BookId");
         Logger.LogInformation($"Book search for id {id}");
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -74,9 +74,8 @@ public class Functions
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
-        Metrics.AddMetadata("BookId", bookId);
         Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
-        Tracing.AddAnnotation("BookId", bookId);
+        bookId.AddObservabilityTag("BookId");
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 
