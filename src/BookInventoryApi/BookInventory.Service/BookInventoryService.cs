@@ -6,7 +6,7 @@ namespace BookInventory.Service;
 
 public class BookInventoryService : IBookInventoryService
 {
-    private IBookInventoryRepository bookInventoryRepository;
+    private readonly IBookInventoryRepository bookInventoryRepository;
 
     public BookInventoryService(IBookInventoryRepository bookInventoryRepository)
     {

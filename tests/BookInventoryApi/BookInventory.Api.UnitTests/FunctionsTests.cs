@@ -21,6 +21,8 @@ public class FunctionsTests
 
     public FunctionsTests()
     {
+        Environment.SetEnvironmentVariable("POWERTOOLS_SERVICE_NAME", "BookInventory");
+        Environment.SetEnvironmentVariable("POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics");
         this.bookInventoryService = A.Fake<IBookInventoryService>();
         this.createBookValidator = new CreateBookDtoValidator();
         this.updateBookValidator = new UpdateBookDtoValidator();
@@ -214,7 +216,7 @@ public class FunctionsTests
             Quantity = 1,
             Summary = "Sample book"
         };
-        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Throws(new ProductNotFoundException($"Book not found for id {bookId}"));
+        A.CallTo(() => this.bookInventoryService.UpdateBookAsync(bookId, book)).Throws(new ProductNotFoundException($"Book not found for id", bookId));
 
         // Act
         var response = await this.sut.UpdateBook(bookId, book);

@@ -2,6 +2,7 @@ using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.APIGatewayEvents;
 using AWS.Lambda.Powertools.Logging;
+using AWS.Lambda.Powertools.Metrics;
 using AWS.Lambda.Powertools.Tracing;
 using BookInventory.Api.Extensions;
 using BookInventory.Common;
@@ -27,21 +28,23 @@ public class Functions
     }
 
     [LambdaFunction()]
-    [Tracing]
     [RestApi(LambdaHttpMethod.Get, "/books")]
+    [Tracing]
+    [Logging]
     public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        var books = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
-        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, books);
+        var response = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
+        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
     }
 
     [LambdaFunction()]
-    [Tracing]
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
+    [Tracing]
+    [Logging]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
+        id.AddObservabilityTag("BookId");
         Logger.LogInformation($"Book search for id {id}");
-
         if (string.IsNullOrWhiteSpace(id))
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");
@@ -59,22 +62,28 @@ public class Functions
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Post, "/books")]
+    [Tracing]
+    [Logging]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
         var validationResult = createBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
-            return ApiGatewayResponseBuilder.Build(
-                HttpStatusCode.BadRequest,
-                validationResult.GetErrorMessage());
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
+        Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
+        bookId.AddObservabilityTag("BookId");
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
+    [Tracing]
+    [Logging]
+    [Metrics]
     public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
     {
         var validationResult = updateBookValidator.Validate(bookDto);
