@@ -22,13 +22,14 @@ public class Functions
     private readonly IValidator<CreateBookDto> createBookValidator;
     private readonly IValidator<UpdateBookDto> updateBookValidator;
     private readonly IAmazonS3 s3Client;
-    private readonly string bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
+    private readonly string bucketName;
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
         this.bookInventoryService = bookInventoryService;
         this.createBookValidator = createBookValidator;
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
+        this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
     }
 
     [LambdaFunction()]
