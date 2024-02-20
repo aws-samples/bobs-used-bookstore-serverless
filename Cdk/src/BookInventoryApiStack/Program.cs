@@ -5,9 +5,9 @@ using BookInventoryApiStack;
 
 var app = new App();
 
-var stockPriceStack = new BookInventoryServiceStack(
+var bookInventoryServiceStack = new BookInventoryServiceStack(
     app,
     $"BookInventoryServiceStack",
-    new BookInventoryServiceStackProps());
+    new BookInventoryServiceStackProps(""));
 
 app.Synth();

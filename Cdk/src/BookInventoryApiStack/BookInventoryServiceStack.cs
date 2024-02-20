@@ -8,9 +8,10 @@ namespace BookInventoryApiStack;
 
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.Logs;
+using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.SSM;
 
-public record BookInventoryServiceStackProps();
+public record BookInventoryServiceStackProps(string BucketName);
 
 public class BookInventoryServiceStack : Stack
 {
@@ -23,6 +24,12 @@ public class BookInventoryServiceStack : Stack
         id,
         props)
     {
+        // S3 bucket
+        var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
+        {
+            BucketName = $"{this.Account}-book-inventory-bucket"
+        });
+
         //Database
         var bookInventory = new Table(this, "BookInventoryTable", new TableProps
         {
@@ -62,7 +69,7 @@ public class BookInventoryServiceStack : Stack
             });
 
         //Lambda Functions
-        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps(bookInventoryBucket.BucketName);
         
         var getBooksApi = new GetBooksApi(
             this,
@@ -84,17 +91,27 @@ public class BookInventoryServiceStack : Stack
             "UpdateBooksEndpoint",
             bookInventoryServiceStackProps);
 
+        var generatePreSignedURLApi = new GeneratePreSignedURLApi(
+            this,
+            "GeneratePreSignedURLEndpoint",
+            bookInventoryServiceStackProps);
+
         //Api
-        
+
         var api = new SharedConstructs.Api(
                 this,
                 "BookInventoryApi",
-                new RestApiProps { RestApiName = "BookInventoryApi", DeployOptions = new StageOptions {
-                    AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
-                    AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
-                    TracingEnabled = true,
-                    LoggingLevel = MethodLoggingLevel.ERROR
-                }})
+                new RestApiProps
+                {
+                    RestApiName = "BookInventoryApi",
+                    DeployOptions = new StageOptions
+                    {
+                        AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
+                        AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
+                        TracingEnabled = true,
+                        LoggingLevel = MethodLoggingLevel.ERROR
+                    }
+                })
             .WithCognito(userPool)
             .WithEndpoint(
                 "/books/{id}",
@@ -114,13 +131,18 @@ public class BookInventoryServiceStack : Stack
                 "/books/{id}",
                 HttpMethod.Put,
                 updateBooksApi.Function,
-                false);
+                false)
+            .WithEndpoint(
+                "books/cover-page-upload-url/{fileName}",
+                HttpMethod.Get,
+                generatePreSignedURLApi.Function);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
+        bookInventoryBucket.GrantPut(generatePreSignedURLApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,
