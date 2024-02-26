@@ -21,6 +21,8 @@ public class FunctionsTests
 
     public FunctionsTests()
     {
+        Environment.SetEnvironmentVariable("POWERTOOLS_SERVICE_NAME", "BookInventory");
+        Environment.SetEnvironmentVariable("POWERTOOLS_METRICS_NAMESPACE", "BookInventoryMetrics");
         this.bookInventoryService = A.Fake<IBookInventoryService>();
         this.createBookValidator = new CreateBookDtoValidator();
         this.updateBookValidator = new UpdateBookDtoValidator();

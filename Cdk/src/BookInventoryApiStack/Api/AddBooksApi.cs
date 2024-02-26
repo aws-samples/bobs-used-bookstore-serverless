@@ -20,9 +20,11 @@ public class AddBooksApi : Construct
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
-                Environment = new Dictionary<string, string>(1)
+                Environment = new Dictionary<string, string>(3)
                 {
-                    { "POWERTOOLS_SERVICE_NAME", "Books" },
+                    { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
+                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
+                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}//TODO:Enable LogEvent for debugging in non-production environments
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;

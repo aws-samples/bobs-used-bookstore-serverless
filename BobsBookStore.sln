@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Api.UnitTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Service.UnitTests", "tests\BookInventoryApi\BookInventory.Service.UnitTests\BookInventory.Service.UnitTests.csproj", "{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Api", "src\OrderServiceApi\OrderService.Api\OrderService.Api.csproj", "{64E7CCA4-1A1C-426A-B7D4-29C0E684466E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Common", "src\OrderServiceApi\OrderService.Common\OrderService.Common.csproj", "{71FA2D8E-4CC3-4F65-8EEB-1F37734ECCCB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Models", "src\OrderServiceApi\OrderService.Models\OrderService.Models.csproj", "{9D38686E-2137-4C90-B25B-CBE62F27A076}"
@@ -29,6 +27,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Service", "src\OrderServiceApi\OrderService.Service\OrderService.Service.csproj", "{0BFBE09E-9962-4E1F-98D9-4C019DF9403B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderServiceApiStack", "Cdk\src\OrderServiceApiStack\OrderServiceApiStack.csproj", "{63C9E8B7-BD99-46A9-8CF2-EB68D564E006}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Api", "src\OrderServiceApi\OrderService.Api\OrderService.Api.csproj", "{EA9FE4DE-E596-497F-9FB0-A859BFC7E7B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,10 +76,6 @@ Global
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCDA5057-2D9B-4F81-B8CF-4AAF4E87914D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64E7CCA4-1A1C-426A-B7D4-29C0E684466E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64E7CCA4-1A1C-426A-B7D4-29C0E684466E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64E7CCA4-1A1C-426A-B7D4-29C0E684466E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64E7CCA4-1A1C-426A-B7D4-29C0E684466E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71FA2D8E-4CC3-4F65-8EEB-1F37734ECCCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71FA2D8E-4CC3-4F65-8EEB-1F37734ECCCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71FA2D8E-4CC3-4F65-8EEB-1F37734ECCCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -96,5 +92,9 @@ Global
 		{63C9E8B7-BD99-46A9-8CF2-EB68D564E006}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63C9E8B7-BD99-46A9-8CF2-EB68D564E006}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63C9E8B7-BD99-46A9-8CF2-EB68D564E006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA9FE4DE-E596-497F-9FB0-A859BFC7E7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA9FE4DE-E596-497F-9FB0-A859BFC7E7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA9FE4DE-E596-497F-9FB0-A859BFC7E7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA9FE4DE-E596-497F-9FB0-A859BFC7E7B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

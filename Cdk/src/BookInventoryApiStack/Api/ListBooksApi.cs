@@ -20,9 +20,10 @@ public class ListBooksApi : Construct
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_GetBooks_Generated::GetBooks",
-                Environment = new Dictionary<string, string>(1)
+                Environment = new Dictionary<string, string>(2)
                 {
-                    { "POWERTOOLS_SERVICE_NAME", "Books" },
+                    { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
+                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;

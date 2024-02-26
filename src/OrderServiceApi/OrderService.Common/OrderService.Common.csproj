@@ -6,4 +6,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AWS.Lambda.Powertools.Tracing" Version="1.4.0" />
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.300.9" />
+      <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.300" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\OrderService.Service\OrderService.Service.csproj" />
+    </ItemGroup>
+
 </Project>

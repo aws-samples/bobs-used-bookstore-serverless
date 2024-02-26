@@ -8,9 +8,8 @@
   "profile": "",
   "region": "",
   "configuration": "Release",
-  "function-runtime": "provided.al2",
-  "function-memory-size": 256,
-  "function-timeout": 30,
-  "function-handler": "bootstrap",
+  "s3-prefix": "OrderService.Api/",
+  "template": "serverless.template",
+  "template-parameters": "",
   "msbuild-parameters": "--self-contained true"
 }

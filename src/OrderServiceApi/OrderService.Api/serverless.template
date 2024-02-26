@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
-  "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
+  "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v1.2.0.0).",
   "Resources": {
     "OrderServiceApiFunctionsGetOrderGenerated": {
       "Type": "AWS::Serverless::Function",
@@ -12,7 +12,7 @@
         ]
       },
       "Properties": {
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -20,7 +20,7 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "bootstrap",
+        "Handler": "OrderService.Api",
         "Environment": {
           "Variables": {
             "ANNOTATIONS_HANDLER": "GetOrder"
@@ -46,7 +46,7 @@
         ]
       },
       "Properties": {
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -54,7 +54,7 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "bootstrap",
+        "Handler": "OrderService.Api",
         "Environment": {
           "Variables": {
             "ANNOTATIONS_HANDLER": "GetOrders"
@@ -69,6 +69,14 @@
             }
           }
         }
+      }
+    }
+  },
+  "Outputs": {
+    "ApiURL": {
+      "Description": "API endpoint URL for Prod environment",
+      "Value": {
+        "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
       }
     }
   }

@@ -27,40 +27,36 @@ public class LambdaFunction : Construct
     public Function Function { get; }
     
     public Alias FunctionAlias { get; }
-    
-    public LambdaFunction(Construct scope, string id, LambdaFunctionProps props) : base(scope, id)
+
+    public LambdaFunction(
+        Construct scope,
+        string id,
+        LambdaFunctionProps props) : base(
+        scope,
+        id)
     {
-        if (props.IsNativeAot)
-        {
-            this.Function = new Function(this, id, new FunctionProps()
+        this.Function = new DotNetFunction(
+            this,
+            id,
+            new DotNetFunctionProps()
             {
                 FunctionName = id,
-                Runtime = Runtime.PROVIDED_AL2,
-                MemorySize = props.MemorySize ?? 1024,
-                LogRetention = RetentionDays.ONE_DAY,
-                Handler = "bootstrap",
-                Environment = props.Environment,
-                Tracing = Tracing.ACTIVE,
-                Code = Code.FromAsset(props.CodePath),
-                Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64 ? Architecture.ARM_64 : Architecture.X86_64,
-                OnFailure = new SqsDestination(new Queue(this, $"{id}FunctionDLQ")),
-            });
-        }
-        else
-        {
-            this.Function = new DotNetFunction(this, id, new DotNetFunctionProps()
-            {
-                FunctionName = id,
-                Runtime = Runtime.DOTNET_6,
+                Runtime = Runtime.DOTNET_8,
                 MemorySize = props.MemorySize ?? 1024,
                 LogRetention = RetentionDays.ONE_DAY,
                 Handler = props.Handler,
                 Environment = props.Environment,
                 Tracing = Tracing.ACTIVE,
                 ProjectDir = props.CodePath,
-                Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64 ? Architecture.ARM_64 : Architecture.X86_64,
-                OnFailure = new SqsDestination(new Queue(this, $"{id}FunctionDLQ")),
-            });   
-        }
+                Architecture =
+                    System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture ==
+                    System.Runtime.InteropServices.Architecture.Arm64
+                        ? Architecture.ARM_64
+                        : Architecture.X86_64,
+                OnFailure = new SqsDestination(
+                    new Queue(
+                        this,
+                        $"{id}FunctionDLQ")),
+            });
     }
 }
