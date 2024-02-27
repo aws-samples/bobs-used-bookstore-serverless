@@ -14,10 +14,11 @@ public class GetOrdersApi : Construct
         scope,
         id)
     {
+        //src/OrderServiceApi/OrderService.Api/bin/Release/net8.0/OrderService.Api
         this.Function = new LambdaFunction(
             this,
             $"GetOrdersApi",
-            new LambdaFunctionProps(".src/OrderServiceApi/OrderService.Api/bin/Release/net8.0/OrderService.Api")
+            new LambdaFunctionProps("src/OrderServiceApi/OrderService.Api")
             {
                 Handler = "OrderService.Api",
                 Environment = new Dictionary<string, string>(1)
@@ -25,7 +26,7 @@ public class GetOrdersApi : Construct
                     { "POWERTOOLS_SERVICE_NAME", "Orders" },
                     { "ANNOTATIONS_HANDLER", "GetOrders" }
                 },
-                IsNativeAot = true
+                IsDotNetFunction = true
             }).Function;
     }
 }

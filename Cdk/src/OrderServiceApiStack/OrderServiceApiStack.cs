@@ -30,15 +30,15 @@ public class OrderServiceApiStack : Stack
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
-        var userPool = UserPool.FromUserPoolArn(this, "UserPool", userPoolParameterValue);
+        var userPool = UserPool.FromUserPoolArn(this, "OrderService-UserPool", userPoolParameterValue);
         
         new CfnOutput(
             this,
-            $"User Pool Id",
+            $"OrderService-User-Pool-Id",
             new CfnOutputProps
             {
                 Value = userPool.UserPoolId,
-                ExportName = "UserPool",
+                ExportName = "OrderService-UserPool",
                 Description = "UserPool"
             });
 
@@ -65,7 +65,7 @@ public class OrderServiceApiStack : Stack
                     TracingEnabled = true,
                     LoggingLevel = MethodLoggingLevel.ERROR
                 }})
-            //.WithCognito(userPool)
+            .WithCognito(userPool)
             .WithEndpoint(
                 "/orders/{id}",
                 HttpMethod.Get,
@@ -80,11 +80,11 @@ public class OrderServiceApiStack : Stack
 
         var apiEndpointOutput = new CfnOutput(
             this,
-            $"APIEndpointOutput",
+            $"OrderService-APIEndpointOutput",
             new CfnOutputProps
             {
                 Value = api.Url,
-                ExportName = $"ApiEndpoint",
+                ExportName = $"OrderService-ApiEndpoint",
                 Description = "Endpoint of the Order Service API"
             });
     }

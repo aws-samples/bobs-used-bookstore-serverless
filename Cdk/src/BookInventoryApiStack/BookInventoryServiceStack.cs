@@ -49,7 +49,7 @@ public class BookInventoryServiceStack : Stack
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
-        var userPool = UserPool.FromUserPoolArn(this, "UserPool", userPoolParameterValue);
+        var userPool = UserPool.FromUserPoolArn(this, "BookInventory-UserPool", userPoolParameterValue);
         
         new CfnOutput(
             this,
