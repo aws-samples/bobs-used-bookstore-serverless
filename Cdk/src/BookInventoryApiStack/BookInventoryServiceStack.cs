@@ -25,7 +25,7 @@ public class BookInventoryServiceStack : Stack
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
         {
-            BucketName = $"{this.Account}-book-inventory-bucket"
+            BucketName = $"{this.Account}-book-inventory-bucket"//TODO: we can add pre/post fix name to create multiple S3 bucket in same account
         });
 
         //Database
@@ -92,7 +92,7 @@ public class BookInventoryServiceStack : Stack
             "UpdateBooksEndpoint",
             bookInventoryServiceStackProps);
 
-        var generatePreSignedURLApi = new GetCoverPageUploadUrlApi(
+        var getCoverPageUploadApi = new GetCoverPageUploadApi(
             this,
             "GeneratePreSignedURLEndpoint",
             bookInventoryServiceStackProps);
@@ -136,14 +136,14 @@ public class BookInventoryServiceStack : Stack
             .WithEndpoint(
                 "books/cover-page-upload-url/{fileName}",
                 HttpMethod.Get,
-                generatePreSignedURLApi.Function);
+                getCoverPageUploadApi.Function);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
-        bookInventoryBucket.GrantPut(generatePreSignedURLApi.Function.Role!);
+        bookInventoryBucket.GrantPut(getCoverPageUploadApi.Function.Role!);
 
         var apiEndpointOutput = new CfnOutput(
             this,

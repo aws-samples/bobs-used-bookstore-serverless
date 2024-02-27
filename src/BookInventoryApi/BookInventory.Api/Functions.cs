@@ -24,7 +24,7 @@ public class Functions
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
     // Specify how long the signed URL will be valid in minutes.
-    private readonly double duration = 5;//TODO Move this value to parameter store
+    private readonly double duration = 5;//TODO Get expiration duration value from AWS Parameter store
 
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
@@ -115,7 +115,7 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload-url/{fileName}")]
     [Tracing]
     [Logging]
-    public async Task<APIGatewayProxyResponse> GetCoverPageUploadUrl(string fileName)
+    public async Task<APIGatewayProxyResponse> GetCoverPageUpload(string fileName)
     {
         var request = new GetPreSignedUrlRequest
         {

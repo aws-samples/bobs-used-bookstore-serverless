@@ -119,7 +119,7 @@
         }
       }
     },
-    "BookInventoryApiFunctionsGetCoverPageUploadUrlGenerated": {
+    "BookInventoryApiFunctionsGetCoverPageUploadGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -136,7 +136,7 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUploadUrl_Generated::GetCoverPageUploadUrl",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUpload_Generated::GetCoverPageUpload",
         "Events": {
           "RootGet": {
             "Type": "Api",

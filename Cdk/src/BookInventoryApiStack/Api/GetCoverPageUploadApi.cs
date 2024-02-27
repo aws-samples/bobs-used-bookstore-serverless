@@ -1,16 +1,14 @@
-namespace BookInventoryApiStack.Api;
-
 using Amazon.CDK.AWS.Lambda;
-
 using Constructs;
-
 using SharedConstructs;
 
-public class GetCoverPageUploadUrlApi : Construct
+namespace BookInventoryApiStack.Api;
+
+public class GetCoverPageUploadApi : Construct
 {
     public Function Function { get; }
 
-    public GetCoverPageUploadUrlApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public GetCoverPageUploadApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
