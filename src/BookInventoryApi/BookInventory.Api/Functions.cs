@@ -23,6 +23,9 @@ public class Functions
     private readonly IValidator<UpdateBookDto> updateBookValidator;
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
+    // Specify how long the signed URL will be valid in minutes.
+    private readonly double duration = 5;//TODO Move this value to parameter store
+
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
         this.bookInventoryService = bookInventoryService;
@@ -112,21 +115,17 @@ public class Functions
     [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload-url/{fileName}")]
     [Tracing]
     [Logging]
-    public async Task<APIGatewayProxyResponse> GeneratePreSignedURL(string fileName)
+    public async Task<APIGatewayProxyResponse> GetCoverPageUploadUrl(string fileName)
     {
-        // Set expiration time
-        var expirationTime = DateTime.Now.AddMinutes(5);//TODO: we can move this value to parameter store
-
         var request = new GetPreSignedUrlRequest
         {
             BucketName = bucketName,
-            Key = fileName, // $"{Guid.NewGuid().ToString()}/{fileName}",
+            Key = fileName,
             Verb = HttpVerb.PUT, // Use PUT for uploading
-            ContentType = "image/jpeg", // Set the content type to JPEG"
-            Expires = expirationTime
+            ContentType = "image/jpeg", // Set the content type i.e. image/jpeg to JPEG"
+            Expires = DateTime.UtcNow.AddMinutes(duration)
         };
 
-        // Generate the pre-signed URL
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, preSignedUrl);
     }

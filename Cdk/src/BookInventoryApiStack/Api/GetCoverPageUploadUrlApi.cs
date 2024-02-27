@@ -6,11 +6,11 @@ using Constructs;
 
 using SharedConstructs;
 
-public class GeneratePreSignedURLApi : Construct
+public class GetCoverPageUploadUrlApi : Construct
 {
     public Function Function { get; }
 
-    public GeneratePreSignedURLApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public GetCoverPageUploadUrlApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
@@ -19,7 +19,7 @@ public class GeneratePreSignedURLApi : Construct
             $"GeneratePreSignedURLApi",
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
-                Handler = "BookInventory.Api::BookInventory.Api.Functions_GeneratePreSignedURL_Generated::GeneratePreSignedURL",
+                Handler = "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUploadUrl_Generated::GetCoverPageUploadUrl",
                 Environment = new Dictionary<string, string>(3)
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },

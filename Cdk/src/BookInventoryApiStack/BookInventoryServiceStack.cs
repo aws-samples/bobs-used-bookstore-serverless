@@ -11,8 +11,6 @@ using Amazon.CDK.AWS.Logs;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.SSM;
 
-public record BookInventoryServiceStackProps(string BucketName);
-
 public class BookInventoryServiceStack : Stack
 {
     internal BookInventoryServiceStack(
@@ -69,7 +67,10 @@ public class BookInventoryServiceStack : Stack
             });
 
         //Lambda Functions
-        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps(bookInventoryBucket.BucketName);
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps
+        {
+            BucketName = bookInventoryBucket.BucketName
+        };
         
         var getBooksApi = new GetBooksApi(
             this,
@@ -91,7 +92,7 @@ public class BookInventoryServiceStack : Stack
             "UpdateBooksEndpoint",
             bookInventoryServiceStackProps);
 
-        var generatePreSignedURLApi = new GeneratePreSignedURLApi(
+        var generatePreSignedURLApi = new GetCoverPageUploadUrlApi(
             this,
             "GeneratePreSignedURLEndpoint",
             bookInventoryServiceStackProps);
