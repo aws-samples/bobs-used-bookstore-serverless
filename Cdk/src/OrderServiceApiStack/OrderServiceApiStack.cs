@@ -8,16 +8,16 @@ using Amazon.CDK.AWS.SSM;
 
 using Constructs;
 
-using OrderServiceApiStack.Api;
+using global::OrderServiceApiStack.Api;
 
-public record OrderServiceStackProps();
+public record OrderServiceApiStackProps();
 
-public class OrderServiceStack : Stack
+public class OrderServiceApiStack : Stack
 {
-    internal OrderServiceStack(
+    internal OrderServiceApiStack(
         Construct scope,
         string id,
-        OrderServiceStackProps apiProps,
+        OrderServiceApiStackProps apiProps,
         IStackProps props = null) : base(
         scope,
         id,
@@ -43,7 +43,7 @@ public class OrderServiceStack : Stack
             });
 
         //Lambda Functions
-        var orderServiceStackProps = new OrderServiceStackProps();
+        var orderServiceStackProps = new OrderServiceApiStackProps();
         
         var getOrderApi = new GetOrderApi(
             this,

@@ -5,7 +5,7 @@ using BookInventoryApiStack;
 
 var app = new App();
 
-var stockPriceStack = new BookInventoryServiceStack(
+var inventoryServiceStack = new BookInventoryServiceStack(
     app,
     $"BookInventoryServiceStack",
     new BookInventoryServiceStackProps());

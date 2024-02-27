@@ -10,7 +10,7 @@ public class GetOrderApi : Construct
 {
     public Function Function { get; }
 
-    public GetOrderApi(Construct scope, string id, OrderServiceStackProps props) : base(
+    public GetOrderApi(Construct scope, string id, OrderServiceApiStackProps props) : base(
         scope,
         id)
     {

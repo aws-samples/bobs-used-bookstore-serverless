@@ -35,6 +35,29 @@ public class LambdaFunction : Construct
         scope,
         id)
     {
+        this.Function = new Function(this,
+            id,
+            new FunctionProps
+            {
+                FunctionName = id,
+                Runtime = Runtime.DOTNET_8,
+                MemorySize = props.MemorySize ?? 1024,
+                LogRetention = RetentionDays.ONE_DAY,
+                Handler = props.Handler,
+                Environment = props.Environment,
+                Tracing = Tracing.ACTIVE,
+                Code = Code.FromAsset(props.CodePath),
+                Architecture =
+                    System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture ==
+                    System.Runtime.InteropServices.Architecture.Arm64
+                        ? Architecture.ARM_64
+                        : Architecture.X86_64,
+                OnFailure = new SqsDestination(
+                    new Queue(
+                        this,
+                        $"{id}FunctionDLQ")),
+            });
+        /*
         this.Function = new DotNetFunction(
             this,
             id,
@@ -58,5 +81,6 @@ public class LambdaFunction : Construct
                         this,
                         $"{id}FunctionDLQ")),
             });
+            */
     }
 }

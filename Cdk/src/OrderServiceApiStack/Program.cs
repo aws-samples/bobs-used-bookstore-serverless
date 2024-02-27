@@ -1,3 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Amazon.CDK;
 
-Console.WriteLine("Hello, World!");
+using OrderServiceApiStack;
+
+var app = new App();
+
+var orderServiceApiStack = new OrderServiceApiStack.OrderServiceApiStack(
+    app,
+    $"OrderServiceApiStack",
+    new OrderServiceApiStackProps());
+
+app.Synth();
