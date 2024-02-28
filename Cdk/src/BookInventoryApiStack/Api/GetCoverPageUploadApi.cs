@@ -14,16 +14,16 @@ public class GetCoverPageUploadApi : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            $"GeneratePreSignedURLApi",
+            $"GetCoverPageUploadApi",
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUploadUrl_Generated::GetCoverPageUploadUrl",
-                Environment = new Dictionary<string, string>(3)
+                Environment = new Dictionary<string, string>(4)
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true"},//TODO:Enable LogEvent for debugging in non-production environments
-                    { "S3_BUCKET_NAME", props.BucketName}
+                    { "S3_BUCKET_NAME", props.BucketName }
                 },
                 IsNativeAot = false //dotnet 6 runtime
             }).Function;
