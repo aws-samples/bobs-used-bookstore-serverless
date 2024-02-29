@@ -11,6 +11,7 @@ using OrderService.Api;
 
 namespace OrderService.Api;
 
+using OrderService.Common;
 using OrderService.Models;
 using OrderService.Service;
 
@@ -25,6 +26,9 @@ using OrderService.Service;
 /// </summary>
 [JsonSerializable(typeof(APIGatewayProxyRequest))]
 [JsonSerializable(typeof(APIGatewayProxyResponse))]
+[JsonSerializable(typeof(ApiWrapper<string>))]
+[JsonSerializable(typeof(ApiWrapper<Order>))]
+[JsonSerializable(typeof(ApiWrapper<List<Order>>))]
 public partial class LambdaFunctionJsonSerializerContext : JsonSerializerContext
 {
     // By using this partial class derived from JsonSerializerContext, we can generate reflection free JSON Serializer code at compile time

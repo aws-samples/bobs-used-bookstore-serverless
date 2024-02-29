@@ -23,22 +23,21 @@ public class OrderServiceApiStack : Stack
         id,
         props)
     {
-        //Database
-        
+        string servicePrefix = "OrderService";
         
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
-        var userPool = UserPool.FromUserPoolArn(this, "OrderService-UserPool", userPoolParameterValue);
+        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
         
         new CfnOutput(
             this,
-            $"OrderService-User-Pool-Id",
+            $"{servicePrefix}-User-Pool-Id",
             new CfnOutputProps
             {
                 Value = userPool.UserPoolId,
-                ExportName = "OrderService-UserPool",
+                ExportName = $"{servicePrefix}-UserPool",
                 Description = "UserPool"
             });
 
@@ -80,11 +79,11 @@ public class OrderServiceApiStack : Stack
 
         var apiEndpointOutput = new CfnOutput(
             this,
-            $"OrderService-APIEndpointOutput",
+            $"{servicePrefix}-APIEndpointOutput",
             new CfnOutputProps
             {
                 Value = api.Url,
-                ExportName = $"OrderService-ApiEndpoint",
+                ExportName = $"{servicePrefix}-ApiEndpoint",
                 Description = "Endpoint of the Order Service API"
             });
     }

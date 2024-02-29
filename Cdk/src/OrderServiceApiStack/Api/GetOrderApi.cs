@@ -25,7 +25,7 @@ public class GetOrderApi : Construct
                     { "POWERTOOLS_SERVICE_NAME", "Orders" },
                     { "ANNOTATIONS_HANDLER", "GetOrder" }
                 },
-                IsDotNetFunction = true
+                IsNativeAot = true
             }).Function;
     }
 }
