@@ -23,6 +23,7 @@ public class Functions
     private readonly IValidator<UpdateBookDto> updateBookValidator;
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
+
     // Specify how long the signed URL will be valid in minutes.
     private readonly double duration = 5;//TODO Get expiration duration value from AWS Parameter store
 
@@ -112,17 +113,22 @@ public class Functions
     }
 
     [LambdaFunction()]
-    [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload-url/{fileName}")]
+    [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload/{fileName}")]
     [Tracing]
     [Logging]
     public async Task<APIGatewayProxyResponse> GetCoverPageUpload(string fileName)
     {
+        if (!fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+        {
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Only .jpg file is allowed");
+        }
+
         var request = new GetPreSignedUrlRequest
         {
             BucketName = bucketName,
             Key = fileName,
-            Verb = HttpVerb.PUT, // Use PUT for uploading
-            ContentType = "image/jpeg", // Set the content type i.e. image/jpeg to JPEG"
+            Verb = HttpVerb.PUT,
+            ContentType = "image/jpeg",
             Expires = DateTime.UtcNow.AddMinutes(duration)
         };
 

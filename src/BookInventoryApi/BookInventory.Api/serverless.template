@@ -141,7 +141,7 @@
           "RootGet": {
             "Type": "Api",
             "Properties": {
-              "Path": "/books/cover-page-upload-url/{fileName}",
+              "Path": "/books/cover-page-upload/{fileName}",
               "Method": "GET"
             }
           }
