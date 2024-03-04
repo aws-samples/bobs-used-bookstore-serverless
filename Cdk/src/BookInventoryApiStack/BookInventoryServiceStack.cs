@@ -1,15 +1,14 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.DynamoDB;
+using Amazon.CDK.AWS.Logs;
+using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.SSM;
 using BookInventoryApiStack.Api;
 using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
-
-using Amazon.CDK.AWS.Cognito;
-using Amazon.CDK.AWS.Logs;
-using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.SSM;
 
 public class BookInventoryServiceStack : Stack
 {
@@ -17,19 +16,21 @@ public class BookInventoryServiceStack : Stack
         Construct scope,
         string id,
         BookInventoryServiceStackProps apiProps,
-        IStackProps props = null) : base(
+        IStackProps? props = null) : base(
         scope,
         id,
         props)
     {
+        string servicePrefix = "BookInventoryService";
+
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
         {
-            BucketName = $"{this.Account}-book-inventory-bucket"//TODO: we can add pre/post fix name to create multiple S3 bucket in same account
+            BucketName = $"{this.Account}-{servicePrefix}-book-inventory-bucket"
         });
 
         //Database
-        var bookInventory = new Table(this, "BookInventoryTable", new TableProps
+        var bookInventory = new Table(this, $"{servicePrefix}-BookInventoryTable", new TableProps
         {
             TableName = "BookInventory",
             PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "BookId", Type = AttributeType.STRING },
@@ -47,41 +48,41 @@ public class BookInventoryServiceStack : Stack
             {
                 Name = "GSI1SK",
                 Type = AttributeType.STRING
-            }, 
+            },
         });
-        
+
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
-        var userPool = UserPool.FromUserPoolArn(this, "UserPool", userPoolParameterValue);
-        
-        new CfnOutput(
+        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
+
+        _ = new CfnOutput(
             this,
-            $"User Pool Id",
+            $"{servicePrefix}-User-Pool-Id",
             new CfnOutputProps
             {
                 Value = userPool.UserPoolId,
-                ExportName = "UserPool",
+                ExportName = $"{servicePrefix}-UserPool",
                 Description = "UserPool"
             });
 
-        //Lambda Functions
         var bookInventoryServiceStackProps = new BookInventoryServiceStackProps
         {
             BucketName = bookInventoryBucket.BucketName
         };
-        
+        //Lambda Functions
+
         var getBooksApi = new GetBooksApi(
             this,
             "GetBooksEndpoint",
             bookInventoryServiceStackProps);
-        
+
         var addBooksApi = new AddBooksApi(
             this,
             "AddBooksEndpoint",
             bookInventoryServiceStackProps);
-        
+
         var listBooks = new ListBooksApi(
             this,
             "ListBooksEndpoint",
@@ -145,13 +146,13 @@ public class BookInventoryServiceStack : Stack
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
         bookInventoryBucket.GrantPut(getCoverPageUploadApi.Function.Role!);
 
-        var apiEndpointOutput = new CfnOutput(
+        _ = new CfnOutput(
             this,
-            $"APIEndpointOutput",
+            $"{servicePrefix}-APIEndpointOutput",
             new CfnOutputProps
             {
                 Value = api.Url,
-                ExportName = $"ApiEndpoint",
+                ExportName = $"{servicePrefix}-ApiEndpoint",
                 Description = "Endpoint of the Book Inventory API"
             });
     }

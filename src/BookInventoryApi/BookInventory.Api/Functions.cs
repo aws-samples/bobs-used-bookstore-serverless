@@ -23,9 +23,7 @@ public class Functions
     private readonly IValidator<UpdateBookDto> updateBookValidator;
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
-
-    // Specify how long the signed URL will be valid in minutes.
-    private readonly double duration = 5;//TODO Get expiration duration value from AWS Parameter store
+    private readonly double expiryDuration = 5;//minutes
 
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
@@ -34,6 +32,7 @@ public class Functions
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
         this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
+        this.expiryDuration = double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
     }
 
     [LambdaFunction()]
