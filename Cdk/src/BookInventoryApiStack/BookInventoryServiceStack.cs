@@ -65,12 +65,12 @@ public class BookInventoryServiceStack : Stack
         //Lambda Functions
         var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
         
-        var getBooksApi = new GetBooksApi(
+        var getBooksApi = new SearchBookApi(
             this,
             "GetBooksEndpoint",
             bookInventoryServiceStackProps);
         
-        var addBooksApi = new AddBooksApi(
+        var addBooksApi = new AddBookApi(
             this,
             "AddBooksEndpoint",
             bookInventoryServiceStackProps);
@@ -80,7 +80,7 @@ public class BookInventoryServiceStack : Stack
             "ListBooksEndpoint",
             bookInventoryServiceStackProps);
 
-        var updateBooksApi = new UpdateBooksApi(
+        var updateBooksApi = new UpdateBookApi(
             this,
             "UpdateBooksEndpoint",
             bookInventoryServiceStackProps);

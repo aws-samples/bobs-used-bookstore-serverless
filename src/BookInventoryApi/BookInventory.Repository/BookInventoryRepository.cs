@@ -20,17 +20,19 @@ public class BookInventoryRepository : IBookInventoryRepository
         this.client = client;
     }
 
+    [Tracing]
     public async Task<Book?> GetByIdAsync(string bookId)
     {
         return await context.LoadAsync<Book>(bookId);
     }
 
+    [Tracing]
     public async Task SaveAsync(Book book)
     {
         await context.SaveAsync(book);
     }
 
-    /// <inheritdoc/>
+    [Tracing]
     public async Task<ListResponse> List(int pageSize = 10, string cursor = null)
     {
         var bookResponse = new ListResponse(cursor);

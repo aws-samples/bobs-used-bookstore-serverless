@@ -27,23 +27,38 @@ public class Functions
         this.updateBookValidator = updateBookValidator;
     }
 
-    [LambdaFunction()]
+    [LambdaFunction]
     [RestApi(LambdaHttpMethod.Get, "/books")]
-    [Tracing]
-    [Logging]
-    public async Task<APIGatewayProxyResponse> GetBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
+    [Tracing(CaptureMode = TracingCaptureMode.Error)]
+    [Logging(ClearState = true)]
+    public async Task<APIGatewayProxyResponse> ListBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        var response = await this.bookInventoryService.ListAllBooksAsync(pageSize, cursor);
-        return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, response);
+        Tracing.AddAnnotation("ListBooks",cursor);
+        Logger.AppendKey("ListBooks", cursor);
+        try
+        {
+            var response = await this.bookInventoryService.ListAllBooksAsync(
+                pageSize,
+                cursor);
+            return ApiGatewayResponseBuilder.Build(
+                HttpStatusCode.OK,
+                response);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex,$"Error occured while searching books for criteria {cursor}");
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.InternalServerError, $"Error occured while searching books for criteria {cursor}");
+        }
     }
 
-    [LambdaFunction()]
+    [LambdaFunction]
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
-    [Tracing]
-    [Logging]
+    [Tracing(CaptureMode = TracingCaptureMode.Error)]
+    [Logging(ClearState = true)]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
-        id.AddObservabilityTag("BookId");
+        Logger.AppendKey("BookId", id);
+        Tracing.AddAnnotation("BookId", id);
         Logger.LogInformation($"Book search for id {id}");
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -60,13 +75,15 @@ public class Functions
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.OK, book);
     }
 
-    [LambdaFunction()]
+    [LambdaFunction]
     [RestApi(LambdaHttpMethod.Post, "/books")]
-    [Tracing]
-    [Logging]
-    [Metrics]
+    [Tracing(CaptureMode = TracingCaptureMode.Error)]
+    [Logging(ClearState = true)]
+    [Metrics(Namespace = "BookInventory")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
+        Tracing.AddAnnotation("CreateBook",bookDto.Name);
+        Logger.AppendKey("CreateBook", bookDto.Name);
         var validationResult = createBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
@@ -74,18 +91,19 @@ public class Functions
         }
 
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
-        Metrics.AddMetric("Book_Created", 1, MetricUnit.Count);
-        bookId.AddObservabilityTag("BookId");
+        Metrics.AddMetric("BookCreated", 1, MetricUnit.Count);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
     }
 
-    [LambdaFunction()]
+    [LambdaFunction]
     [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
-    [Tracing]
-    [Logging]
-    [Metrics]
+    [Tracing(CaptureMode = TracingCaptureMode.Error)]
+    [Logging(ClearState = true)]
     public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
     {
+        Tracing.AddAnnotation("UpdateBook",id);
+        Logger.AppendKey("UpdateBook", id);
+        
         var validationResult = updateBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {

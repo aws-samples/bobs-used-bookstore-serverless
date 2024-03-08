@@ -61,35 +61,6 @@
         }
       }
     },
-    "BookInventoryApiFunctionsGetBooksGenerated": {
-      "Type": "AWS::Serverless::Function",
-      "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootGet"
-        ]
-      },
-      "Properties": {
-        "Runtime": "dotnet6",
-        "CodeUri": ".",
-        "MemorySize": 256,
-        "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
-        "PackageType": "Zip",
-        "Handler": "BookInventory.Api::BookInventory.Api.Functions_GetBooks_Generated::GetBooks",
-        "Events": {
-          "RootGet": {
-            "Type": "Api",
-            "Properties": {
-              "Path": "/books",
-              "Method": "GET"
-            }
-          }
-        }
-      }
-    },
     "BookInventoryApiFunctionsUpdateBookGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
@@ -114,6 +85,35 @@
             "Properties": {
               "Path": "/books/{id}",
               "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
+    "BookInventoryApiFunctionsListBooksGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_ListBooks_Generated::ListBooks",
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/books",
+              "Method": "GET"
             }
           }
         }

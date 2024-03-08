@@ -45,6 +45,10 @@ public class AuthenticationStack : Stack
                         Required = true
                     }
                 },
+                CustomAttributes = new Dictionary<string, ICustomAttribute>()
+                {
+                    { "user_id", new StringAttribute(new StringAttributeProps { Mutable = false }) } // Setup Guid on setting up user id
+                },
                 PasswordPolicy = new PasswordPolicy
                 {
                     MinLength = 6,
@@ -79,16 +83,29 @@ public class AuthenticationStack : Stack
                         FamilyName = true,
                         Email = true,
                         EmailVerified = true
-                    }),
+                    }).WithCustomAttributes(["user_id"]),
                 WriteAttributes = new ClientAttributes().WithStandardAttributes(
                     new StandardAttributesMask()
                     {
                         GivenName = true,
                         FamilyName = true,
                         Email = true
-                    })
+                    }).WithCustomAttributes(["user_id"])
             });
 
+        var cfnUserPoolAdminGroup = new CfnUserPoolGroup(this, "BookStoreAdminGroup", new CfnUserPoolGroupProps {
+            UserPoolId = userPool.UserPoolId,
+            Description = "Bookstore Admin group",
+            GroupName = "Admin",
+            Precedence = 123,
+        });
+        var cfnUserPoolSellerGroup = new CfnUserPoolGroup(this, "BookStoreSellerGroup", new CfnUserPoolGroupProps {
+            UserPoolId = userPool.UserPoolId,
+            Description = "Bookstore sellers",
+            GroupName = "Seller",
+            Precedence = 124,
+        });
+        
         var userPoolParameter = new StringParameter(
             this,
             "UserPoolParameter",
