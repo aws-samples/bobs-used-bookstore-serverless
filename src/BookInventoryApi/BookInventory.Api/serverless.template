@@ -3,12 +3,12 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
   "Resources": {
-    "BookInventoryApiFunctionsAddBookGenerated": {
+    "BookInventoryApiFunctionsListBooksGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
-          "RootPost"
+          "RootGet"
         ]
       },
       "Properties": {
@@ -20,13 +20,13 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_ListBooks_Generated::ListBooks",
         "Events": {
-          "RootPost": {
+          "RootGet": {
             "Type": "Api",
             "Properties": {
               "Path": "/books",
-              "Method": "POST"
+              "Method": "GET"
             }
           }
         }
@@ -61,6 +61,64 @@
         }
       }
     },
+    "BookInventoryApiFunctionsAddBookGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
+        "Events": {
+          "RootPost": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/books",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    "BookInventoryApiFunctionsGetCoverPageUploadGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUpload_Generated::GetCoverPageUpload",
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/books/cover-page-upload/{fileName}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
     "BookInventoryApiFunctionsUpdateBookGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
@@ -85,35 +143,6 @@
             "Properties": {
               "Path": "/books/{id}",
               "Method": "PUT"
-            }
-          }
-        }
-      }
-    },
-    "BookInventoryApiFunctionsListBooksGenerated": {
-      "Type": "AWS::Serverless::Function",
-      "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootGet"
-        ]
-      },
-      "Properties": {
-        "Runtime": "dotnet6",
-        "CodeUri": ".",
-        "MemorySize": 256,
-        "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
-        "PackageType": "Zip",
-        "Handler": "BookInventory.Api::BookInventory.Api.Functions_ListBooks_Generated::ListBooks",
-        "Events": {
-          "RootGet": {
-            "Type": "Api",
-            "Properties": {
-              "Path": "/books",
-              "Method": "GET"
             }
           }
         }

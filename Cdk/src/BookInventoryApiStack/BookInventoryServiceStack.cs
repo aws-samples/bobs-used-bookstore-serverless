@@ -1,16 +1,14 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.DynamoDB;
+using Amazon.CDK.AWS.Logs;
+using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.SSM;
 using BookInventoryApiStack.Api;
 using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
-
-using Amazon.CDK.AWS.Cognito;
-using Amazon.CDK.AWS.Logs;
-using Amazon.CDK.AWS.SSM;
-
-public record BookInventoryServiceStackProps();
 
 public class BookInventoryServiceStack : Stack
 {
@@ -18,14 +16,21 @@ public class BookInventoryServiceStack : Stack
         Construct scope,
         string id,
         BookInventoryServiceStackProps apiProps,
-        IStackProps props = null) : base(
+        IStackProps? props = null) : base(
         scope,
         id,
         props)
     {
         string servicePrefix = "BookInventoryService";
+
+        // S3 bucket
+        var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
+        {
+            BucketName = $"{this.Account}-{servicePrefix}-book-inventory-bucket"
+        });
+
         //Database
-        var bookInventory = new Table(this, "BookInventoryTable", new TableProps
+        var bookInventory = new Table(this, $"{servicePrefix}-BookInventoryTable", new TableProps
         {
             TableName = "BookInventory",
             PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "BookId", Type = AttributeType.STRING },
@@ -43,16 +48,16 @@ public class BookInventoryServiceStack : Stack
             {
                 Name = "GSI1SK",
                 Type = AttributeType.STRING
-            }, 
+            },
         });
-        
+
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
         var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
-        
-        new CfnOutput(
+
+        _ = new CfnOutput(
             this,
             $"{servicePrefix}-User-Pool-Id",
             new CfnOutputProps
@@ -62,19 +67,22 @@ public class BookInventoryServiceStack : Stack
                 Description = "UserPool"
             });
 
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps
+        {
+            BucketName = bookInventoryBucket.BucketName
+        };
         //Lambda Functions
-        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
-        
+
         var getBooksApi = new SearchBookApi(
             this,
             "GetBooksEndpoint",
             bookInventoryServiceStackProps);
-        
+
         var addBooksApi = new AddBookApi(
             this,
             "AddBooksEndpoint",
             bookInventoryServiceStackProps);
-        
+
         var listBooks = new ListBooksApi(
             this,
             "ListBooksEndpoint",
@@ -85,17 +93,27 @@ public class BookInventoryServiceStack : Stack
             "UpdateBooksEndpoint",
             bookInventoryServiceStackProps);
 
+        var getCoverPageUploadApi = new GetCoverPageUploadApi(
+            this,
+            "GeneratePreSignedURLEndpoint",
+            bookInventoryServiceStackProps);
+
         //Api
-        
+
         var api = new SharedConstructs.Api(
                 this,
                 "BookInventoryApi",
-                new RestApiProps { RestApiName = "BookInventoryApi", DeployOptions = new StageOptions {
-                    AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
-                    AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
-                    TracingEnabled = true,
-                    LoggingLevel = MethodLoggingLevel.ERROR
-                }})
+                new RestApiProps
+                {
+                    RestApiName = "BookInventoryApi",
+                    DeployOptions = new StageOptions
+                    {
+                        AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
+                        AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
+                        TracingEnabled = true,
+                        LoggingLevel = MethodLoggingLevel.ERROR
+                    }
+                })
             .WithCognito(userPool)
             .WithEndpoint(
                 "/books/{id}",
@@ -115,15 +133,20 @@ public class BookInventoryServiceStack : Stack
                 "/books/{id}",
                 HttpMethod.Put,
                 updateBooksApi.Function,
-                false);
+                false)
+            .WithEndpoint(
+                "books/cover-page-upload-url/{fileName}",
+                HttpMethod.Get,
+                getCoverPageUploadApi.Function);
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBooksApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
+        bookInventoryBucket.GrantPut(getCoverPageUploadApi.Function.Role!);
 
-        var apiEndpointOutput = new CfnOutput(
+        _ = new CfnOutput(
             this,
             $"{servicePrefix}-APIEndpointOutput",
             new CfnOutputProps
