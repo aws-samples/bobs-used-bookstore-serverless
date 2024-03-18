@@ -25,7 +25,7 @@ public class GetBooksApi : Construct
                     { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
                 },
-                IsNativeAot = false //dotnet 6 runtime
+                IsNativeAot = false //dotnet 8 runtime
             }).Function;
     }
 }

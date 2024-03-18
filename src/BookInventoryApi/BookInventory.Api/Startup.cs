@@ -1,3 +1,4 @@
+using Amazon.S3;
 using BookInventory.Api.Validators;
 using BookInventory.Common;
 using BookInventory.Models;
@@ -21,6 +22,7 @@ public class Startup
     {
         services.AddSharedServices();
         services.AddDynamoDBServices();
+        services.AddAWSService<IAmazonS3>();
         services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
         services.AddScoped<IValidator<UpdateBookDto>, UpdateBookDtoValidator>();
     }

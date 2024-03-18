@@ -1,3 +1,4 @@
+using Amazon.S3;
 using BookInventory.Api.Validators;
 using BookInventory.Common;
 using BookInventory.Models;
@@ -18,6 +19,7 @@ public class FunctionsTests
     private readonly IValidator<CreateBookDto> createBookValidator;
     private readonly IValidator<UpdateBookDto> updateBookValidator;
     private readonly Functions sut;
+    private readonly IAmazonS3 s3Client;
 
     public FunctionsTests()
     {
@@ -26,7 +28,8 @@ public class FunctionsTests
         this.bookInventoryService = A.Fake<IBookInventoryService>();
         this.createBookValidator = new CreateBookDtoValidator();
         this.updateBookValidator = new UpdateBookDtoValidator();
-        this.sut = new Functions(this.bookInventoryService, this.createBookValidator, this.updateBookValidator);
+        this.s3Client = A.Fake<IAmazonS3>();
+        this.sut = new Functions(this.bookInventoryService, this.createBookValidator, this.updateBookValidator, s3Client);
     }
 
     [Fact]
