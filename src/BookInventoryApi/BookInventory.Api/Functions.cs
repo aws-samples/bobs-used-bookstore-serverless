@@ -128,7 +128,7 @@ public class Functions
             Key = fileName,
             Verb = HttpVerb.PUT,
             ContentType = "image/jpeg",
-            Expires = DateTime.UtcNow.AddMinutes(duration)
+            Expires = DateTime.UtcNow.AddMinutes(expiryDuration)
         };
 
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
