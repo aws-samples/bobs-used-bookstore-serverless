@@ -42,8 +42,7 @@ public class Functions
     [Logging(ClearState = true)]
     public async Task<APIGatewayProxyResponse> ListBooks([FromQuery] int pageSize = 10, [FromQuery] string cursor = null)
     {
-        Tracing.AddAnnotation("ListBooks",cursor);
-        Logger.AppendKey("ListBooks", cursor);
+        cursor.AddObservabilityTag("ListBooks");
         try
         {
             var response = await this.bookInventoryService.ListAllBooksAsync(
