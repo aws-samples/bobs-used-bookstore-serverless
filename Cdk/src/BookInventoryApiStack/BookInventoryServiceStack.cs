@@ -73,9 +73,9 @@ public class BookInventoryServiceStack : Stack
         };
         //Lambda Functions
 
-        var getBooksApi = new SearchBookApi(
+        var getBookApi = new GetBookApi(
             this,
-            "GetBooksEndpoint",
+            "GetBookEndpoint",
             bookInventoryServiceStackProps);
 
         var addBooksApi = new AddBookApi(
@@ -118,7 +118,7 @@ public class BookInventoryServiceStack : Stack
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Get,
-                getBooksApi.Function,
+                getBookApi.Function,
                 false)
             .WithEndpoint(
                 "/books",
@@ -140,7 +140,7 @@ public class BookInventoryServiceStack : Stack
                 getCoverPageUploadApi.Function);
 
         //Grant DynamoDB Permission
-        bookInventory.GrantReadData(getBooksApi.Function.Role!);
+        bookInventory.GrantReadData(getBookApi.Function.Role!);
         bookInventory.GrantReadData(listBooks.Function.Role!);
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);

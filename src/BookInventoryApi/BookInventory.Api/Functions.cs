@@ -33,7 +33,7 @@ public class Functions
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
         this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
-        this.expiryDuration = double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
+        this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
     }
 
     [LambdaFunction]
@@ -63,17 +63,15 @@ public class Functions
     [LambdaFunction]
     [RestApi(LambdaHttpMethod.Get, "/books/{id}")]
     [Tracing(CaptureMode = TracingCaptureMode.Error)]
-    [Logging(ClearState = true)]
+    [Logging(ClearState = true, LogEvent = true)]
     public async Task<APIGatewayProxyResponse> GetBook(string id)
     {
-        Logger.AppendKey("BookId", id);
-        Tracing.AddAnnotation("BookId", id);
         Logger.LogInformation($"Book search for id {id}");
         if (string.IsNullOrWhiteSpace(id))
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Id cannot be null");
         }
-
+        id.AddObservabilityTag("BookId");
         var book = await this.bookInventoryService.GetBookByIdAsync(id);
 
         if (book == null)
@@ -87,18 +85,16 @@ public class Functions
     [LambdaFunction]
     [RestApi(LambdaHttpMethod.Post, "/books")]
     [Tracing(CaptureMode = TracingCaptureMode.Error)]
-    [Logging(ClearState = true)]
+    [Logging(ClearState = true, LogEvent = true)]
     [Metrics(Namespace = "BookInventory")]
     public async Task<APIGatewayProxyResponse> AddBook([FromBody] CreateBookDto bookDto)
     {
-        Tracing.AddAnnotation("CreateBook",bookDto.Name);
-        Logger.AppendKey("CreateBook", bookDto.Name);
         var validationResult = createBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
-
+        bookDto.Name.AddObservabilityTag("CreateBook");
         var bookId = await this.bookInventoryService.AddBookAsync(bookDto);
         Metrics.AddMetric("BookCreated", 1, MetricUnit.Count);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, bookId);
@@ -107,18 +103,15 @@ public class Functions
     [LambdaFunction]
     [RestApi(LambdaHttpMethod.Put, "/books/{id}")]
     [Tracing(CaptureMode = TracingCaptureMode.Error)]
-    [Logging(ClearState = true)]
+    [Logging(ClearState = true, LogEvent = true)]
     public async Task<APIGatewayProxyResponse> UpdateBook(string id, [FromBody] UpdateBookDto bookDto)
     {
-        Tracing.AddAnnotation("UpdateBook",id);
-        Logger.AppendKey("UpdateBook", id);
-        
         var validationResult = updateBookValidator.Validate(bookDto);
         if (!validationResult.IsValid)
         {
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, validationResult.GetErrorMessage());
         }
-
+        id.AddObservabilityTag("UpdateBook");
         try
         {
             await this.bookInventoryService.UpdateBookAsync(id, bookDto);
@@ -133,7 +126,7 @@ public class Functions
     [LambdaFunction()]
     [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload/{fileName}")]
     [Tracing]
-    [Logging]
+    [Logging(LogEvent = true)]
     public async Task<APIGatewayProxyResponse> GetCoverPageUpload(string fileName)
     {
         if (!fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))

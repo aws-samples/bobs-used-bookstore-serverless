@@ -6,11 +6,11 @@ using Constructs;
 
 using SharedConstructs;
 
-public class SearchBookApi : Construct
+public class GetBookApi : Construct
 {
     public Function Function { get; }
 
-    public SearchBookApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public GetBookApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
