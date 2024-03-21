@@ -4,6 +4,8 @@ using BookInventory.Service.Exceptions;
 
 namespace BookInventory.Service;
 
+using AWS.Lambda.Powertools.Tracing;
+
 public class BookInventoryService : IBookInventoryService
 {
     private readonly IBookInventoryRepository bookInventoryRepository;
@@ -13,7 +15,7 @@ public class BookInventoryService : IBookInventoryService
         this.bookInventoryRepository = bookInventoryRepository;
     }
 
-    /// <inheritdoc />
+    [Tracing]
     public async Task<BookQueryResponse> ListAllBooksAsync(int pageCount = 10, string cursor = null)
     {
         var books = await this.bookInventoryRepository.List(pageCount, cursor);
@@ -33,6 +35,7 @@ public class BookInventoryService : IBookInventoryService
         return new BookQueryResponse(bookResponse, books.Cursor);
     }
 
+    [Tracing]
     public async Task<BookDto?> GetBookByIdAsync(string id)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(id);
@@ -54,6 +57,7 @@ public class BookInventoryService : IBookInventoryService
         };
     }
 
+    [Tracing]
     public async Task<string> AddBookAsync(CreateBookDto dto)
     {
         var book = new Book(
@@ -72,6 +76,7 @@ public class BookInventoryService : IBookInventoryService
         return book.BookId;
     }
 
+    [Tracing]
     public async Task UpdateBookAsync(string bookId, UpdateBookDto dto)
     {
         var book = await this.bookInventoryRepository.GetByIdAsync(bookId) ?? throw new ProductNotFoundException($"Book not found.", bookId);

@@ -6,27 +6,27 @@ using Constructs;
 
 using SharedConstructs;
 
-public class UpdateBooksApi : Construct
+public class UpdateBookApi : Construct
 {
     public Function Function { get; }
 
-    public UpdateBooksApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public UpdateBookApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
         this.Function = new LambdaFunction(
             this,
-            $"UpdateBooksApi",
+            Constants.UPDATE_BOOK_API,
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_UpdateBook_Generated::UpdateBook",
                 Environment = new Dictionary<string, string>(3)
                 {
-                    { "POWERTOOLS_SERVICE_NAME", Constants.SERVICE_NAME },
-                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
-                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true"}//TODO:Enable LogEvent for debugging in non-production environments
+                    { "POWERTOOLS_SERVICE_NAME", Constants.UPDATE_BOOK_API },
+                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.UPDATE_BOOK_API },
+                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true" }
                 },
-                IsNativeAot = false //dotnet 8 runtime
+                IsNativeAot = false
             }).Function;
     }
 }

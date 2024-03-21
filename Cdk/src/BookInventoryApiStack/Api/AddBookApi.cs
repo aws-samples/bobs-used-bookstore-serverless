@@ -6,24 +6,24 @@ using Constructs;
 
 using SharedConstructs;
 
-public class ListBooksApi : Construct
+public class AddBookApi : Construct
 {
     public Function Function { get; }
 
-    public ListBooksApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
+    public AddBookApi(Construct scope, string id, BookInventoryServiceStackProps props) : base(
         scope,
         id)
     {
         this.Function = new LambdaFunction(
-            this, 
-            Constants.LIST_BOOK_API,
+            this,
+            Constants.ADD_BOOK_API,
             new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
             {
-                Handler = "BookInventory.Api::BookInventory.Api.Functions_ListBooks_Generated::ListBooks",
+                Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
                 Environment = new Dictionary<string, string>
                 {
-                    { "POWERTOOLS_SERVICE_NAME", Constants.LIST_BOOK_API },
-                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.LIST_BOOK_API },
+                    { "POWERTOOLS_SERVICE_NAME", Constants.ADD_BOOK_API },
+                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.ADD_BOOK_API },
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true" }
                 },
                 IsNativeAot = false
