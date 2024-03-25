@@ -26,7 +26,7 @@ public class BookInventoryServiceStack : Stack
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
         {
-            BucketName = $"{this.Account}-{servicePrefix}-book-inventory-bucket"
+            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket"
         });
 
         //Database
