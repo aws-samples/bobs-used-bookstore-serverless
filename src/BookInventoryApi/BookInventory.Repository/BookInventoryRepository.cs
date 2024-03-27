@@ -111,19 +111,22 @@ public class BookInventoryRepository : IBookInventoryRepository
         foreach (var item in queryResponse.Items)
         {
             bookResponse.Books.Add(
-                new Book(
-                    item.AsString("Name"),
-                    item.AsString("Author"),
-                    item.AsString("ISBN"),
-                    item.AsString("Publisher"),
-                    item.AsString("BookType"),
-                    item.AsString("Genre"),
-                    item.AsString("Condition"),
-                    item.AsDecimal("Price"),
-                    item.AsInt("Quantity"),
-                    item.AsString("Summary"),
-                    item.AsInt("Year"),
-                    item.AsString("CoverImageUrl")));
+                new Book
+                {
+                    BookId = item.AsString("BookId"),
+                    Name = item.AsString("Name"),
+                    Author = item.AsString("Author"),
+                    ISBN = item.AsString("ISBN"),
+                    Publisher = item.AsString("Publisher"),
+                    BookType = item.AsString("BookType"),
+                    Genre = item.AsString("Genre"),
+                    Condition = item.AsString("Condition"),
+                    Price = item.AsDecimal("Price"),
+                    Quantity = item.AsInt("Quantity"),
+                    Summary = item.AsString("Summary"),
+                    Year = item.AsInt("Year"),
+                    CoverImageUrl = item.AsString("CoverImageUrl")
+                });
 
             if (bookResponse.Books.Count != pageSize) continue;
 
