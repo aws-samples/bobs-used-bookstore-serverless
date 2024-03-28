@@ -1,3 +1,6 @@
+using Amazon.Lambda.SQSEvents;
+using AWS.Lambda.Powertools.BatchProcessing;
+
 namespace BookInventory.Common;
 
 using Amazon.Lambda.APIGatewayEvents;
@@ -14,6 +17,8 @@ using System.Text.Json.Serialization;
 [JsonSerializable(typeof(ApiWrapper<BookQueryResponse>))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
+[JsonSerializable(typeof(SQSEvent))]
+[JsonSerializable(typeof(BatchItemFailuresResponse))]
 public partial class CustomSerializationContext : JsonSerializerContext
 {
 }
