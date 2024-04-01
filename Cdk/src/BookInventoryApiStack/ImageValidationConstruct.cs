@@ -39,6 +39,7 @@ internal class ImageValidationConstruct : Construct
             BucketName = $"{props.Account}-{props.ServicePrefix.ToLower()}-book-inventory-image-publish",
             BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
             AccessControl = BucketAccessControl.PRIVATE,
+            Versioned = true,
             Cors =
             [
                 new CorsRule()
@@ -94,8 +95,23 @@ internal class ImageValidationConstruct : Construct
             }
         });
         
-        // Publish Image uploaded/created event in SQS
-        props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue));
+        // Publish Image uploaded/created event in SQS - Trigger notification only for .jpg and .png
+        props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue),
+            filters:
+            [
+                new NotificationKeyFilter
+                {
+                    Suffix = ".jpg"
+                }
+            ]);
+        props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue),
+            filters:
+            [
+                new NotificationKeyFilter
+                {
+                    Suffix = ".png"
+                }
+            ]);
         
         // Lambda to validate image and move to Published folder
         var imageValidationLambda = new SharedConstructs.LambdaFunction(

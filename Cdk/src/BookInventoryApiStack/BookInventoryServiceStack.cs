@@ -26,7 +26,8 @@ public sealed class BookInventoryServiceStack : Stack
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
         {
-            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket"
+            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket",
+            Versioned = true
         });
         
         //Database
