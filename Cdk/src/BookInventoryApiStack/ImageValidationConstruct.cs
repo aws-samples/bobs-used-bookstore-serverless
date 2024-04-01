@@ -1,6 +1,8 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.DynamoDB;
+using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Notifications;
@@ -107,7 +109,8 @@ internal class ImageValidationConstruct : Construct
                     { "POWERTOOLS_SERVICE_NAME", Constants.VALIDATE_BOOK_IMAGE_API },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.VALIDATE_BOOK_IMAGE_API },
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true" },
-                    { "QUEUE_URL", imageNotificationQueue.QueueUrl }
+                    { "QUEUE_URL", imageNotificationQueue.QueueUrl },
+                    { "PUBLISH_IMAGE_BUCKET", bookInventoryPublishBucket.BucketName }
                 }
             }).Function;
         // Lambda roles
@@ -118,5 +121,30 @@ internal class ImageValidationConstruct : Construct
             ReportBatchItemFailures = true
         }));
         props.BookInventoryTable.GrantReadWriteData(imageValidationLambda.Role!);
+        imageValidationLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps()
+        {
+            Effect = Effect.ALLOW,
+            Resources = ["*"],
+            Actions = ["rekognition:DetectModerationLabels"]
+        }));
+        props.ImageBucket.GrantReadWrite(imageValidationLambda.Role!);
+        bookInventoryPublishBucket.GrantReadWrite(imageValidationLambda.Role!);
+        /*
+        imageValidationLambda.Role.AttachInlinePolicy(new Policy(this, "RecognitionPermissionPolicy", new PolicyProps()
+        {
+            Document = new PolicyDocument(new PolicyDocumentProps()
+            {
+                Statements = [new PolicyStatement()
+                {
+                    Effect = Effect.ALLOW
+                }]
+            })
+        }));
+        imageValidationLambda.AddPermission("RecognitionPermission", new Permission()
+        {
+            Action = "rekognition:*",
+
+        });
+        */
     }
 }
