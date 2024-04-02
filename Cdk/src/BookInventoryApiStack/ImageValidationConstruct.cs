@@ -82,7 +82,7 @@ internal class ImageValidationConstruct : Construct
             });
         
         // Queue for event notification from S3 Upload
-        Queue imageNotificationQueue = new Queue(this, $"{id}-queue", new QueueProps()
+        var imageNotificationQueue = new Queue(this, $"{id}-queue", new QueueProps()
         {
             QueueName = "cover-page-image-upload-queue",
             DeadLetterQueue = new DeadLetterQueue()
