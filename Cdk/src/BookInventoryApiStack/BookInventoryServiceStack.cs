@@ -10,7 +10,7 @@ using Construct = Constructs.Construct;
 
 namespace BookInventoryApiStack;
 
-public class BookInventoryServiceStack : Stack
+public sealed class BookInventoryServiceStack : Stack
 {
     internal BookInventoryServiceStack(
         Construct scope,
@@ -26,9 +26,10 @@ public class BookInventoryServiceStack : Stack
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
         {
-            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket"
+            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket",
+            Versioned = true
         });
-
+        
         //Database
         var bookInventory = new Table(this, $"{servicePrefix}-BookInventoryTable", new TableProps
         {
@@ -50,7 +51,11 @@ public class BookInventoryServiceStack : Stack
                 Type = AttributeType.STRING
             },
         });
-
+        
+        // Image Validation Stack
+        var imageValidationConstruct = new ImageValidationConstruct(this, "ImageValidationConstruct",
+            new ImageValidationConstructProps(this.Account, servicePrefix, bookInventoryBucket, bookInventory));
+        
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");

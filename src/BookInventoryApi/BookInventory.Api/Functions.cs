@@ -13,6 +13,11 @@ using BookInventory.Service;
 using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
+using Amazon.Lambda.Core;
+using Amazon.Lambda.SQSEvents;
+using AWS.Lambda.Powertools.BatchProcessing;
+using AWS.Lambda.Powertools.BatchProcessing.Sqs;
+using BookInventory.Api.Utility;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 namespace BookInventory.Api;
@@ -144,5 +149,21 @@ public class Functions
 
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, preSignedUrl);
+    }
+    
+    /// <summary>
+    /// Image validation
+    /// </summary>
+    /// <param name="evnt">SQS Event</param>
+    /// <param name="context">Lambda context</param>
+    /// <returns>Image Validation Response</returns>
+    [LambdaFunction()]
+    [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.EventBridge)]
+    [Metrics(CaptureColdStart = true)]
+    [Tracing(CaptureMode = TracingCaptureMode.ResponseAndError)]
+    [BatchProcessor(RecordHandler = typeof(BatchProcessorHandler), BatchParallelProcessingEnabled = true, MaxDegreeOfParallelism = -1)]
+    public BatchItemFailuresResponse ImageValidation(SQSEvent evnt, ILambdaContext context)
+    {
+        return SqsBatchProcessor.Result.BatchItemFailuresResponse;
     }
 }

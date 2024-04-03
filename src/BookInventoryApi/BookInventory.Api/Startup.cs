@@ -1,4 +1,6 @@
+using Amazon.Rekognition;
 using Amazon.S3;
+using BookInventory.Api.Utility;
 using BookInventory.Api.Validators;
 using BookInventory.Common;
 using BookInventory.Models;
