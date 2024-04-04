@@ -1,8 +1,12 @@
 using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.APIGatewayEvents;
+using Amazon.Lambda.Core;
+using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Model;
+using AWS.Lambda.Powertools.BatchProcessing;
+using AWS.Lambda.Powertools.BatchProcessing.Sqs;
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Metrics;
 using AWS.Lambda.Powertools.Tracing;
@@ -11,13 +15,9 @@ using BookInventory.Common;
 using BookInventory.Models;
 using BookInventory.Service;
 using BookInventory.Service.Exceptions;
+using BookInventory.Service.Utility;
 using FluentValidation;
 using System.Net;
-using Amazon.Lambda.Core;
-using Amazon.Lambda.SQSEvents;
-using AWS.Lambda.Powertools.BatchProcessing;
-using AWS.Lambda.Powertools.BatchProcessing.Sqs;
-using BookInventory.Api.Utility;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 namespace BookInventory.Api;
@@ -38,7 +38,7 @@ public class Functions
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
         this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
-        this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
+        this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION")) ? 0 : double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
     }
 
     [LambdaFunction]
@@ -59,7 +59,7 @@ public class Functions
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex,$"Error occured while searching books for criteria {cursor}");
+            Logger.LogError(ex, $"Error occured while searching books for criteria {cursor}");
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.InternalServerError, $"Error occured while searching books for criteria {cursor}");
         }
     }
@@ -150,7 +150,7 @@ public class Functions
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, preSignedUrl);
     }
-    
+
     /// <summary>
     /// Image validation
     /// </summary>
