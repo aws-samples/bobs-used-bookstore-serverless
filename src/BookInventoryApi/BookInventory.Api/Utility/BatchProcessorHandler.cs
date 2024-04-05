@@ -55,7 +55,7 @@ public class BatchProcessorHandler : ISqsRecordHandler
     {
         var isImageSafe = await imageService.IsSafeAsync(bucket,
             image);
-        Logger.LogDebug(
+        Logger.LogInformation(
             $"Image {image} in bucket {bucket} is {(isImageSafe ? "Safe" : "UnSafe")}");
 
         if (!isImageSafe)
