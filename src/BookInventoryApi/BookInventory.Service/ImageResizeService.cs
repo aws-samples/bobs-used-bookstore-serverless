@@ -1,6 +1,6 @@
 using ImageMagick;
 
-namespace BookInventory.Service.Utility
+namespace BookInventory.Service
 {
     public class ImageResizeService : IImageResizeService
     {

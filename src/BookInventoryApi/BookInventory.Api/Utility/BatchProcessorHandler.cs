@@ -4,9 +4,10 @@ using AWS.Lambda.Powertools.BatchProcessing;
 using AWS.Lambda.Powertools.BatchProcessing.Sqs;
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Metrics;
+using BookInventory.Service;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BookInventory.Service.Utility;
+namespace BookInventory.Api.Utility;
 
 public class BatchProcessorHandler : ISqsRecordHandler
 {

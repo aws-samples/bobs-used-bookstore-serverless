@@ -5,7 +5,7 @@ using Amazon.S3.Model;
 using AWS.Lambda.Powertools.Logging;
 using S3Object = Amazon.Rekognition.Model.S3Object;
 
-namespace BookInventory.Service.Utility;
+namespace BookInventory.Service;
 
 public class ImageService : IImageService
 {

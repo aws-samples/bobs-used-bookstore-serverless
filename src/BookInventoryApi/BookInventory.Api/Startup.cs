@@ -3,7 +3,7 @@ using Amazon.S3;
 using BookInventory.Api.Validators;
 using BookInventory.Common;
 using BookInventory.Models;
-using BookInventory.Service.Utility;
+using BookInventory.Service;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,9 +25,6 @@ public class Startup
         services.AddSharedServices();
         services.AddDynamoDBServices();
         services.AddAWSService<IAmazonS3>();
-        services.AddAWSService<IAmazonRekognition>();
-        services.AddScoped<IImageService, ImageService>();
-        services.AddScoped<IImageResizeService, ImageResizeService>();
         services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
         services.AddScoped<IValidator<UpdateBookDto>, UpdateBookDtoValidator>();
     }

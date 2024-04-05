@@ -1,4 +1,4 @@
-namespace BookInventory.Service.Utility
+namespace BookInventory.Service
 {
     public interface IImageResizeService
     {
