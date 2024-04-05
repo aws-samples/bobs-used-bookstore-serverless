@@ -22,7 +22,6 @@ internal class Services
         services.AddAWSService<IAmazonRekognition>();
         services.AddAWSService<IAmazonS3>();
         services.AddScoped<IImageService, ImageService>();
-        services.AddScoped<IImageResizeService, ImageResizeService>();
         return services.BuildServiceProvider();
     }
 }

@@ -18,7 +18,7 @@ public class BatchProcessorHandler : ISqsRecordHandler
         imageService = Services.Provider.GetRequiredService<IImageService>();
     }
 
-    [Logging(LogEvent = true, LogLevel = Microsoft.Extensions.Logging.LogLevel.Debug)]
+    [Logging(LogEvent = true)]
     [Metrics]
     public async Task<RecordHandlerResult> HandleAsync(SQSEvent.SQSMessage record, CancellationToken cancellationToken)
     {
