@@ -27,4 +27,10 @@
       <ProjectReference Include="..\..\..\src\BookInventoryApi\BookInventory.Service\BookInventory.Service.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="TestData\1001jokes.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
