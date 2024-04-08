@@ -27,7 +27,7 @@ namespace BookInventory.Service.UnitTests
         public async Task IsSafeAsync_WhenImageIsSafe_ReturnsTrue()
         {
             // Arrange
-            var bucket = "test-bucket";
+            var bucket = "source-bucket";
             var image = "test-image.jpg";
             var detectionResult = new DetectModerationLabelsResponse
             {
@@ -48,7 +48,7 @@ namespace BookInventory.Service.UnitTests
         public async Task IsSafeAsync_WhenImageIsUnsafe_ReturnsFalse()
         {
             // Arrange
-            var bucket = "test-bucket";
+            var bucket = "source-bucket";
             var image = "test-image.jpg";
             var detectionResult = new DetectModerationLabelsResponse
             {
@@ -65,7 +65,7 @@ namespace BookInventory.Service.UnitTests
             result.Should().BeFalse();
         }
 
-        //This test will comver SaveImageAsync and ResizeImageAsync functionality
+        //This test case would cover SaveImageAsync and ResizeImageAsync functionality
         [Fact]
         public async Task SaveImageAsync_ResizesImageAndUploadsToDestinationBucket()
         {
