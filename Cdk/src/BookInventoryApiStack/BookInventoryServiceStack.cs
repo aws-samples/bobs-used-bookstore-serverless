@@ -6,7 +6,9 @@ using Amazon.CDK.AWS.Logs;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.SSM;
 using BookInventoryApiStack.Api;
+using Authorizer = BookInventoryApiStack.Api.Authorizer;
 using Construct = Constructs.Construct;
+
 
 namespace BookInventoryApiStack;
 
@@ -61,7 +63,7 @@ public sealed class BookInventoryServiceStack : Stack
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
         var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
-
+        
         _ = new CfnOutput(
             this,
             $"{servicePrefix}-User-Pool-Id",
@@ -71,13 +73,27 @@ public sealed class BookInventoryServiceStack : Stack
                 ExportName = $"{servicePrefix}-UserPool",
                 Description = "UserPool"
             });
+        var userPoolClientParameterValue =
+            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-client-id");
+        
+        _ = new CfnOutput(
+            this,
+            $"{servicePrefix}-User-Pool-Client-Id",
+            new CfnOutputProps
+            {
+                Value = userPoolClientParameterValue,
+                ExportName = $"{servicePrefix}-UserPool-Client",
+                Description = "UserPoolClientId"
+            });
 
         var bookInventoryServiceStackProps = new BookInventoryServiceStackProps
         {
-            BucketName = bookInventoryBucket.BucketName
+            BucketName = bookInventoryBucket.BucketName,
+            UserPoolId = userPool.UserPoolId,
+            UserPoolClientId = userPoolClientParameterValue
         };
+        
         //Lambda Functions
-
         var getBookApi = new GetBookApi(
             this,
             "GetBookEndpoint",
@@ -103,6 +119,8 @@ public sealed class BookInventoryServiceStack : Stack
             "GeneratePreSignedURLEndpoint",
             bookInventoryServiceStackProps);
 
+        var authorizer = new Authorizer(this, "BookInventoryAuthorizer", bookInventoryServiceStackProps);
+
         //Api
 
         var api = new SharedConstructs.Api(
@@ -116,10 +134,10 @@ public sealed class BookInventoryServiceStack : Stack
                         AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
                         AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
                         TracingEnabled = true,
-                        LoggingLevel = MethodLoggingLevel.ERROR
+                        LoggingLevel = MethodLoggingLevel.INFO
                     }
                 })
-            .WithCognito(userPool)
+            .WithCognito(authorizer.Function)
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Get,
@@ -150,6 +168,7 @@ public sealed class BookInventoryServiceStack : Stack
         bookInventory.GrantWriteData(addBooksApi.Function.Role!);
         bookInventory.GrantReadWriteData(updateBooksApi.Function.Role!);
         bookInventoryBucket.GrantPut(getCoverPageUploadApi.Function.Role!);
+        
 
         _ = new CfnOutput(
             this,

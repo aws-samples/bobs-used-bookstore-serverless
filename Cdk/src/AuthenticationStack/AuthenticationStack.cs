@@ -99,10 +99,10 @@ public class AuthenticationStack : Stack
             GroupName = "Admin",
             Precedence = 123,
         });
-        var cfnUserPoolSellerGroup = new CfnUserPoolGroup(this, "BookStoreSellerGroup", new CfnUserPoolGroupProps {
+        var cfnUserPoolCustomerGroup = new CfnUserPoolGroup(this, "BookStoreCustomerGroup", new CfnUserPoolGroupProps {
             UserPoolId = userPool.UserPoolId,
-            Description = "Bookstore sellers",
-            GroupName = "Seller",
+            Description = "Bookstore Buyer",
+            GroupName = "Customer",
             Precedence = 124,
         });
         

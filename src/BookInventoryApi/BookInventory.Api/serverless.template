@@ -164,6 +164,23 @@
         "PackageType": "Zip",
         "Handler": "BookInventory.Api::BookInventory.Api.Functions_ImageValidation_Generated::ImageValidation"
       }
+    },
+    "BookInventoryApiFunctionsBookInventoryAuthorizerGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "BookInventory.Api::BookInventory.Api.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer"
+      }
     }
   }
 }

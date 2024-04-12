@@ -1,3 +1,4 @@
+using Amazon.CognitoIdentityProvider;
 using Amazon.Rekognition;
 using Amazon.S3;
 using BookInventory.Api.Utility;
@@ -25,6 +26,7 @@ public class Startup
         services.AddSharedServices();
         services.AddDynamoDBServices();
         services.AddAWSService<IAmazonS3>();
+        services.AddAWSService<IAmazonCognitoIdentityProvider>();
         services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
         services.AddScoped<IValidator<UpdateBookDto>, UpdateBookDtoValidator>();
     }

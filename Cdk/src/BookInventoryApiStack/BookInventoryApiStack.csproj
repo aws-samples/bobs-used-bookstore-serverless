@@ -15,8 +15,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Amazon.CDK.Lib" Version="2.130.0" />
+      <PackageReference Include="Amazon.CDK.Lib" Version="2.135.0" />
+      <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.0" />
+      <PackageReference Include="AWSSDK.ApiGatewayManagementApi" Version="3.7.300.67" />
+      <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.303.12" />
       <PackageReference Include="Constructs" Version="10.3.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.0" />
     </ItemGroup>
 
 

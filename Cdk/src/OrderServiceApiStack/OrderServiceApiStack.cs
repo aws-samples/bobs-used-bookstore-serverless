@@ -64,7 +64,7 @@ public class OrderServiceApiStack : Stack
                     TracingEnabled = true,
                     LoggingLevel = MethodLoggingLevel.ERROR
                 }})
-            .WithCognito(userPool)
+            //.WithCognito(userPool)
             .WithEndpoint(
                 "/orders/{id}",
                 HttpMethod.Get,

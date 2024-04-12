@@ -19,6 +19,8 @@ using System.Text.Json.Serialization;
 [JsonSerializable(typeof(Dictionary<string, object>))]
 [JsonSerializable(typeof(SQSEvent))]
 [JsonSerializable(typeof(BatchItemFailuresResponse))]
+[JsonSerializable(typeof(APIGatewayCustomAuthorizerRequest))]
+[JsonSerializable(typeof(APIGatewayCustomAuthorizerResponse))]
 public partial class CustomSerializationContext : JsonSerializerContext
 {
 }

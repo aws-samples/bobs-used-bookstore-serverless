@@ -18,6 +18,7 @@ using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.BatchProcessing;
 using AWS.Lambda.Powertools.BatchProcessing.Sqs;
 using BookInventory.Api.Utility;
+using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 namespace BookInventory.Api;
@@ -30,6 +31,10 @@ public class Functions
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
     private readonly double expiryDuration = 5;//minutes
+    private readonly Dictionary<string, string> apiAuthMapping;
+    private const string REGION = "REGION";
+    private const string COGNITO_USER_POOL_ID = "COGNITO_USER_POOL_ID";
+    private const string COGNITO_USER_POOL_CLIENT_ID = "COGNITO_USER_POOL_CLIENT_ID";
 
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
@@ -39,6 +44,11 @@ public class Functions
         this.s3Client = s3Client;
         this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
         this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
+        this.apiAuthMapping = new Dictionary<string, string>()
+        {
+            {"POST/books","Admin"},
+            {"GET/books/cover-page-upload-url","Admin"}
+        };
     }
 
     [LambdaFunction]
@@ -165,5 +175,54 @@ public class Functions
     public BatchItemFailuresResponse ImageValidation(SQSEvent evnt, ILambdaContext context)
     {
         return SqsBatchProcessor.Result.BatchItemFailuresResponse;
+    }
+
+    [LambdaFunction()]
+    [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.ApiGatewayRest)]
+    [Metrics(CaptureColdStart = true)]
+    [Tracing(CaptureMode = TracingCaptureMode.ResponseAndError)]
+    public async Task<APIGatewayCustomAuthorizerResponse> BookInventoryAuthorizer(APIGatewayCustomAuthorizerRequest request)
+    {
+        string token = request.AuthorizationToken;
+        string? userPoolId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_ID);
+        string? clientId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_CLIENT_ID);
+        string? region = Environment.GetEnvironmentVariable(REGION);
+        string method = request.MethodArn;
+        try
+        {
+            // 1. Retrieve claim
+            var claimPrincipal = await new CognitoJwtVerifier(userPoolId, clientId, region).ValidateTokenAsync(token);
+            // 2. either claimPrincipal is recieved (not null) or an exception is thrown in case of invalid token
+            if (claimPrincipal is null)
+            {
+                return ApiUtility.UnauthorizedResponse("Unable to retrieve the claim");
+            }
+            // Get cognito user name
+            string cogntioUserId = claimPrincipal.Claims.First(t => t.Type == "cognito:username").Value;
+            
+            // Get groups from token
+            var groups = claimPrincipal.Claims.Where(t => t.Type == "cognito:groups").Select(x=>x.Value).ToList();
+            Logger.LogInformation($"User Logged in {cogntioUserId} groups {string.Join(",",groups)}");
+
+            // Get matching apis from mapping
+            var apiMapping = this.apiAuthMapping.Where(x => method.EndsWith(x.Key, StringComparison.OrdinalIgnoreCase)).ToList();
+            // Expected user groups to access the api
+            var requiredGroups = apiMapping.Select(x => x.Value).ToList();
+            Logger.LogInformation($"User groups allowed for the api {apiMapping.FirstOrDefault().Key} are {string.Join(",",requiredGroups)}");
+            if (groups.Any(x => requiredGroups.Any(y => y.Equals(x, StringComparison.OrdinalIgnoreCase))))
+            {
+                return ApiUtility.AuthorizedResponse(cogntioUserId, request.MethodArn);
+            }
+
+            string unauthorizedMessage =
+                $"User has groups {string.Join(",", groups)}, not meeting api rules";
+            Logger.LogInformation($"User {cogntioUserId} not allowed to access api {apiMapping.FirstOrDefault().Key} - {unauthorizedMessage}");
+            return ApiUtility.UnauthorizedResponse(unauthorizedMessage);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error occured in Lambda Custom Authorization");
+            return ApiUtility.UnauthorizedResponse(e.Message);
+        }
     }
 }
