@@ -1,14 +1,21 @@
+using System.Text.Json.Nodes;
 using Amazon.CDK;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.DynamoDB;
+using Amazon.CDK.AWS.Events;
+using Amazon.CDK.AWS.Events.Targets;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.KMS;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Notifications;
 using Amazon.CDK.AWS.SES.Actions;
 using Amazon.CDK.AWS.SQS;
+using Amazon.CDK.AWS.StepFunctions;
 using Constructs;
+using EventBus = Amazon.CDK.AWS.Events.EventBus;
+using EventBusProps = Amazon.CDK.AWS.Events.EventBusProps;
 
 namespace BookInventoryApiStack;
 
@@ -80,7 +87,61 @@ internal class ImageValidationConstruct : Construct
                     }
                 ]
             });
+        #region EventToStepFunction
+        // Enable S3 event notifications through Event Bridge
+        props.ImageBucket.EnableEventBridgeNotification();
         
+        
+        var imageValidationWorkflow = new StateMachine(this, "ImageValidationStateMachine", new StateMachineProps()
+        {
+            DefinitionBody = DefinitionBody.FromChainable(new Pass(this, "ImageValidationStateMachinePass"))
+        });
+        // Create Event Rule in Default - Event Bus (Only Default Bus can receive events from AWS Services) 
+        var eventRule = new Rule(this, "BookInventoryImageUpload-Rule", new RuleProps()
+        {
+            Description = "Image upload event for validation",
+            RuleName = "BookInventoryImageUpload-Rule",
+            Targets = [new SfnStateMachine(imageValidationWorkflow)],
+            EventPattern = new EventPattern()
+            {
+                Source = ["aws.s3"],
+                DetailType = ["Object Created"],
+                Detail =  new Dictionary<string, object>()
+                {
+                    {
+                        "bucket", new Dictionary<string, object>()
+                        {
+                            {
+                                "name", new[]
+                                {
+                                    props.ImageBucket.BucketName
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "object", new Dictionary<string, object>()
+                        {
+                            {
+                                "key", new Dictionary<string, object>[]
+                                {
+                                    new()
+                                    {
+                                        {"suffix",".png"}
+                                    },
+                                    new()
+                                    {
+                                        {"suffix",".jpg"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        #endregion EventToStepFunction
+        #region EventToLambda
         // Queue for event notification from S3 Upload
         var imageNotificationQueue = new Queue(this, $"{id}-queue", new QueueProps()
         {
@@ -145,22 +206,6 @@ internal class ImageValidationConstruct : Construct
         }));
         props.ImageBucket.GrantReadWrite(imageValidationLambda.Role!);
         bookInventoryPublishBucket.GrantReadWrite(imageValidationLambda.Role!);
-        /*
-        imageValidationLambda.Role.AttachInlinePolicy(new Policy(this, "RecognitionPermissionPolicy", new PolicyProps()
-        {
-            Document = new PolicyDocument(new PolicyDocumentProps()
-            {
-                Statements = [new PolicyStatement()
-                {
-                    Effect = Effect.ALLOW
-                }]
-            })
-        }));
-        imageValidationLambda.AddPermission("RecognitionPermission", new Permission()
-        {
-            Action = "rekognition:*",
-
-        });
-        */
+        #endregion EventToLambda
     }
 }
