@@ -1,16 +1,15 @@
 namespace SharedConstructs;
 
 using Amazon.CDK.AWS.APIGateway;
-using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.Lambda;
 
 using Constructs;
 
-using HttpMethod = System.Net.Http.HttpMethod;
+using HttpMethod = HttpMethod;
 
 public class Api : RestApi
 {
-    public CognitoUserPoolsAuthorizer Authorizer { get; private set; }
+    public TokenAuthorizer Authorizer { get; private set; }
     
     public Api(
         Construct scope,
@@ -20,24 +19,16 @@ public class Api : RestApi
         id,
         props)
     {
-        
     }
-
-    public Api WithCognito(IUserPool cognitoUserPool)
+    
+    public Api WithCognito(Function authorizerFunction)
     {
-        this.Authorizer = new CognitoUserPoolsAuthorizer(
-            this,
-            "CognitoAuthorizer",
-            new CognitoUserPoolsAuthorizerProps
-            {
-                CognitoUserPools = new IUserPool[]
-                {
-                    cognitoUserPool
-                },
-                AuthorizerName = "cognitoauthorizer",
-                IdentitySource = "method.request.header.Authorization"
-            });
-
+        this.Authorizer = new TokenAuthorizer(this, "CognitoTokenAuthorizer", new TokenAuthorizerProps()
+        {
+            AuthorizerName = "cognitotokenauthorizer",
+            IdentitySource = "method.request.header.Authorization",
+            Handler = authorizerFunction
+        });
         return this;
     }
     
@@ -77,7 +68,7 @@ public class Api : RestApi
                     new MethodResponse { StatusCode = "400" },
                     new MethodResponse { StatusCode = "500" }
                 },
-                AuthorizationType = authorizeApi ? AuthorizationType.COGNITO : AuthorizationType.NONE,
+                AuthorizationType = authorizeApi ? AuthorizationType.CUSTOM : AuthorizationType.NONE,
                 Authorizer = authorizeApi ? this.Authorizer : null
             });
 
