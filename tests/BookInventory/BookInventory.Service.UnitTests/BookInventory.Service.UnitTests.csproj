@@ -23,8 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\BookInventoryApi\BookInventory.Repository\BookInventory.Repository.csproj" />
-      <ProjectReference Include="..\..\..\src\BookInventoryApi\BookInventory.Service\BookInventory.Service.csproj" />
+      <ProjectReference Include="..\..\..\src\BookInventory\BookInventory.Repository\BookInventory.Repository.csproj" />
+      <ProjectReference Include="..\..\..\src\BookInventory\BookInventory.Service\BookInventory.Service.csproj" />
     </ItemGroup>
 
 </Project>
