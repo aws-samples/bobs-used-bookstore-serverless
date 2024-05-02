@@ -13,9 +13,12 @@ using Amazon.CDK.AWS.S3.Notifications;
 using Amazon.CDK.AWS.SES.Actions;
 using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.StepFunctions;
+using Amazon.CDK.AWS.StepFunctions.Tasks;
+using BookInventoryApiStack.ImageValidation;
 using Constructs;
 using EventBus = Amazon.CDK.AWS.Events.EventBus;
 using EventBusProps = Amazon.CDK.AWS.Events.EventBusProps;
+using HttpMethods = Amazon.CDK.AWS.S3.HttpMethods;
 
 namespace BookInventoryApiStack;
 
@@ -90,12 +93,70 @@ internal class ImageValidationConstruct : Construct
         #region EventToStepFunction
         // Enable S3 event notifications through Event Bridge
         props.ImageBucket.EnableEventBridgeNotification();
+
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
         
+        var validateImageLambda = new ValidateImage(
+            this,
+            $"{Constants.VALIDATE_IMAGE}-Step",
+            bookInventoryServiceStackProps).Function;
+        validateImageLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps()
+        {
+            Effect = Effect.ALLOW,
+            Resources = ["*"],
+            Actions = ["rekognition:DetectModerationLabels"]
+        }));
+        props.ImageBucket.GrantReadWrite(validateImageLambda.Role!);
+        bookInventoryPublishBucket.GrantReadWrite(validateImageLambda.Role!);
+        var validateImageLambdaInvoke = new LambdaInvoke(this, Constants.VALIDATE_IMAGE, new LambdaInvokeProps()
+        {
+            LambdaFunction = validateImageLambda,
+            IntegrationPattern = IntegrationPattern.REQUEST_RESPONSE,
+            Payload = TaskInput.FromObject(
+                new Dictionary<string, object>
+                {
+                    {
+                        "bucketName.$","$.detail.bucket.name" 
+                    },
+                    {
+                        "objectKey.$","$.detail.object.key" 
+                    },
+                    {
+                        "objectSize.$","$.detail.object.size" 
+                    }
+                }),
+            InputPath = "$",
+            ResultPath = "$.imageValidationResponse"
+        });
+        var successStep = new Succeed(this, "Image-validation-workflow-Successful");
+        var chain = Chain
+            .Start(
+                new Choice(this, "Image-Size-Check", new ChoiceProps
+                    {
+                        InputPath = "$"
+                    })
+                    .When(Condition.NumberLessThanEquals("$.detail.object.size", 0), successStep)
+                    .Otherwise(validateImageLambdaInvoke
+                        .Next(
+                            new Choice(this, "Image-Safe-Check", new ChoiceProps
+                                {
+                                    InputPath = "$"
+                                })
+                                .When(Condition.BooleanEquals("$.imageValidationResponse.Payload.isImageSafe", false),
+                                    successStep)
+                                .Otherwise(new Pass(this, "Image-Resize")
+                                    .Next(new Pass(this, "Delete-Image-From-Source"))
+                                    .Next(successStep)
+                                )
+                        )));
         
         var imageValidationWorkflow = new StateMachine(this, "ImageValidationStateMachine", new StateMachineProps()
         {
-            DefinitionBody = DefinitionBody.FromChainable(new Pass(this, "ImageValidationStateMachinePass"))
+            DefinitionBody = DefinitionBody.FromChainable(chain),
+            StateMachineName = "BookInventory-ImageValidation",
+            TracingEnabled = true
         });
+        
         // Create Event Rule in Default - Event Bus (Only Default Bus can receive events from AWS Services) 
         var eventRule = new Rule(this, "BookInventoryImageUpload-Rule", new RuleProps()
         {
@@ -131,7 +192,15 @@ internal class ImageValidationConstruct : Construct
                                     },
                                     new()
                                     {
+                                        {"suffix",".PNG"}
+                                    },
+                                    new()
+                                    {
                                         {"suffix",".jpg"}
+                                    },
+                                    new()
+                                    {
+                                        {"suffix",".JPG"}
                                     }
                                 }
                             }
@@ -140,6 +209,7 @@ internal class ImageValidationConstruct : Construct
                 }
             }
         });
+        
         #endregion EventToStepFunction
         #region EventToLambda
         // Queue for event notification from S3 Upload
@@ -165,6 +235,7 @@ internal class ImageValidationConstruct : Construct
                     Suffix = ".jpg"
                 }
             ]);
+        
         props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue),
             filters:
             [
@@ -178,7 +249,7 @@ internal class ImageValidationConstruct : Construct
         var imageValidationLambda = new SharedConstructs.LambdaFunction(
             this,
             Constants.VALIDATE_BOOK_IMAGE_API,
-            new SharedConstructs.LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
+            new SharedConstructs.LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_ImageValidation_Generated::ImageValidation",
                 Environment = new Dictionary<string, string>
