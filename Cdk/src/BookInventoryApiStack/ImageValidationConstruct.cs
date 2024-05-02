@@ -120,9 +120,6 @@ internal class ImageValidationConstruct : Construct
                     },
                     {
                         "objectKey.$","$.detail.object.key" 
-                    },
-                    {
-                        "objectSize.$","$.detail.object.size" 
                     }
                 }),
             InputPath = "$",

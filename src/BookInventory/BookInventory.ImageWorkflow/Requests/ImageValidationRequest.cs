@@ -9,7 +9,4 @@ public class ImageValidationRequest
     
     [JsonPropertyName("objectKey")]
     public string ObjectKey { get; set; }
-    
-    [JsonPropertyName("objectSize")]
-    public long ObjectSize { get; set; }
 }

@@ -29,9 +29,7 @@ public class Functions
     /// <summary>
     /// Image validation
     /// </summary>
-    /// <param name="bucketName">SQS Event</param>
-    /// <param name="imageKey">Lambda context</param>
-    /// <param name="objectSize">Lambda context</param>
+    /// <param name="imageValidationRequest">Image to validate</param>
     /// <returns>Image Validation Response</returns>
     [LambdaFunction()]
     [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.EventBridge)]
@@ -41,11 +39,6 @@ public class Functions
     {
         Logger.LogInformation(
             $"Image to validate {imageValidationRequest.BucketName} - {imageValidationRequest.ObjectKey}");
-        if (imageValidationRequest.ObjectSize > 0)
-        {
-            Logger.LogInformation($"Image {imageValidationRequest.ObjectKey} in bucket {imageValidationRequest.BucketName} is empty");
-            Metrics.AddMetric("Empty Image", 1, MetricUnit.Count);
-        }
         // Validate image
         var isImageSafe = await this.imageService.IsSafeAsync(imageValidationRequest.BucketName,
             imageValidationRequest.ObjectKey);
