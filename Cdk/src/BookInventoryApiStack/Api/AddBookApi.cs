@@ -17,7 +17,7 @@ public class AddBookApi : Construct
         this.Function = new LambdaFunction(
             this,
             Constants.ADD_BOOK_API,
-            new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
+            new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
                 Environment = new Dictionary<string, string>

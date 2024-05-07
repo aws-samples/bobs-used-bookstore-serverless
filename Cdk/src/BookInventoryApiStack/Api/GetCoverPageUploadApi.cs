@@ -15,7 +15,7 @@ public class GetCoverPageUploadApi : Construct
         this.Function = new LambdaFunction(
             this,
             $"GetCoverPageUploadApi",
-            new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
+            new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUpload_Generated::GetCoverPageUpload",
                 Environment = new Dictionary<string, string>(5)

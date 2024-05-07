@@ -16,7 +16,7 @@ public class Authorizer : Construct
         this.Function = new LambdaFunction(
             this,
             $"{Constants.AUTHORIZER}",
-            new LambdaFunctionProps("./src/BookInventoryApi/BookInventory.Api")
+            new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer",

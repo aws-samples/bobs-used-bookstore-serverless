@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <AWSProjectType>Lambda</AWSProjectType>
+        <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <!-- Generate ready to run images during publishing to improvement cold starts. -->
+        <PublishReadyToRun>true</PublishReadyToRun>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0"/>
+        <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.0" />
+        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.3.1"/>
+        <PackageReference Include="Amazon.Lambda.Annotations" Version="0.13.1"/>
+        <PackageReference Include="AWS.Lambda.Powertools.Metrics" Version="1.6.1" />
+        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.301.27" />
+        <PackageReference Include="AWSSDK.S3" Version="3.7.307.25" />
+    </ItemGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\BookInventory.Common\BookInventory.Common.csproj" />
+      <ProjectReference Include="..\BookInventory.Models\BookInventory.Models.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="BookInventory.Service">
+        <HintPath>..\BookInventory.Service\bin\Debug\net8.0\BookInventory.Service.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+</Project>
