@@ -1,7 +1,6 @@
 ﻿using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.Lambda.DotNet;
 using Amazon.CDK.AWS.Logs;
-
-using XaasKit.CDK.AWS.Lambda.DotNet;
 
 namespace SharedConstructs;
 

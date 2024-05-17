@@ -95,6 +95,7 @@ internal class ImageValidationConstruct : Construct
         props.ImageBucket.EnableEventBridgeNotification();
 
         var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
+        bookInventoryServiceStackProps.PublishBucketName = bookInventoryPublishBucket.BucketName;
         
         var validateImageLambda = new ValidateImage(
             this,
@@ -106,8 +107,13 @@ internal class ImageValidationConstruct : Construct
             Resources = ["*"],
             Actions = ["rekognition:DetectModerationLabels"]
         }));
-        props.ImageBucket.GrantReadWrite(validateImageLambda.Role!);
-        bookInventoryPublishBucket.GrantReadWrite(validateImageLambda.Role!);
+        props.ImageBucket.GrantRead(validateImageLambda.Role!);
+
+        var resizeImageLambda = new ResizeImage(this, $"{Constants.RESIZE_IMAGE}-Step", bookInventoryServiceStackProps)
+            .Function;
+        props.ImageBucket.GrantRead(resizeImageLambda.Role!);
+        bookInventoryPublishBucket.GrantReadWrite(resizeImageLambda.Role!);
+        
         var validateImageLambdaInvoke = new LambdaInvoke(this, Constants.VALIDATE_IMAGE, new LambdaInvokeProps()
         {
             LambdaFunction = validateImageLambda,
@@ -125,7 +131,27 @@ internal class ImageValidationConstruct : Construct
             InputPath = "$",
             ResultPath = "$.imageValidationResponse"
         });
+        
+        var imageResizeLambdaInvoke = new LambdaInvoke(this, Constants.RESIZE_IMAGE, new LambdaInvokeProps()
+        {
+            LambdaFunction = resizeImageLambda,
+            IntegrationPattern = IntegrationPattern.REQUEST_RESPONSE,
+            Payload = TaskInput.FromObject(
+                new Dictionary<string, object>
+                {
+                    {
+                        "bucketName.$","$.detail.bucket.name" 
+                    },
+                    {
+                        "objectKey.$","$.detail.object.key" 
+                    }
+                }),
+            InputPath = "$",
+            ResultPath = "$.imageResizeResponse"
+        });
+        
         var successStep = new Succeed(this, "Image-validation-workflow-Successful");
+        var failureStep = new Fail(this, "Image-validation-workflow-Fails");
         var chain = Chain
             .Start(
                 new Choice(this, "Image-Size-Check", new ChoiceProps
@@ -140,12 +166,30 @@ internal class ImageValidationConstruct : Construct
                                     InputPath = "$"
                                 })
                                 .When(Condition.BooleanEquals("$.imageValidationResponse.Payload.isImageSafe", false),
-                                    successStep)
-                                .Otherwise(new Pass(this, "Image-Resize")
-                                    .Next(new Pass(this, "Delete-Image-From-Source"))
-                                    .Next(successStep)
-                                )
-                        )));
+                                    failureStep)
+                                .Otherwise(imageResizeLambdaInvoke
+                                    .Next(new Choice(this, "Image-Resize-Check", new ChoiceProps
+                                        {
+                                            InputPath = "$"
+                                        }).When(
+                                            Condition.BooleanEquals(
+                                                "$.imageResizeResponse.Payload.isPublishedInDestination", false),
+                                            failureStep)
+                                        .Otherwise(new CallAwsService(this, "Delete-Image", new CallAwsServiceProps
+                                        {
+                                            Service = "s3",
+                                            Action = "deleteObject",
+                                            InputPath = "$",
+                                            Parameters = new Dictionary<string, object>
+                                            {
+                                                {"Bucket", JsonPath.StringAt("$.detail.bucket.name")},
+                                                {"Key", JsonPath.StringAt("$.detail.object.key")}
+                                            },
+                                            IamResources = [props.ImageBucket.ArnForObjects("*")],
+                                            ResultPath = "$.DeleteImageResponse"
+                                        }).Next(successStep))
+                                    )
+                                ))));
         
         var imageValidationWorkflow = new StateMachine(this, "ImageValidationStateMachine", new StateMachineProps()
         {

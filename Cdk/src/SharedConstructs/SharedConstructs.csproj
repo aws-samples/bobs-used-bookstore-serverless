@@ -7,10 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Amazon.CDK.AWS.Lambda.DotNet" Version="0.0.4" />
       <PackageReference Include="Amazon.CDK.Lib" Version="2.130.0" />
       <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.0" />
       <PackageReference Include="Constructs" Version="10.3.0" />
-      <PackageReference Include="XaasKit.CDK.AWS.Lambda.DotNet" Version="0.1.0" />
     </ItemGroup>
 
 

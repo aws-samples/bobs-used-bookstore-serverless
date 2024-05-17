@@ -6,6 +6,8 @@ namespace BookInventoryApiStack
     {
         public string BucketName { get; set; }
         
+        public string PublishBucketName { get; set; }
+        
         public string UserPoolId { get; set; }
         
         public string UserPoolClientId { get; set; }
