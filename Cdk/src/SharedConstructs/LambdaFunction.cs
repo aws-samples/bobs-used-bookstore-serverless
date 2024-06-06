@@ -15,17 +15,12 @@ public class LambdaFunctionProps : FunctionProps
     {
         CodePath = codePath;
     }
-    
-    public bool IsNativeAot { get; set; }
-    
     public string CodePath { get; set; }
 }
 
 public class LambdaFunction : Construct
 {
     public Function Function { get; }
-    
-    public Alias FunctionAlias { get; }
 
     public LambdaFunction(
         Construct scope,

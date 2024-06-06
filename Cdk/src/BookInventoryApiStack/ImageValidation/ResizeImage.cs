@@ -14,7 +14,7 @@ public class ResizeImage  : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            Constants.RESIZE_IMAGE,
+            $"{Constants.RESIZE_IMAGE}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.ImageWorkflow")
             {
                 Handler = "BookInventory.ImageWorkflow::BookInventory.ImageWorkflow.Functions_SaveResizedImage_Generated::SaveResizedImage",

@@ -26,16 +26,16 @@ public sealed class BookInventoryServiceStack : Stack
         string servicePrefix = "BookInventoryService";
 
         // S3 bucket
-        var bookInventoryBucket = new Bucket(this, "BookInventoryBucket", new BucketProps
+        var bookInventoryBucket = new Bucket(this, $"BookInventoryBucket{apiProps.PostFix}", new BucketProps
         {
-            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-book-inventory-bucket",
+            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}",
             Versioned = true
         });
         
         //Database
-        var bookInventory = new Table(this, $"{servicePrefix}-BookInventoryTable", new TableProps
+        var bookInventory = new Table(this, $"{servicePrefix}-BookInventoryTable{apiProps.PostFix}", new TableProps
         {
-            TableName = "BookInventory",
+            TableName = $"BookInventory{apiProps.PostFix}",
             PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "BookId", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST
         });
@@ -55,83 +55,84 @@ public sealed class BookInventoryServiceStack : Stack
         });
         
         // Image Validation Stack
-        var imageValidationConstruct = new ImageValidationConstruct(this, "ImageValidationConstruct",
-            new ImageValidationConstructProps(this.Account, servicePrefix, bookInventoryBucket, bookInventory));
+        var imageValidationConstruct = new ImageValidationConstruct(this, $"ImageValidationConstruct{apiProps.PostFix}",
+            new ImageValidationConstructProps(this.Account, servicePrefix, apiProps.PostFix, bookInventoryBucket, bookInventory));
         
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
-            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
+            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id{apiProps.PostFix}");
 
-        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
+        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool{apiProps.PostFix}", userPoolParameterValue);
         
         _ = new CfnOutput(
             this,
-            $"{servicePrefix}-User-Pool-Id",
+            $"{servicePrefix}-User-Pool-Id{apiProps.PostFix}",
             new CfnOutputProps
             {
                 Value = userPool.UserPoolId,
-                ExportName = $"{servicePrefix}-UserPool",
+                ExportName = $"{servicePrefix}-UserPool{apiProps.PostFix}",
                 Description = "UserPool"
             });
         var userPoolClientParameterValue =
-            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-client-id");
+            StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-client-id{apiProps.PostFix}");
         
         _ = new CfnOutput(
             this,
-            $"{servicePrefix}-User-Pool-Client-Id",
+            $"{servicePrefix}-User-Pool-Client-Id{apiProps.PostFix}",
             new CfnOutputProps
             {
                 Value = userPoolClientParameterValue,
-                ExportName = $"{servicePrefix}-UserPool-Client",
+                ExportName = $"{servicePrefix}-UserPool-Client{apiProps.PostFix}",
                 Description = "UserPoolClientId"
             });
 
-        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps(apiProps.PostFix)
         {
             BucketName = bookInventoryBucket.BucketName,
             UserPoolId = userPool.UserPoolId,
-            UserPoolClientId = userPoolClientParameterValue
+            UserPoolClientId = userPoolClientParameterValue,
+            Table = bookInventory.TableName
         };
         
         //Lambda Functions
         var getBookApi = new GetBookApi(
             this,
-            "GetBookEndpoint",
+            $"GetBookEndpoint{apiProps.PostFix}",
             bookInventoryServiceStackProps);
 
         var addBooksApi = new AddBookApi(
             this,
-            "AddBooksEndpoint",
+            $"AddBooksEndpoint{apiProps.PostFix}",
             bookInventoryServiceStackProps);
 
         var listBooks = new ListBooksApi(
             this,
-            "ListBooksEndpoint",
+            $"ListBooksEndpoint{apiProps.PostFix}",
             bookInventoryServiceStackProps);
 
         var updateBooksApi = new UpdateBookApi(
             this,
-            "UpdateBooksEndpoint",
+            $"UpdateBooksEndpoint{apiProps.PostFix}",
             bookInventoryServiceStackProps);
 
         var getCoverPageUploadApi = new GetCoverPageUploadApi(
             this,
-            "GeneratePreSignedURLEndpoint",
+            $"GeneratePreSignedURLEndpoint{apiProps.PostFix}",
             bookInventoryServiceStackProps);
 
-        var authorizer = new Authorizer(this, "BookInventoryAuthorizer", bookInventoryServiceStackProps);
+        var authorizer = new Authorizer(this, $"BookInventoryAuthorizer{apiProps.PostFix}", bookInventoryServiceStackProps);
 
         //Api
 
         var api = new SharedConstructs.Api(
                 this,
-                "BookInventoryApi",
+                $"BookInventoryApi{apiProps.PostFix}",
                 new RestApiProps
                 {
-                    RestApiName = "BookInventoryApi",
+                    RestApiName = $"BookInventoryApi{apiProps.PostFix}",
                     DeployOptions = new StageOptions
                     {
-                        AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "BookInventoryLogGroup")),
+                        AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, $"BookInventoryLogGroup{apiProps.PostFix}")),
                         AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
                         TracingEnabled = true,
                         LoggingLevel = MethodLoggingLevel.INFO
@@ -172,11 +173,11 @@ public sealed class BookInventoryServiceStack : Stack
 
         _ = new CfnOutput(
             this,
-            $"{servicePrefix}-APIEndpointOutput",
+            $"{servicePrefix}-APIEndpointOutput{apiProps.PostFix}",
             new CfnOutputProps
             {
                 Value = api.Url,
-                ExportName = $"{servicePrefix}-ApiEndpoint",
+                ExportName = $"{servicePrefix}-ApiEndpoint{apiProps.PostFix}",
                 Description = "Endpoint of the Book Inventory API"
             });
     }

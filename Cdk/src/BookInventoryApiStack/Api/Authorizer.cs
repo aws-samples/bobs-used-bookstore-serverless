@@ -15,7 +15,7 @@ public class Authorizer : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            $"{Constants.AUTHORIZER}",
+            $"{Constants.AUTHORIZER}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 
@@ -28,8 +28,7 @@ public class Authorizer : Construct
                     { "REGION",  Stack.Of(this).Region},
                     { "COGNITO_USER_POOL_ID", props.UserPoolId },
                     { "COGNITO_USER_POOL_CLIENT_ID", props.UserPoolClientId}
-                },
-                IsNativeAot = false
+                }
             }).Function;
     }
 }

@@ -13,23 +13,44 @@ public class BookInventoryRepository : IBookInventoryRepository
     private readonly IAmazonDynamoDB client;
     private readonly Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
     private const int MAX_MONTHS_TO_CHECK = 1;
+    private readonly bool isPostfix = false;
+    private readonly string tableNameOverride;
 
     public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
     {
         this.context = context;
         this.client = client;
+        isPostfix = IsPostFix();
+        if (isPostfix)
+        {
+            tableNameOverride = Environment.GetEnvironmentVariable("TABLE_NAME");
+            Logger.LogInformation($"Postfix environment to query postfix table {tableNameOverride}");
+        }
     }
 
     [Tracing]
     public async Task<Book?> GetByIdAsync(string bookId)
     {
-        return await context.LoadAsync<Book>(bookId);
+        Logger.LogInformation($"Postfix environment {(isPostfix?"true" :"false")} Table Name to override {tableNameOverride}" );
+        return await context.LoadAsync<Book>(bookId, 
+            isPostfix ? 
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = tableNameOverride
+                }
+            : null);
     }
 
     [Tracing]
     public async Task SaveAsync(Book book)
     {
-        await context.SaveAsync(book);
+        await context.SaveAsync(book,
+            isPostfix ? 
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = tableNameOverride
+                }
+                : null);
     }
 
     [Tracing]
@@ -161,7 +182,7 @@ public class BookInventoryRepository : IBookInventoryRepository
 
         var queryRequest = new QueryRequest
         {
-            TableName = BookInventoryConstants.TABLE_NAME,
+            TableName = tableNameOverride,
             KeyConditionExpression = "#gsi1pk = :gsi1pk",
             ExpressionAttributeNames = this.listAttributeNames,
             ExpressionAttributeValues = attributeValues,
@@ -173,5 +194,16 @@ public class BookInventoryRepository : IBookInventoryRepository
         var queryResponse = await this.client.QueryAsync(queryRequest);
 
         return queryResponse;
+    }
+    
+    private bool IsPostFix()
+    {
+        string isPostFixString = Environment.GetEnvironmentVariable("IS_POSTFIX");
+        if (string.IsNullOrEmpty(isPostFixString) || isPostFixString.ToLower() == "false")
+        {
+            return false;
+        }
+
+        return true;
     }
 }

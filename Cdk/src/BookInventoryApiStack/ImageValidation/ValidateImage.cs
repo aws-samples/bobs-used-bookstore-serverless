@@ -14,7 +14,7 @@ public class ValidateImage : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            Constants.VALIDATE_IMAGE,
+            $"{Constants.VALIDATE_IMAGE}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.ImageWorkflow")
             {
                 Handler = "BookInventory.ImageWorkflow::BookInventory.ImageWorkflow.Functions_ImageValidation_Generated::ImageValidation",

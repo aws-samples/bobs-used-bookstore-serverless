@@ -16,7 +16,7 @@ public class UpdateBookApi : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            Constants.UPDATE_BOOK_API,
+            $"{Constants.UPDATE_BOOK_API}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_UpdateBook_Generated::UpdateBook",
@@ -24,9 +24,10 @@ public class UpdateBookApi : Construct
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.UPDATE_BOOK_API },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.UPDATE_BOOK_API },
-                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true" }
-                },
-                IsNativeAot = false
+                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true" },
+                    { "IS_POSTFIX", string.IsNullOrWhiteSpace(props.PostFix)?"false":"true" },
+                    { "TABLE_NAME", props.Table }
+                }
             }).Function;
     }
 }

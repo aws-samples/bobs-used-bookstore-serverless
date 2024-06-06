@@ -16,7 +16,7 @@ public class GetOrderApi : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            $"GetOrderApi",
+            $"GetOrderApi{props.PostFix}",
             new LambdaFunctionProps("src/OrderServiceApi/OrderService.Api")
             {
                 Handler = "OrderService.Api",
@@ -24,8 +24,7 @@ public class GetOrderApi : Construct
                 {
                     { "POWERTOOLS_SERVICE_NAME", "Orders" },
                     { "ANNOTATIONS_HANDLER", "GetOrder" }
-                },
-                IsNativeAot = true
+                }
             }).Function;
     }
 }
