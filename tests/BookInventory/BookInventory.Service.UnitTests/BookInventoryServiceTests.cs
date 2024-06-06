@@ -157,7 +157,7 @@ public class BookInventoryServiceTests
         };
 
         // Act Assert
-        var response = Assert.ThrowsAsync<ProductNotFoundException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
+        Assert.ThrowsAsync<ProductNotFoundException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).MustNotHaveHappened();
     }
 }
