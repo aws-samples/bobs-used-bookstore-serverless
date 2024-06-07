@@ -14,29 +14,29 @@ public class BookInventoryRepository : IBookInventoryRepository
     private readonly Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
     private const int MAX_MONTHS_TO_CHECK = 1;
     private readonly bool isPostfix = false;
-    private readonly string tableNameOverride;
+    private readonly string tableName;
 
     public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
     {
         this.context = context;
         this.client = client;
         isPostfix = IsPostFix();
+        tableName = Environment.GetEnvironmentVariable("TABLE_NAME");
         if (isPostfix)
         {
-            tableNameOverride = Environment.GetEnvironmentVariable("TABLE_NAME");
-            Logger.LogInformation($"Postfix environment to query postfix table {tableNameOverride}");
+            Logger.LogInformation($"Postfix environment to query postfix table {tableName}");
         }
     }
 
     [Tracing]
     public async Task<Book?> GetByIdAsync(string bookId)
     {
-        Logger.LogInformation($"Postfix environment {(isPostfix?"true" :"false")} Table Name to override {tableNameOverride}" );
+        Logger.LogInformation($"Postfix environment {(isPostfix?"true" :"false")} Table Name to override {tableName}" );
         return await context.LoadAsync<Book>(bookId, 
             isPostfix ? 
                 new DynamoDBOperationConfig
                 {
-                    OverrideTableName = tableNameOverride
+                    OverrideTableName = tableName
                 }
             : null);
     }
@@ -48,7 +48,7 @@ public class BookInventoryRepository : IBookInventoryRepository
             isPostfix ? 
                 new DynamoDBOperationConfig
                 {
-                    OverrideTableName = tableNameOverride
+                    OverrideTableName = tableName
                 }
                 : null);
     }
@@ -182,7 +182,7 @@ public class BookInventoryRepository : IBookInventoryRepository
 
         var queryRequest = new QueryRequest
         {
-            TableName = tableNameOverride,
+            TableName = tableName, // Always takes table name from environment variable irrespective of postfix
             KeyConditionExpression = "#gsi1pk = :gsi1pk",
             ExpressionAttributeNames = this.listAttributeNames,
             ExpressionAttributeValues = attributeValues,
