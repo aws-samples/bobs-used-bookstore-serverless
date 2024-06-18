@@ -192,7 +192,7 @@ public class Functions
         {
             // 1. Retrieve claim
             var claimPrincipal = await new CognitoJwtVerifier(userPoolId, clientId, region).ValidateTokenAsync(token);
-            // 2. either claimPrincipal is recieved (not null) or an exception is thrown in case of invalid token
+            // 2. either claimPrincipal is received (not null) or an exception is thrown in case of invalid token
             if (claimPrincipal is null)
             {
                 return ApiUtility.UnauthorizedResponse("Unable to retrieve the claim");

@@ -1,37 +1,30 @@
-using System.Text.Json.Nodes;
 using Amazon.CDK;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.DynamoDB;
 using Amazon.CDK.AWS.Events;
 using Amazon.CDK.AWS.Events.Targets;
 using Amazon.CDK.AWS.IAM;
-using Amazon.CDK.AWS.KMS;
-using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.S3.Notifications;
-using Amazon.CDK.AWS.SES.Actions;
-using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.StepFunctions;
 using Amazon.CDK.AWS.StepFunctions.Tasks;
 using BookInventoryApiStack.ImageValidation;
 using Constructs;
-using EventBus = Amazon.CDK.AWS.Events.EventBus;
-using EventBusProps = Amazon.CDK.AWS.Events.EventBusProps;
 using HttpMethods = Amazon.CDK.AWS.S3.HttpMethods;
 
 namespace BookInventoryApiStack;
 
 public record ImageValidationConstructProps
 {
-    public ImageValidationConstructProps(string account, string servicePrefix, Bucket imageBucket, Table bookInventoryTable)
+    public ImageValidationConstructProps(string account, string servicePrefix, string postfix, Bucket imageBucket, Table bookInventoryTable)
     {
+        PostFix = postfix;
         Account = account;
         ServicePrefix = servicePrefix;
         ImageBucket = imageBucket;
         BookInventoryTable = bookInventoryTable;
     }
 
+    public string PostFix { get; set; }
     public string Account { get; set; }
     public string ServicePrefix { get; set; }
     public Bucket ImageBucket { get; set; }
@@ -44,9 +37,9 @@ internal class ImageValidationConstruct : Construct
         ImageValidationConstructProps props) : base(scope, id)
     {
         // S3 bucket to publish Image
-        var bookInventoryPublishBucket = new Bucket(this, "BookInventoryBucket-PublishedImage", new BucketProps
+        var bookInventoryPublishBucket = new Bucket(this, $"BookInventory-PublishedImage{props.PostFix}", new BucketProps
         {
-            BucketName = $"{props.Account}-{props.ServicePrefix.ToLower()}-book-inventory-image-publish",
+            BucketName = $"{props.Account}-{props.ServicePrefix.ToLower()}-coverpage-images-publish{props.PostFix}",
             BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
             AccessControl = BucketAccessControl.PRIVATE,
             Versioned = true,
@@ -63,10 +56,10 @@ internal class ImageValidationConstruct : Construct
         });
         
         // CloudFront Distribution to use images in published bucket
-        var oai = new OriginAccessIdentity(this, "BookInventory-OAI");
+        var oai = new OriginAccessIdentity(this, $"BookInventory-OAI{props.PostFix}");
         bookInventoryPublishBucket.GrantRead(oai);
 
-        var distribution = new CloudFrontWebDistribution(this, "BookInventory-Image-Distribution",
+        var distribution = new CloudFrontWebDistribution(this, $"BookInventory-Image-Distribution{props.PostFix}",
             new CloudFrontWebDistributionProps()
             {
                 OriginConfigs =
@@ -94,12 +87,12 @@ internal class ImageValidationConstruct : Construct
         // Enable S3 event notifications through Event Bridge
         props.ImageBucket.EnableEventBridgeNotification();
 
-        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps();
+        var bookInventoryServiceStackProps = new BookInventoryServiceStackProps(props.PostFix);
         bookInventoryServiceStackProps.PublishBucketName = bookInventoryPublishBucket.BucketName;
         
         var validateImageLambda = new ValidateImage(
             this,
-            $"{Constants.VALIDATE_IMAGE}-Step",
+            $"{Constants.VALIDATE_IMAGE}-Step{props.PostFix}",
             bookInventoryServiceStackProps).Function;
         validateImageLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps()
         {
@@ -109,12 +102,12 @@ internal class ImageValidationConstruct : Construct
         }));
         props.ImageBucket.GrantRead(validateImageLambda.Role!);
 
-        var resizeImageLambda = new ResizeImage(this, $"{Constants.RESIZE_IMAGE}-Step", bookInventoryServiceStackProps)
+        var resizeImageLambda = new ResizeImage(this, $"{Constants.RESIZE_IMAGE}-Step{props.PostFix}", bookInventoryServiceStackProps)
             .Function;
         props.ImageBucket.GrantRead(resizeImageLambda.Role!);
         bookInventoryPublishBucket.GrantReadWrite(resizeImageLambda.Role!);
         
-        var validateImageLambdaInvoke = new LambdaInvoke(this, Constants.VALIDATE_IMAGE, new LambdaInvokeProps()
+        var validateImageLambdaInvoke = new LambdaInvoke(this, $"{Constants.VALIDATE_IMAGE}{props.PostFix}", new LambdaInvokeProps()
         {
             LambdaFunction = validateImageLambda,
             IntegrationPattern = IntegrationPattern.REQUEST_RESPONSE,
@@ -132,7 +125,7 @@ internal class ImageValidationConstruct : Construct
             ResultPath = "$.imageValidationResponse"
         });
         
-        var imageResizeLambdaInvoke = new LambdaInvoke(this, Constants.RESIZE_IMAGE, new LambdaInvokeProps()
+        var imageResizeLambdaInvoke = new LambdaInvoke(this, $"{Constants.RESIZE_IMAGE}{props.PostFix}", new LambdaInvokeProps()
         {
             LambdaFunction = resizeImageLambda,
             IntegrationPattern = IntegrationPattern.REQUEST_RESPONSE,
@@ -150,32 +143,32 @@ internal class ImageValidationConstruct : Construct
             ResultPath = "$.imageResizeResponse"
         });
         
-        var successStep = new Succeed(this, "Image-validation-workflow-Successful");
-        var failureStep = new Fail(this, "Image-validation-workflow-Fails");
+        var successStep = new Succeed(this, $"Image-validation-workflow-Successful{props.PostFix}");
+        var failureStep = new Fail(this, $"Image-validation-workflow-Fails{props.PostFix}");
         var chain = Chain
             .Start(
-                new Choice(this, "Image-Size-Check", new ChoiceProps
+                new Choice(this, $"Image-Size-Check{props.PostFix}", new ChoiceProps
                     {
                         InputPath = "$"
                     })
                     .When(Condition.NumberLessThanEquals("$.detail.object.size", 0), successStep)
                     .Otherwise(validateImageLambdaInvoke
                         .Next(
-                            new Choice(this, "Image-Safe-Check", new ChoiceProps
+                            new Choice(this, $"Image-Safe-Check{props.PostFix}", new ChoiceProps
                                 {
                                     InputPath = "$"
                                 })
                                 .When(Condition.BooleanEquals("$.imageValidationResponse.Payload.isImageSafe", false),
                                     failureStep)
                                 .Otherwise(imageResizeLambdaInvoke
-                                    .Next(new Choice(this, "Image-Resize-Check", new ChoiceProps
+                                    .Next(new Choice(this, $"Image-Resize-Check{props.PostFix}", new ChoiceProps
                                         {
                                             InputPath = "$"
                                         }).When(
                                             Condition.BooleanEquals(
                                                 "$.imageResizeResponse.Payload.isPublishedInDestination", false),
                                             failureStep)
-                                        .Otherwise(new CallAwsService(this, "Delete-Image", new CallAwsServiceProps
+                                        .Otherwise(new CallAwsService(this, $"Delete-Image{props.PostFix}", new CallAwsServiceProps
                                         {
                                             Service = "s3",
                                             Action = "deleteObject",
@@ -191,18 +184,18 @@ internal class ImageValidationConstruct : Construct
                                     )
                                 ))));
         
-        var imageValidationWorkflow = new StateMachine(this, "ImageValidationStateMachine", new StateMachineProps()
+        var imageValidationWorkflow = new StateMachine(this, $"ImageValidationStateMachine{props.PostFix}", new StateMachineProps()
         {
             DefinitionBody = DefinitionBody.FromChainable(chain),
-            StateMachineName = "BookInventory-ImageValidation",
+            StateMachineName = $"BookInventory-ImageValidation{props.PostFix}",
             TracingEnabled = true
         });
         
         // Create Event Rule in Default - Event Bus (Only Default Bus can receive events from AWS Services) 
-        var eventRule = new Rule(this, "BookInventoryImageUpload-Rule", new RuleProps()
+        var eventRule = new Rule(this, $"BookInventoryImageUpload-Rule{props.PostFix}", new RuleProps()
         {
             Description = "Image upload event for validation",
-            RuleName = "BookInventoryImageUpload-Rule",
+            RuleName = $"BookInventoryImageUpload-Rule{props.PostFix}",
             Targets = [new SfnStateMachine(imageValidationWorkflow)],
             EventPattern = new EventPattern()
             {
@@ -252,72 +245,5 @@ internal class ImageValidationConstruct : Construct
         });
         
         #endregion EventToStepFunction
-        #region EventToLambda
-        // Queue for event notification from S3 Upload
-        var imageNotificationQueue = new Queue(this, $"{id}-queue", new QueueProps()
-        {
-            QueueName = "cover-page-image-upload-queue",
-            DeadLetterQueue = new DeadLetterQueue()
-            {
-                MaxReceiveCount = 3,
-                Queue = new Queue(this, $"{id}-queue-failure", new QueueProps()
-                {
-                    QueueName = "cover-page-image-upload-queue-failure"
-                })
-            }
-        });
-        
-        // Publish Image uploaded/created event in SQS - Trigger notification only for .jpg and .png
-        props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue),
-            filters:
-            [
-                new NotificationKeyFilter
-                {
-                    Suffix = ".jpg"
-                }
-            ]);
-        
-        props.ImageBucket.AddObjectCreatedNotification(new SqsDestination(imageNotificationQueue),
-            filters:
-            [
-                new NotificationKeyFilter
-                {
-                    Suffix = ".png"
-                }
-            ]);
-        
-        // Lambda to validate image and move to Published folder
-        var imageValidationLambda = new SharedConstructs.LambdaFunction(
-            this,
-            Constants.VALIDATE_BOOK_IMAGE_API,
-            new SharedConstructs.LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
-            {
-                Handler = "BookInventory.Api::BookInventory.Api.Functions_ImageValidation_Generated::ImageValidation",
-                Environment = new Dictionary<string, string>
-                {
-                    { "POWERTOOLS_SERVICE_NAME", Constants.VALIDATE_BOOK_IMAGE_API },
-                    { "POWERTOOLS_METRICS_NAMESPACE", Constants.VALIDATE_BOOK_IMAGE_API },
-                    { "POWERTOOLS_LOGGER_LOG_EVENT", "true" },
-                    { "QUEUE_URL", imageNotificationQueue.QueueUrl },
-                    { "PUBLISH_IMAGE_BUCKET", bookInventoryPublishBucket.BucketName }
-                }
-            }).Function;
-        // Lambda roles
-        imageNotificationQueue.GrantConsumeMessages(imageValidationLambda.Role!);
-        imageValidationLambda.AddEventSource(new SqsEventSource(imageNotificationQueue, new SqsEventSourceProps()
-        {
-            BatchSize = 5,
-            ReportBatchItemFailures = true
-        }));
-        props.BookInventoryTable.GrantReadWriteData(imageValidationLambda.Role!);
-        imageValidationLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps()
-        {
-            Effect = Effect.ALLOW,
-            Resources = ["*"],
-            Actions = ["rekognition:DetectModerationLabels"]
-        }));
-        props.ImageBucket.GrantReadWrite(imageValidationLambda.Role!);
-        bookInventoryPublishBucket.GrantReadWrite(imageValidationLambda.Role!);
-        #endregion EventToLambda
     }
 }

@@ -14,7 +14,7 @@ public class GetCoverPageUploadApi : Construct
     {
         this.Function = new LambdaFunction(
             this,
-            $"GetCoverPageUploadApi",
+            $"{Constants.UPLOAD_BOOK_IMAGE_API}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {
                 Handler = "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUpload_Generated::GetCoverPageUpload",
@@ -24,9 +24,8 @@ public class GetCoverPageUploadApi : Construct
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.METRICS_NAMESPACE},
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true"},//TODO:Enable LogEvent for debugging in non-production environments
                     { "S3_BUCKET_NAME", props.BucketName },
-                    { "EXPIRY_DURATION", "5" },
-                },
-                IsNativeAot = false //dotnet 8 runtime
+                    { "EXPIRY_DURATION", "5" }
+                }
             }).Function;
     }
 }

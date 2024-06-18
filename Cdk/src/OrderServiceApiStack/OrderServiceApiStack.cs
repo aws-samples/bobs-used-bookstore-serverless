@@ -10,7 +10,7 @@ using Constructs;
 
 using global::OrderServiceApiStack.Api;
 
-public record OrderServiceApiStackProps();
+public record OrderServiceApiStackProps(string PostFix);
 
 public class OrderServiceApiStack : Stack
 {
@@ -29,11 +29,11 @@ public class OrderServiceApiStack : Stack
         var userPoolParameterValue =
             StringParameter.ValueForStringParameter(this, $"/bookstore/authentication/user-pool-id");
 
-        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool", userPoolParameterValue);
+        var userPool = UserPool.FromUserPoolArn(this, $"{servicePrefix}-UserPool{apiProps.PostFix}", userPoolParameterValue);
         
         new CfnOutput(
             this,
-            $"{servicePrefix}-User-Pool-Id",
+            $"{servicePrefix}-User-Pool-Id{apiProps.PostFix}",
             new CfnOutputProps
             {
                 Value = userPool.UserPoolId,
@@ -42,24 +42,24 @@ public class OrderServiceApiStack : Stack
             });
 
         //Lambda Functions
-        var orderServiceStackProps = new OrderServiceApiStackProps();
+        var orderServiceStackProps = new OrderServiceApiStackProps(apiProps.PostFix);
         
         var getOrderApi = new GetOrderApi(
             this,
-            "GetOrderEndpoint",
+            $"GetOrderEndpoint{apiProps.PostFix}",
             orderServiceStackProps);
         
         var listOrdersApi = new GetOrdersApi(
             this,
-            "ListOrdersEndpoint",
+            $"ListOrdersEndpoint{apiProps.PostFix}",
             orderServiceStackProps);
 
         //Api
         var api = new SharedConstructs.Api(
                 this,
-                "OrderServiceApi",
-                new RestApiProps { RestApiName = "OrderServiceApi", DeployOptions = new StageOptions {
-                    AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, "OrderServiceLogGroup")),
+                $"OrderServiceApi{apiProps.PostFix}",
+                new RestApiProps { RestApiName = $"OrderServiceApi{apiProps.PostFix}", DeployOptions = new StageOptions {
+                    AccessLogDestination = new LogGroupLogDestination(new LogGroup(this, $"OrderServiceLogGroup{apiProps.PostFix}")),
                     AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
                     TracingEnabled = true,
                     LoggingLevel = MethodLoggingLevel.ERROR
@@ -79,7 +79,7 @@ public class OrderServiceApiStack : Stack
 
         var apiEndpointOutput = new CfnOutput(
             this,
-            $"{servicePrefix}-APIEndpointOutput",
+            $"{servicePrefix}-APIEndpointOutput{apiProps.PostFix}",
             new CfnOutputProps
             {
                 Value = api.Url,

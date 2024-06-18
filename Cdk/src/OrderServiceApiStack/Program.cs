@@ -3,10 +3,10 @@
 using OrderServiceApiStack;
 
 var app = new App();
-
+var postFix = System.Environment.GetEnvironmentVariable("STACK_POSTFIX");
 var orderServiceApiStack = new OrderServiceApiStack.OrderServiceApiStack(
     app,
-    $"OrderServiceApiStack",
-    new OrderServiceApiStackProps());
+    $"OrderServiceApiStack{postFix}",
+    new OrderServiceApiStackProps(postFix));
 
 app.Synth();

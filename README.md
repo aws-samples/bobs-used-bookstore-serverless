@@ -9,6 +9,19 @@ cdk deploy BookInventoryServiceStack --require-approval=never --app "dotnet run 
 ```
 cdk deploy OrderServiceApiStack --require-approval=never --app "dotnet run --project cdk/src/OrderServiceApiStack/OrderServiceApiStack.csproj"
 ```
+## Postfix
+### Bash
+```
+export STACK_POSTFIX=""
+cdk deploy $"AuthenticationStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+cdk deploy $"BookInventoryServiceStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
+### Windows
+```
+$Env:STACK_POSTFIX=""
+cdk deploy AuthenticationStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+cdk deploy BookInventoryServiceStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
 ## Overview 
 Bob's Used BookStore serverless is a serverless version of the [Bob's Used Books Sample Application](https://github.com/aws-samples/bobs-used-bookstore-sample).
 

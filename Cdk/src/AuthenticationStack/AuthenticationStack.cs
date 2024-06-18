@@ -6,7 +6,7 @@ using Amazon.CDK.AWS.SSM;
 
 using Constructs;
 
-public record AuthenticationProps();
+public record AuthenticationProps(string Postfix);
 
 public class AuthenticationStack : Stack
 {
@@ -21,10 +21,10 @@ public class AuthenticationStack : Stack
     {
         var userPool = new UserPool(
             this,
-            "BookStoreUserPool",
+            $"BookStoreUserPool{authProps.Postfix}",
             new UserPoolProps
             {
-                UserPoolName = "book-store-users",
+                UserPoolName = $"book-store-users{authProps.Postfix}",
                 SelfSignUpEnabled = true,
                 SignInAliases = new SignInAliases
                 {
@@ -62,7 +62,7 @@ public class AuthenticationStack : Stack
             });
 
         var userPoolClient = userPool.AddClient(
-            "BookStoreClient",
+            $"BookStoreClient{authProps.Postfix}",
             new UserPoolClientOptions
             {
                 UserPoolClientName = "api-login",
@@ -93,13 +93,13 @@ public class AuthenticationStack : Stack
                     }).WithCustomAttributes(["user_id"])
             });
 
-        var cfnUserPoolAdminGroup = new CfnUserPoolGroup(this, "BookStoreAdminGroup", new CfnUserPoolGroupProps {
+        var cfnUserPoolAdminGroup = new CfnUserPoolGroup(this, $"BookStoreAdminGroup{authProps.Postfix}", new CfnUserPoolGroupProps {
             UserPoolId = userPool.UserPoolId,
             Description = "Bookstore Admin group",
             GroupName = "Admin",
             Precedence = 123,
         });
-        var cfnUserPoolCustomerGroup = new CfnUserPoolGroup(this, "BookStoreCustomerGroup", new CfnUserPoolGroupProps {
+        var cfnUserPoolCustomerGroup = new CfnUserPoolGroup(this, $"BookStoreCustomerGroup{authProps.Postfix}", new CfnUserPoolGroupProps {
             UserPoolId = userPool.UserPoolId,
             Description = "Bookstore Buyer",
             GroupName = "Customer",
@@ -108,38 +108,38 @@ public class AuthenticationStack : Stack
         
         var userPoolParameter = new StringParameter(
             this,
-            "UserPoolParameter",
+            $"UserPoolParameter{authProps.Postfix}",
             new StringParameterProps()
             {
-                ParameterName = "/bookstore/authentication/user-pool-id",
+                ParameterName = $"/bookstore/authentication/user-pool-id{authProps.Postfix}",
                 StringValue = userPool.UserPoolArn
             });
 
         var userPoolClientParameter = new StringParameter(
             this,
-            "UserPoolClientParameter",
+            $"UserPoolClientParameter{authProps.Postfix}",
             new StringParameterProps()
             {
-                ParameterName = "/bookstore/authentication/user-pool-client-id",
+                ParameterName = $"/bookstore/authentication/user-pool-client-id{authProps.Postfix}",
                 StringValue = userPoolClient.UserPoolClientId
             });
 
         var userPoolOutput = new CfnOutput(
             this,
-            "UserPoolId",
+            $"UserPoolId{authProps.Postfix}",
             new CfnOutputProps()
             {
                 Value = userPool.UserPoolId,
-                ExportName = "UserPoolId"
+                ExportName = $"UserPoolId{authProps.Postfix}"
             });
 
         var clientIdOutput = new CfnOutput(
             this,
-            "ClientId",
+            $"ClientId{authProps.Postfix}",
             new CfnOutputProps()
             {
                 Value = userPoolClient.UserPoolClientId,
-                ExportName = "ClientId"
+                ExportName = $"ClientId{authProps.Postfix}"
             });
     }
 }
