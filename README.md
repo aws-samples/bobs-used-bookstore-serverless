@@ -1,54 +1,10 @@
 ## Bob's Used BookStore Serverless
 
-```
-cdk deploy AuthenticationStack --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
-```
-```
-cdk deploy BookInventoryServiceStack --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
-```
-```
-cdk deploy OrderServiceApiStack --require-approval=never --app "dotnet run --project cdk/src/OrderServiceApiStack/OrderServiceApiStack.csproj"
-```
-## Postfix
-### Bash
-```
-export STACK_POSTFIX=""
-cdk deploy $"AuthenticationStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
-cdk deploy $"BookInventoryServiceStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
-```
-### Windows
-```
-$Env:STACK_POSTFIX=""
-cdk deploy AuthenticationStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
-cdk deploy BookInventoryServiceStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
-```
 ## Overview 
 Bob's Used BookStore serverless is a serverless version of the [Bob's Used Books Sample Application](https://github.com/aws-samples/bobs-used-bookstore-sample).
 
-```
-aws cognito-idp admin-create-user --user-pool-id <USER_POOL_ID> --username john@example.com --user-attributes Name="given_name",Value="john" Name="family_name",Value="smith"
-```
+![img.png](img.png)
 
-```
-aws cognito-idp admin-set-user-password --user-pool-id <USER_POOL_ID> --username john@example.com --password "<PASSWORD>" --permanent
-```
-
-```
-aws cognito-idp admin-initiate-auth --cli-input-json file://auth.json
-```
-
-**auth.json**
-```json
-{
-    "UserPoolId": "<USER_POOl_ID>",
-    "ClientId": "<CLIENT_ID>",
-    "AuthFlow": "ADMIN_NO_SRP_AUTH",
-    "AuthParameters": {
-        "USERNAME": "john@example.com",
-        "PASSWORD": "<PASSWORD>"
-    }
-}
-```
 
 Be sure to:
 ## Prerequisites
@@ -62,27 +18,160 @@ To deploy the application to AWS you need the following:
 * [Bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) your AWS environment for the AWS CDK by executing `cdk bootstrap` in a terminal window
 
 ## Getting started
-TODO
+1. AuthenticationStack - Authentication Stack configures Cognito user pool "book-store-users". It will also create user groups "Admin" and "Customer".
+2. BookInventoryServiceStack - BookInventoryServiceStack deploys Api gateway with lambda and dynamoDb as the data store. Cognito user pool created in "AuthenticationStack" is used for authentication and authorization in api gateway.
 
 ## Deployment
-Bookstore application can be deployed to AWS via the CDK's command-line tooling.
+Bookstore application can be deployed to AWS via the CDK's command-line tooling. BookInventoryServiceStack depends on the resources created by AuthenticationStack. 
 
-`cdk deploy --all`
+```
+cdk deploy AuthenticationStack --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+```
+```
+cdk deploy BookInventoryServiceStack --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
+## Postfix Environment
+When a team of developers developing a same application, may want to test the feature/change in an isolated 
+environment without impacting other developers. So the developer can create postfix environment which will create 
+all the resources with postfix to test developer's change in isolated postfix environment. 
+After successful testing, code can be merged to main/dev branch to deploy tested code. Postfix environment can be 
+destroyed after testing.   
+
+### Bash
+```
+export STACK_POSTFIX=""
+cdk deploy $"AuthenticationStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+cdk deploy $"BookInventoryServiceStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
+### Windows
+```
+$Env:STACK_POSTFIX=""
+cdk deploy AuthenticationStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+cdk deploy BookInventoryServiceStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
 
 ## How to test
 
 The following microservices are used while building BookStore serverless:
 
-- [Book Inventory Api](/src/BookInventoryApi/README.md)
+1. Setup user in cognito
+   * Create new user 
+   ```
+   aws cognito-idp admin-create-user --user-pool-id <USER_POOL_ID> --username john@example.com --user-attributes Name="given_name",Value="john" Name="family_name",Value="smith"
+   ```
+   * Setup password to the user
+   ```
+   aws cognito-idp admin-set-user-password --user-pool-id <USER_POOL_ID> --username john@example.com --password "<PASSWORD>" --permanent
+   ```
+   * Assign role to the user in Cognito
+     * Login to aws console. Select Cognito Service and select the user pool
+     * Select the user created under the user pool
+     * Go to "Group memberships". Add/Remove to the group
+   * Get Id token (Api Gateway Lambda authorizer fetches role information from Id token)
+   ```
+   aws cognito-idp admin-initiate-auth --cli-input-json file://auth.json
+   ```
+   **auth.json**
+   ```json
+   {
+       "UserPoolId": "<USER_POOl_ID>",
+       "ClientId": "<CLIENT_ID>",
+       "AuthFlow": "ADMIN_NO_SRP_AUTH",
+       "AuthParameters": {
+           "USERNAME": "john@example.com",
+           "PASSWORD": "<PASSWORD>"
+       }
+   }
+   ```
+2. Use Api Test tools such as postman to test Book Inventory. Take Book Inventory Api Url from stack output  
+   **Add Book**
+   * It is POST method, requires Authorization header with Id token (No need of Bearer infront of Id token)
+   ````
+   POST https://{{api_gateway_url}}/books
+   ````   
+   * Request body
+   ````
+   {
+    "name": "2020: The Apocalypse",
+    "author": "Li Juan",
+    "bookType": "Hardcover",
+    "condition": "Like New",
+    "genre": "Mystery, Thriller & Suspense",
+    "publisher": "Astral Publishing",
+    "year": 2024,
+    "isbn": "6556784356",
+    "summary": "Bobs used book serverless",
+    "price": 5,
+    "quantity": 10,
+    "coverImage": null,
+    "coverImageFileName": "/Content/Images/coverimages/apocalypse.png"
+    }
+   ````
+   
+   **Update Book**
+   * It is POST method, requires Authorization header with Id token (No need of Bearer infront of Id token)
+   ````
+   POST https://{{api_gateway_url}}/books
+   ````   
+   * Request body
+   ````
+   {
+    "name": "2020: The Apocalypse",
+    "author": "Li Juan",
+    "bookType": "Hardcover",
+    "condition": "Like New",
+    "genre": "Mystery, Thriller & Suspense",
+    "publisher": "Astral Publishing",
+    "year": 2024,
+    "isbn": "6556784356",
+    "summary": "Bobs used book serverless",
+    "price": 5,
+    "quantity": 10,
+    "coverImage": null,
+    "coverImageFileName": "/Content/Images/coverimages/apocalypse.png"
+    }
+   ````
+   
+   **Search Book**
+   * Replace book uid in the url. Authorization header is option as this endpoint allows no specific role required
+     ````
+     GET https://{{api_gateway_url}}/books/{{search_uid}}
+     ````
+   
+   **List Books**
+   * Authorization header is option as this endpoint allows no specific role required
+     ````
+     GET https://{{api_gateway_url}}/books
+     ````
+   * Request body
+   ````
+   Test
+   ````
 
-
+   **Pre-signed url to upload cover page image to S3 bucket**
+   * Replace file name
+   ````
+   GET https://{{api_gateway_url}}/books/cover-page-upload/{fileName}
+   ````
+   
+3. Upload .png/.jpg image to S3 using presigned url. After validation, it will be moved to published image bucket. It can be accessed through cloudFront
+   ````
+   CloudFront Url
+   ````
 ## Deleting the resources
 
 When you have completed working with the sample applications we recommend deleting the resources to avoid possible charges. To do this, either:
 
-* In a terminal window navigate to the solution folder and run the command `cdk destroy --all`, or
-
+* In a terminal window navigate to the solution folder and run the command
+```
+cdk destroy BookInventoryServiceStack --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
+```
+```
+cdk destroy AuthenticationStack --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
+```
+or
 * Navigate to the CloudFormation dashboard in the AWS Management Console and delete all Bob's Used BookStore Serverless stacks.
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.

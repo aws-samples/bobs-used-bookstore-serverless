@@ -15,17 +15,15 @@ namespace BookInventoryApiStack;
 
 public record ImageValidationConstructProps
 {
-    public ImageValidationConstructProps(string account, string servicePrefix, string postfix, Bucket imageBucket, Table bookInventoryTable)
+    public ImageValidationConstructProps(string servicePrefix, string postfix, Bucket imageBucket, Table bookInventoryTable)
     {
         PostFix = postfix;
-        Account = account;
         ServicePrefix = servicePrefix;
         ImageBucket = imageBucket;
         BookInventoryTable = bookInventoryTable;
     }
 
     public string PostFix { get; set; }
-    public string Account { get; set; }
     public string ServicePrefix { get; set; }
     public Bucket ImageBucket { get; set; }
     public Table BookInventoryTable { get; set; }
@@ -37,9 +35,9 @@ internal class ImageValidationConstruct : Construct
         ImageValidationConstructProps props) : base(scope, id)
     {
         // S3 bucket to publish Image
-        var bookInventoryPublishBucket = new Bucket(this, $"BookInventory-PublishedImage{props.PostFix}", new BucketProps
+        var bookInventoryPublishBucket = new Bucket(this, $"{props.ServicePrefix.ToLower()}-published-image{props.PostFix}", new BucketProps
         {
-            BucketName = $"{props.Account}-{props.ServicePrefix.ToLower()}-coverpage-images-publish{props.PostFix}",
+            BucketName = $"{props.ServicePrefix.ToLower()}-published-image{props.PostFix}",
             BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
             AccessControl = BucketAccessControl.PRIVATE,
             Versioned = true,
@@ -52,7 +50,8 @@ internal class ImageValidationConstruct : Construct
                     AllowedMethods = [HttpMethods.GET, HttpMethods.HEAD],
                     MaxAge = 300
                 }
-            ]
+            ],
+            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });
         
         // CloudFront Distribution to use images in published bucket

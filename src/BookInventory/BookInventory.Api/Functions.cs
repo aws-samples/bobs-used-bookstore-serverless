@@ -13,6 +13,7 @@ using BookInventory.Service;
 using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
+using System.Text.Json.Serialization;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.BatchProcessing;
@@ -21,8 +22,22 @@ using BookInventory.Api.Utility;
 using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace BookInventory.Api;
 
+[JsonSerializable(typeof(CreateBookDto))]
+[JsonSerializable(typeof(APIGatewayProxyRequest))]
+[JsonSerializable(typeof(APIGatewayProxyResponse))]
+[JsonSerializable(typeof(ApiWrapper<string>))]
+[JsonSerializable(typeof(ApiWrapper<BookDto>))]
+[JsonSerializable(typeof(ApiWrapper<List<BookDto>>))]
+[JsonSerializable(typeof(ApiWrapper<BookQueryResponse>))]
+[JsonSerializable(typeof(string))]
+[JsonSerializable(typeof(Dictionary<string, object>))]
+[JsonSerializable(typeof(SQSEvent))]
+[JsonSerializable(typeof(BatchItemFailuresResponse))]
+[JsonSerializable(typeof(APIGatewayCustomAuthorizerRequest))]
+[JsonSerializable(typeof(APIGatewayCustomAuthorizerResponse))]
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
