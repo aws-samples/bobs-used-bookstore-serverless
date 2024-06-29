@@ -146,25 +146,24 @@ public sealed class BookInventoryServiceStack : Stack
                 "/books/{id}",
                 HttpMethod.Get,
                 getBookApi.Function,
-                false)
+                false) // Get Book by id, no auth
             .WithEndpoint(
                 "/books",
                 HttpMethod.Post,
-                addBooksApi.Function)
+                addBooksApi.Function) // Add Book, Customer
             .WithEndpoint(
                 "/books",
                 HttpMethod.Get,
                 listBooks.Function,
-                false)
+                false) // List books, no auth
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Put,
-                updateBooksApi.Function,
-                false)
+                updateBooksApi.Function) // Update Book, Admin
             .WithEndpoint(
-                "books/cover-page-upload-url/{fileName}",
+                "/books/{id}/{fileName}",
                 HttpMethod.Get,
-                getCoverPageUploadApi.Function);
+                getCoverPageUploadApi.Function); // Cover page image, Customer
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBookApi.Function.Role!);

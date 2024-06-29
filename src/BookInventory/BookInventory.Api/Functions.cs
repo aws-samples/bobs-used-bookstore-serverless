@@ -14,10 +14,10 @@ using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.BatchProcessing;
-using AWS.Lambda.Powertools.BatchProcessing.Sqs;
 using BookInventory.Api.Utility;
 using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
@@ -46,7 +46,7 @@ public class Functions
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
     private readonly double expiryDuration = 5;//minutes
-    private readonly Dictionary<string, string> apiAuthMapping;
+    private readonly Dictionary<string, List<string>> apiAuthMapping;
     private const string REGION = "REGION";
     private const string COGNITO_USER_POOL_ID = "COGNITO_USER_POOL_ID";
     private const string COGNITO_USER_POOL_CLIENT_ID = "COGNITO_USER_POOL_CLIENT_ID";
@@ -59,10 +59,11 @@ public class Functions
         this.s3Client = s3Client;
         this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
         this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
-        this.apiAuthMapping = new Dictionary<string, string>()
+        this.apiAuthMapping = new Dictionary<string, List<string>>()
         {
-            {"POST/books","Admin"},
-            {"GET/books/cover-page-upload-url","Admin"}
+            {@"^.*?/POST/books$", new List<string> {"Customer"}}, // Add book
+            {@"^.*?/PUT/books/([a-zA-Z0-9\-]+)$", new List<string> {"Customer","Admin"}}, // Update Book
+            {@"^.*?/GET/books/([a-zA-Z0-9\-]+)/([a-zA-Z\.]+)$", new List<string> {"Customer"}} // Upload Image 
         };
     }
 
@@ -153,20 +154,21 @@ public class Functions
     }
 
     [LambdaFunction()]
-    [RestApi(LambdaHttpMethod.Get, "/books/cover-page-upload/{fileName}")]
+    [RestApi(LambdaHttpMethod.Get, "/books/{id}/{fileName}")]
     [Tracing]
     [Logging(LogEvent = true)]
-    public async Task<APIGatewayProxyResponse> GetCoverPageUpload(string fileName)
+    public async Task<APIGatewayProxyResponse> GetCoverPageUpload(string id, string fileName)
     {
-        if (!fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+        string extension = Path.GetExtension(fileName).ToLower();
+        if (!(extension == ".png" || extension == ".jpg"))
         {
-            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Only .jpg file is allowed");
+            return ApiGatewayResponseBuilder.Build(HttpStatusCode.BadRequest, "Only .jpg and .png file is allowed");
         }
 
         var request = new GetPreSignedUrlRequest
         {
             BucketName = bucketName,
-            Key = fileName,
+            Key = $"{id}/{fileName}",
             Verb = HttpVerb.PUT,
             ContentType = "image/jpeg",
             Expires = DateTime.UtcNow.AddMinutes(expiryDuration)
@@ -174,22 +176,6 @@ public class Functions
 
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, preSignedUrl);
-    }
-    
-    /// <summary>
-    /// Image validation
-    /// </summary>
-    /// <param name="evnt">SQS Event</param>
-    /// <param name="context">Lambda context</param>
-    /// <returns>Image Validation Response</returns>
-    [LambdaFunction()]
-    [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.EventBridge)]
-    [Metrics(CaptureColdStart = true)]
-    [Tracing(CaptureMode = TracingCaptureMode.ResponseAndError)]
-    [BatchProcessor(RecordHandler = typeof(BatchProcessorHandler), BatchParallelProcessingEnabled = true, MaxDegreeOfParallelism = -1)]
-    public BatchItemFailuresResponse ImageValidation(SQSEvent evnt, ILambdaContext context)
-    {
-        return SqsBatchProcessor.Result.BatchItemFailuresResponse;
     }
 
     [LambdaFunction()]
@@ -220,9 +206,9 @@ public class Functions
             Logger.LogInformation($"User Logged in {cogntioUserId} groups {string.Join(",",groups)}");
 
             // Get matching apis from mapping
-            var apiMapping = this.apiAuthMapping.Where(x => method.EndsWith(x.Key, StringComparison.OrdinalIgnoreCase)).ToList();
+            var apiMapping = this.apiAuthMapping.Where(x => Regex.IsMatch(method,x.Key)).ToList();
             // Expected user groups to access the api
-            var requiredGroups = apiMapping.Select(x => x.Value).ToList();
+            var requiredGroups = apiMapping.Any()? apiMapping.First().Value : new List<string>(); // Every Api has only one entry in the dictionary. Get all matching roles
             Logger.LogInformation($"User groups allowed for the api {apiMapping.FirstOrDefault().Key} are {string.Join(",",requiredGroups)}");
             if (groups.Any(x => requiredGroups.Any(y => y.Equals(x, StringComparison.OrdinalIgnoreCase))))
             {

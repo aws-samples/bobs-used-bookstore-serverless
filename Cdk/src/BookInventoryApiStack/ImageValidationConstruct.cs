@@ -187,7 +187,8 @@ internal class ImageValidationConstruct : Construct
         {
             DefinitionBody = DefinitionBody.FromChainable(chain),
             StateMachineName = $"BookInventory-ImageValidation{props.PostFix}",
-            TracingEnabled = true
+            TracingEnabled = true,
+            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });
         
         // Create Event Rule in Default - Event Bus (Only Default Bus can receive events from AWS Services) 
@@ -242,7 +243,6 @@ internal class ImageValidationConstruct : Construct
                 }
             }
         });
-        
         #endregion EventToStepFunction
     }
 }

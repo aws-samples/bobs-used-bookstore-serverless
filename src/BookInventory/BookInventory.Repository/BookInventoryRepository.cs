@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
@@ -11,8 +13,7 @@ public class BookInventoryRepository : IBookInventoryRepository
 {
     private readonly IDynamoDBContext context;
     private readonly IAmazonDynamoDB client;
-    private readonly Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
-    private const int MAX_MONTHS_TO_CHECK = 1;
+    private const int MAX_MONTHS_TO_CHECK_WITHOUT_DATA = 2;
     private readonly bool isPostfix = false;
     private readonly string tableName;
 
@@ -56,63 +57,54 @@ public class BookInventoryRepository : IBookInventoryRepository
     [Tracing]
     public async Task<ListResponse> List(int pageSize = 10, string cursor = null)
     {
-        var bookResponse = new ListResponse(cursor);
-
+        // Extract where to start information from the cursor
+        ListResponse bookResponse = new ListResponse(cursor);
+        
         // Execute the initial query.
+        Logger.LogInformation($"ExecuteQuery for the partition {bookResponse.Metadata.LastDate.ToString("yyyyMM")}");
         var queryResponse = await this.ExecuteQuery(bookResponse, pageSize);
-
-        bookResponse.Metadata.AddPartitions(queryResponse);
-
+        Logger.LogInformation($"ExecutedQuery Response for the partition {bookResponse.Metadata.LastGsiPartition}. Next Page: {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
+        
+        // Construct output list. Update meta data based on the next page key
         this.ProcessResults(ref bookResponse, queryResponse, pageSize);
-
+        Logger.LogInformation($"ProcessResults Response: Count - {bookResponse.Books.Count} MetaData: {JsonSerializer.Serialize(bookResponse.Metadata)} New Cursor: {bookResponse.Cursor} PageSize: {pageSize}");
+        
         if (bookResponse.Books.Count == pageSize)
         {
-            Logger.LogInformation("Page size reached, returning");
-
-            // If they are equal, and there is no last evaluated key, increment the months before to allow for queries into the next month.
-            // For example, if the page size is 1 and there are no other items in that month then move the cursor to the next month
-            if (queryResponse.Count == pageSize && queryResponse.LastEvaluatedKey == null)
-            {
-                bookResponse.Metadata.LastCheckedMonth++;
-            }
-
+            Logger.LogInformation("Page size or end of partition is reached, returning from List Api");
             return bookResponse;
         }
-
-        for (var currentMonth = bookResponse.Metadata.LastCheckedMonth; currentMonth <= MAX_MONTHS_TO_CHECK; currentMonth++)
+        
+        // For more data, update Key to look for previous partitions 
+        int noDataInPreviousMonth = 0;
+        while (bookResponse.Books.Count < pageSize && noDataInPreviousMonth < MAX_MONTHS_TO_CHECK_WITHOUT_DATA) // Check 2 past partitions, if no data, end the search to avoid infinite loop
         {
+            Logger.LogInformation($"Check data in previous month - {bookResponse.Metadata.LastDate.ToString()}");
             bookResponse = await this.ListBooksInPreviousMonths(
                 pageSize,
-                currentMonth,
                 bookResponse);
-
+            if (string.IsNullOrEmpty(bookResponse.Cursor))
+            {
+                noDataInPreviousMonth++;
+            }
             if (bookResponse.Books.Count == pageSize)
             {
                 return bookResponse;
             }
         }
-
         return bookResponse;
     }
 
     [Tracing]
     private async Task<ListResponse> ListBooksInPreviousMonths(
         int page,
-        int currentMonth,
         ListResponse bookResponse)
     {
         QueryResponse queryResponse;
 
-        Logger.LogInformation($"Page size not met for current query, attempting query in {currentMonth}(s) previous. Page size is currently at {bookResponse.Books.Count}.");
-
-        // When moving to a different partition (in this case by looking at a different month), the last evaluated key needs to be reset.
-        bookResponse.Metadata.ResetPartitions(currentMonth);
-
         queryResponse = await this.ExecuteQuery(
             bookResponse,
             page);
-
-        bookResponse.Metadata.AddPartitions(queryResponse);
 
         // Build the list of books.
         this.ProcessResults(
@@ -126,7 +118,7 @@ public class BookInventoryRepository : IBookInventoryRepository
     [Tracing]
     private void ProcessResults(ref ListResponse bookResponse, QueryResponse queryResponse, int pageSize)
     {
-        Logger.LogInformation($"Processing results, QueryResponse contains {pageSize} item(s)");
+        Logger.LogInformation($"Processing results, QueryResponse contains {queryResponse.Items.Count} item(s)");
 
         // Build the list of books.
         foreach (var item in queryResponse.Items)
@@ -148,51 +140,59 @@ public class BookInventoryRepository : IBookInventoryRepository
                     Year = item.AsInt("Year"),
                     CoverImageUrl = item.AsString("CoverImageUrl")
                 });
-
-            if (bookResponse.Books.Count != pageSize) continue;
-
-            Logger.LogInformation("Page size reached, returning");
-
-            break;
+        }
+        // If the next page is not available, Reset stored key. Otherwise update the key
+        if (queryResponse.LastEvaluatedKey is null || !queryResponse.LastEvaluatedKey.Any())
+        {
+            Logger.LogInformation("End of the partition is reached, Reset cursor");
+            bookResponse.Metadata.ResetPartitions(1);
+        }
+        else
+        {
+            Logger.LogInformation($"Update cursor: {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
+            bookResponse.Metadata.AddPartitions(queryResponse);
         }
     }
 
     [Tracing]
     private async Task<QueryResponse> ExecuteQuery(ListResponse bookResponse, int pageSize)
     {
-        Logger.LogInformation($"Executing query for listing books, using date of {(bookResponse.Metadata.LastDate.ToString("yyyyMM"))} and page size of {pageSize}");
-
-        var attributeValues = new Dictionary<string, AttributeValue>(1);
-        attributeValues.Add(
-            ":gsi1pk",
-            new AttributeValue(bookResponse.Metadata.LastDate.ToString("yyyyMM")));
-
+        Logger.LogInformation($"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and page size of {pageSize}");
+        
         Dictionary<string, AttributeValue> startKey = null;
-
-        if (!string.IsNullOrEmpty(bookResponse.Metadata.LastPartition))
+        string keyConditionExpression = "#gsi1pk = :gsi1pk";
+        Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" }};
+        var attributeValues = new Dictionary<string, AttributeValue>(1);
+        
+        // Query first page. Skip startkey, GSI1SK and PK (BookId) 
+        if (string.IsNullOrWhiteSpace(bookResponse.Metadata.LastGsiPartition))
         {
+            attributeValues.Add(":gsi1pk", new AttributeValue(bookResponse.Metadata.LastDate.ToString("yyyyMM")));
+        }
+        else
+        {
+            attributeValues.Add(":gsi1pk", new AttributeValue(bookResponse.Metadata.LastGsiPartition));
             startKey = new Dictionary<string, AttributeValue>()
             {
-                { "PK", new AttributeValue(bookResponse.Metadata.LastPartition) },
-                { "SK", new AttributeValue(bookResponse.Metadata.LastKey) },
                 { "GSI1PK", new AttributeValue(bookResponse.Metadata.LastGsiPartition) },
-                { "GSI1SK", new AttributeValue(bookResponse.Metadata.LastGsiKey) }
+                { "GSI1SK", new AttributeValue(bookResponse.Metadata.LastGsiKey) },
+                { "BookId", new AttributeValue(bookResponse.Metadata.LastGsiKey) } // for Paritition Key
             };
         }
-
+        
         var queryRequest = new QueryRequest
         {
             TableName = tableName, // Always takes table name from environment variable irrespective of postfix
-            KeyConditionExpression = "#gsi1pk = :gsi1pk",
-            ExpressionAttributeNames = this.listAttributeNames,
+            KeyConditionExpression = keyConditionExpression,
+            ExpressionAttributeNames = listAttributeNames,
             ExpressionAttributeValues = attributeValues,
             IndexName = "GSI1",
-            Limit = pageSize,
+            Limit = (pageSize-bookResponse.Books.Count),
             ExclusiveStartKey = startKey
         };
-
+        
         var queryResponse = await this.client.QueryAsync(queryRequest);
-
+        Logger.LogInformation($"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and {bookResponse.Metadata.LastGsiKey}. Next key page {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
         return queryResponse;
     }
     
