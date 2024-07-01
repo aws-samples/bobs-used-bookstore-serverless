@@ -7,7 +7,7 @@ using Amazon.DynamoDBv2.Model;
 
 using AWS.Lambda.Powertools.Logging;
 
-using BookInventory.Models;
+using Models;
 
 public record ListResponse
 {
@@ -24,11 +24,10 @@ public record ListResponse
             var base64EncodedBytes = Convert.FromBase64String(cursor);
             this.Metadata = JsonSerializer.Deserialize<QueryMetadata>(Encoding.UTF8.GetString(base64EncodedBytes));
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            Logger.AppendKey("cursor", cursor);
-            Logger.LogError("Failure parsing input cursor.");
-            this.Metadata = new QueryMetadata();
+            Logger.LogError($"Failure parsing input cursor. Cursor: {cursor} Error Message: {exception.Message}");
+            this.Metadata = new QueryMetadata(); // If cursor is altered, search will start from the beginning. Update this logic as per the use case.
         }
         
         Logger.LogInformation("Input metadata:");
@@ -42,7 +41,7 @@ public record ListResponse
     {
         get
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Metadata)));
+            return string.IsNullOrWhiteSpace(Metadata.LastGsiPartition)? String.Empty : Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Metadata)));
         }
     }
 
@@ -59,18 +58,13 @@ public record QueryMetadata()
 
     public string LastPartition { get; set; } = "";
 
-    public string LastKey { get; set; } = "";
-    
-    public int LastCheckedMonth { get; set; } = 1;
-
     public void AddPartitions(QueryResponse queryResponse)
     {
-        if (queryResponse.LastEvaluatedKey != null && queryResponse.LastEvaluatedKey.ContainsKey("PK"))
+        if (queryResponse.LastEvaluatedKey != null && queryResponse.LastEvaluatedKey.ContainsKey("GSI1PK"))
         {
-            Logger.LogInformation(queryResponse);
+            Logger.LogInformation($"Adding Partition for the next query: {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
 
-            this.LastPartition = queryResponse.LastEvaluatedKey["PK"].S;
-            this.LastKey = queryResponse.LastEvaluatedKey["SK"].S;
+            this.LastPartition = queryResponse.LastEvaluatedKey["BookId"].S; // for PK
             this.LastGsiPartition = queryResponse.LastEvaluatedKey["GSI1PK"].S;
             this.LastGsiKey = queryResponse.LastEvaluatedKey["GSI1SK"].S;
         }
@@ -78,11 +72,9 @@ public record QueryMetadata()
 
     public void ResetPartitions(int resetToMonth)
     {
-        this.LastCheckedMonth = resetToMonth;
         this.LastDate = this.LastDate.AddMonths(-resetToMonth);
         this.LastGsiPartition = string.Empty;
         this.LastGsiKey = string.Empty;
         this.LastPartition = string.Empty;
-        this.LastKey = string.Empty;
     }
 }

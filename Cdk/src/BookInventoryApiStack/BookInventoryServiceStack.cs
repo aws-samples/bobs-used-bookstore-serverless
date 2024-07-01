@@ -26,10 +26,11 @@ public sealed class BookInventoryServiceStack : Stack
         string servicePrefix = "BookInventoryService";
 
         // S3 bucket
-        var bookInventoryBucket = new Bucket(this, $"BookInventoryBucket{apiProps.PostFix}", new BucketProps
+        var bookInventoryBucket = new Bucket(this, $"{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}", new BucketProps
         {
-            BucketName = $"{this.Account}-{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}",
-            Versioned = true
+            BucketName = $"{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}",
+            Versioned = true,
+            RemovalPolicy = string.IsNullOrWhiteSpace(apiProps.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });
         
         //Database
@@ -37,7 +38,9 @@ public sealed class BookInventoryServiceStack : Stack
         {
             TableName = $"BookInventory{apiProps.PostFix}",
             PartitionKey = new Amazon.CDK.AWS.DynamoDB.Attribute { Name = "BookId", Type = AttributeType.STRING },
-            BillingMode = BillingMode.PAY_PER_REQUEST
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            RemovalPolicy = string.IsNullOrWhiteSpace(apiProps.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
+            
         });
         bookInventory.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps()
         {
@@ -56,7 +59,7 @@ public sealed class BookInventoryServiceStack : Stack
         
         // Image Validation Stack
         var imageValidationConstruct = new ImageValidationConstruct(this, $"ImageValidationConstruct{apiProps.PostFix}",
-            new ImageValidationConstructProps(this.Account, servicePrefix, apiProps.PostFix, bookInventoryBucket, bookInventory));
+            new ImageValidationConstructProps(servicePrefix, apiProps.PostFix, bookInventoryBucket, bookInventory));
         
         // Retrieve user pool info from ssm
         var userPoolParameterValue =
@@ -143,25 +146,24 @@ public sealed class BookInventoryServiceStack : Stack
                 "/books/{id}",
                 HttpMethod.Get,
                 getBookApi.Function,
-                false)
+                false) // Get Book by id, no auth
             .WithEndpoint(
                 "/books",
                 HttpMethod.Post,
-                addBooksApi.Function)
+                addBooksApi.Function) // Add Book, Customer
             .WithEndpoint(
                 "/books",
                 HttpMethod.Get,
                 listBooks.Function,
-                false)
+                false) // List books, no auth
             .WithEndpoint(
                 "/books/{id}",
                 HttpMethod.Put,
-                updateBooksApi.Function,
-                false)
+                updateBooksApi.Function) // Update Book, Admin
             .WithEndpoint(
-                "books/cover-page-upload-url/{fileName}",
+                "/books/{id}/{fileName}",
                 HttpMethod.Get,
-                getCoverPageUploadApi.Function);
+                getCoverPageUploadApi.Function); // Cover page image, Customer
 
         //Grant DynamoDB Permission
         bookInventory.GrantReadData(getBookApi.Function.Role!);
