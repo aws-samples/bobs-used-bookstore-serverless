@@ -63,7 +63,7 @@ public class Functions
         {
             {@"^.*?/POST/books$", new List<string> {"Customer"}}, // Add book
             {@"^.*?/PUT/books/([a-zA-Z0-9\-]+)$", new List<string> {"Customer","Admin"}}, // Update Book
-            {@"^.*?/GET/books/([a-zA-Z0-9\-]+)/([a-zA-Z\.]+)$", new List<string> {"Customer"}} // Upload Image 
+            {@"^.*?/GET/books/([a-zA-Z0-9\-]+)/?.*$", new List<string> {"Customer"}} // Upload Image 
         };
     }
 
