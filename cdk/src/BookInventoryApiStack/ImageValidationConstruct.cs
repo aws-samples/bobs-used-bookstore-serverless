@@ -37,7 +37,7 @@ internal class ImageValidationConstruct : Construct
         // S3 bucket to publish Image
         var bookInventoryPublishBucket = new Bucket(this, $"{props.ServicePrefix.ToLower()}-published-image{props.PostFix}", new BucketProps
         {
-            BucketName = $"{props.ServicePrefix.ToLower()}-published-image{props.PostFix}",
+            BucketName = $"{props.ServicePrefix.ToLower()}-published-image-{Stack.Of(this).Account}-{Stack.Of(this).Region}{props.PostFix}",
             BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
             AccessControl = BucketAccessControl.PRIVATE,
             Versioned = true,
