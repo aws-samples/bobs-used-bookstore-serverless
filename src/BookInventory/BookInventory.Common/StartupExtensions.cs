@@ -2,8 +2,8 @@ namespace BookInventory.Common;
 
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 
-using BookInventory.Repository;
-using BookInventory.Service;
+using Repository;
+using Service;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +30,7 @@ public static class StartupExtensions
         {
             services.AddSingleton<IBookInventoryRepository, BookInventoryRepository>();
             services.AddSingleton<IBookInventoryService, BookInventoryService>();
+            services.AddSingleton<IBookInventoryRepositoryOptions, BookInventoryRepositoryOptions>();
         }
 
         return services;
