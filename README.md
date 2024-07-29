@@ -3,7 +3,8 @@ Bob's Used BookStore serverless is a serverless version of the [Bob's Used Books
 This sample application is to demonstrate modernizing dotnet API in serverless framework with cdk.
 
 ## Overview 
-In this sample dotnet modernization, microservices are identified. As a first step, BookInventory service is implemented with Cognito integration.
+In this sample dotnet modernization, "Book Inventory" sample microservice is implemented. 
+API Gateway with sample endpoints using Lambda and DynamoDB are implemented with Cognito authorization.  Demonstrated an use case to generate pre-signed url to upload image into S3 bucket and S3 events to validate image on upload.  
 
 ### Architecture
 
