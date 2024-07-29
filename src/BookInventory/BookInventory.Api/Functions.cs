@@ -17,7 +17,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
-using AWS.Lambda.Powertools.BatchProcessing;
 using BookInventory.Api.Utility;
 using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
@@ -35,7 +34,6 @@ namespace BookInventory.Api;
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
 [JsonSerializable(typeof(SQSEvent))]
-[JsonSerializable(typeof(BatchItemFailuresResponse))]
 [JsonSerializable(typeof(APIGatewayCustomAuthorizerRequest))]
 [JsonSerializable(typeof(APIGatewayCustomAuthorizerResponse))]
 public class Functions

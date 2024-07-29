@@ -2,15 +2,13 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>$(TargetFramework)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Amazon.CDK.Lib" Version="2.130.0" />
-      <PackageReference Include="Constructs" Version="10.3.0" />
-      <PackageReference Include="XaasKit.CDK.AWS.Lambda.DotNet" Version="0.1.0" />
+      <PackageReference Include="Amazon.CDK.Lib" Version="$(AmazonCDKLib)" />
+      <PackageReference Include="Constructs" Version="$(Constructs)" />      
     </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
 ## Bob's Used BookStore Serverless
 Bob's Used BookStore serverless is a serverless version of the [Bob's Used Books Sample Application](https://github.com/aws-samples/bobs-used-bookstore-sample).
-This sample application is to demonstrate modernizing dotnet api in serverless framework with cdk.
+This sample application is to demonstrate modernizing dotnet API in serverless framework with cdk.
 
 ## Overview 
 In this sample dotnet modernization, microservices are identified. As a first step, BookInventory service is implemented with Cognito integration.
