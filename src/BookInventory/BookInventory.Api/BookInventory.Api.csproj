@@ -9,24 +9,18 @@
         <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <!-- Generate ready to run images during publishing to improvement cold starts. -->
-        <PublishReadyToRun>true</PublishReadyToRun>
+        <PublishReadyToRun>false</PublishReadyToRun>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
-        <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.0" />
-        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0" />
-        <PackageReference Include="Amazon.Lambda.Annotations" Version="1.1.0" />
-        <PackageReference Include="AWS.Lambda.Powertools.BatchProcessing" Version="1.1.1" />
-        <PackageReference Include="AWS.Lambda.Powertools.Logging" Version="1.4.4" />
-        <PackageReference Include="AWS.Lambda.Powertools.Tracing" Version="1.3.2" />
-		<PackageReference Include="AWS.Lambda.Powertools.Metrics" Version="1.5.3" />
-		<PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.303.13" />
-		<PackageReference Include="AWSSDK.Rekognition" Version="3.7.301.27" />
-		<PackageReference Include="AWSSDK.S3" Version="3.7.307.25" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.8.1" />
-        <PackageReference Include="JsonWebToken" Version="1.9.4" />
-        <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.5.1" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
+        <PackageReference Include="Amazon.Lambda.Core" Version="$(AmazonLambdaCore)" />
+        <PackageReference Include="AWSSDK.Rekognition" Version="$(AWSSDKRekognition)" />
+        <PackageReference Include="AWSSDK.S3" Version="$(AWSSDKS3)" />
+        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="$(AmazonLambdaSerializationSystemTextJson)" />
+        <PackageReference Include="Amazon.Lambda.Annotations" Version="$(AmazonLambdaAnnotations)" />        
+		<PackageReference Include="AWS.Lambda.Powertools.Metrics" Version="$(AWSLambdaPowertoolsMetrics)" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="$(FluentValidationDependencyInjectionExtensions)" />
+        <PackageReference Include="JsonWebToken" Version="$(JsonWebToken)" />
+        <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="$(MicrosoftIdentityModelProtocolsOpenIdConnect)" />        
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\..\cdk\src\SharedConstructs\SharedConstructs.csproj" />
