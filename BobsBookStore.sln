@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Service.UnitT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.ImageWorkflow", "src\BookInventory\BookInventory.ImageWorkflow\BookInventory.ImageWorkflow.csproj", "{4A7B5591-5704-4AC9-B8EE-D6C3A3F3A915}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Repository.IntegrationTests", "tests\BookInventory\BookInventory.Repository.IntegrationTests\BookInventory.Repository.IntegrationTests.csproj", "{68E54916-1D7F-467F-ADE5-C3355BEEB9E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,5 +90,9 @@ Global
 		{4A7B5591-5704-4AC9-B8EE-D6C3A3F3A915}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A7B5591-5704-4AC9-B8EE-D6C3A3F3A915}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A7B5591-5704-4AC9-B8EE-D6C3A3F3A915}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68E54916-1D7F-467F-ADE5-C3355BEEB9E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68E54916-1D7F-467F-ADE5-C3355BEEB9E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68E54916-1D7F-467F-ADE5-C3355BEEB9E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68E54916-1D7F-467F-ADE5-C3355BEEB9E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
