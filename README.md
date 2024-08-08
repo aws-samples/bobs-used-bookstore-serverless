@@ -15,14 +15,13 @@ The BookInventory microservice utilizes various serverless services from AWS, in
     - **ListBook and SearchBook** api can be used by Admin, Customer and by anonymous users.
     - **Add Book** api is restricted to only authorized users. Lambda authorizer checks if the requester has "Customer" role.
     - **Update Book** api is restricted to only authorized users. Lambda authorizer checks if the requester has "Customer" or "Admin" role.
-    - **Cover page Image Upload** api generates presigned URLs to upload cover page image to S3 bucket. Only "Customer" role is allowed to upload image. Uploaded images for book are stored under book id folder in the bucket for easy access.
+    - **Cover page Image Upload** api generates presigned URLs to upload cover page image to Amazon S3 bucket. Only "Customer" role is allowed to upload image. Uploaded images for book are stored under book id folder in the bucket for easy access.
 
 - **S3 Event Notification** triggers image validation process asynchronously as soon as the image is uploaded in S3 bucket.
 - **Step Function and EventBridge Rules** filters are applied to send only new object creation events for images (.jpg and .png) to trigger step function to validate image. Step function checks if the image does not have violent or sexual content using Amazon Rekognition Service.  If the image is safe, another Lambda function resizes it. Otherwise, the image remains in the S3 bucket for manual review. Additionally, this process can be enhanced to include notifications or move the image to a different bucket based on specific requirements
 - **Amazon S3**
     - **Publish Image bucket** is use to store all safe and resized images where all the images are validated to use in frontend. Original images are deleted after publish. CloudFront is used to expose these images from published bucket for the frontend to use.
-- **Amazon DynamoDB**
-    - **BookInventory** is an Amazon DynamoDB table that stores all book-related data.
+- **Amazon DynamoDB** table is used to stores all BookInventory microservice data.
 
 
 ## Prerequisites
@@ -54,13 +53,13 @@ environment without impacting the work of other developers. In such cases, a dev
 
 ### Bash
 ```
-export STACK_POSTFIX="feature-1"
+export STACK_POSTFIX="<<feature-1>>"
 cdk deploy $"AuthenticationStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
 cdk deploy $"BookInventoryServiceStack{STACK_POSTFIX}" --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
 ```
 ### Windows
 ```
-$Env:STACK_POSTFIX="feature-1"
+$Env:STACK_POSTFIX="<<feature-1>>"
 cdk deploy AuthenticationStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/AuthenticationStack/AuthenticationStack.csproj"
 cdk deploy BookInventoryServiceStack$Env:STACK_POSTFIX --require-approval=never --app "dotnet run --project cdk/src/BookInventoryApiStack/BookInventoryApiStack.csproj"
 ```
