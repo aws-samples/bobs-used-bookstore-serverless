@@ -136,7 +136,7 @@ public class BookInventoryServiceTests
     }
 
     [Fact]
-    public void UpdateBook_WhenRequestIsInvalid_ShouldThrowException()
+    public async Task UpdateBook_WhenRequestIsInvalid_ShouldThrowException()
     {
         // Arrange
         string bookId = Guid.NewGuid().ToString();
@@ -157,7 +157,7 @@ public class BookInventoryServiceTests
         };
 
         // Act Assert
-        Assert.ThrowsAsync<ProductNotFoundException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
+        await Assert.ThrowsAsync<ProductNotFoundException>(async () => await this.sut.UpdateBookAsync(bookId, updateBook));
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(A<Book>._)).MustNotHaveHappened();
     }
 }

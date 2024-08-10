@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Amazon.CDK.AWS.Lambda.DotNet" Version="$(AmazonCDKAWSLambdaDotNet)" />
+        <PackageReference Include="Amazon.CDK.Lib" Version="$(AmazonCDKLib)" />
+        <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="$(AmazonLambdaAPIGatewayEvents)" />
+        <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="$(AWSSDKCognitoIdentityProvider)" />
+        <PackageReference Include="Constructs" Version="$(Constructs)" />
+    </ItemGroup>
+
+
+
+</Project>

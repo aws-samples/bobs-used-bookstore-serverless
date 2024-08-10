@@ -28,7 +28,7 @@ public sealed class BookInventoryServiceStack : Stack
         // S3 bucket
         var bookInventoryBucket = new Bucket(this, $"{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}", new BucketProps
         {
-            BucketName = $"{servicePrefix.ToLower()}-coverpage-images{apiProps.PostFix}",
+            BucketName = $"{servicePrefix.ToLower()}-coverpage-images-{Stack.Of(this).Account}-{Stack.Of(this).Region}{apiProps.PostFix}",
             Versioned = true,
             RemovalPolicy = string.IsNullOrWhiteSpace(apiProps.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });

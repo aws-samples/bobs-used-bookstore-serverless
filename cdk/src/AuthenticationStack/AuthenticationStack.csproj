@@ -1,14 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>$(TargetFramework)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AWSSDK.DynamoDBv2" Version="$(AWSSDKDynamoDBv2)" />
+      <PackageReference Include="Amazon.CDK.Lib" Version="$(AmazonCDKLib)" />
+      <PackageReference Include="Constructs" Version="$(Constructs)" />      
     </ItemGroup>
-
-
 </Project>
