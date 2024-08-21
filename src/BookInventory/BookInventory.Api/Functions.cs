@@ -16,7 +16,8 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
-using AWS.Lambda.Powertools.BatchProcessing;
+using BookInventory.Api.Utility;
+using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -32,7 +33,7 @@ namespace BookInventory.Api;
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, object>))]
 [JsonSerializable(typeof(SQSEvent))]
-[JsonSerializable(typeof(BatchItemFailuresResponse))]
+
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;

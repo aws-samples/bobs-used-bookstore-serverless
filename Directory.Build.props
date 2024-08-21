@@ -1,0 +1,32 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <AmazonLambdaCore>2.2.0</AmazonLambdaCore>
+        <AmazonLambdaSerializationSystemTextJson>2.4.0</AmazonLambdaSerializationSystemTextJson>
+        <AmazonCDKAWSLambdaDotNet>0.0.4</AmazonCDKAWSLambdaDotNet>
+        <AmazonCDKLib>2.135.0</AmazonCDKLib>
+        <AmazonLambdaAPIGatewayEvents>2.7.0</AmazonLambdaAPIGatewayEvents>
+        <AWSLambdaPowertoolsLogging>1.4.4</AWSLambdaPowertoolsLogging>
+        <AWSLambdaPowertoolsTracing>1.3.2</AWSLambdaPowertoolsTracing>
+        <AWSLambdaPowertoolsMetrics>1.5.3</AWSLambdaPowertoolsMetrics>
+        <AmazonLambdaAnnotations>1.1.0</AmazonLambdaAnnotations>
+        <AWSSDKDynamoDBv2>3.7.300.9</AWSSDKDynamoDBv2>
+        <AWSSDKApiGatewayManagementApi>3.7.300.67</AWSSDKApiGatewayManagementApi>
+        <AWSSDKCognitoIdentityProvider>3.7.303.12</AWSSDKCognitoIdentityProvider>
+        <AWSSDKRekognition>3.7.301.27</AWSSDKRekognition>
+        <AWSSDKS3>3.7.307.25</AWSSDKS3>
+        <AWSSDKExtensionsNETCoreSetup>3.7.300</AWSSDKExtensionsNETCoreSetup>
+        <Constructs>10.3.0</Constructs>
+        <FakeItEasy>8.0.0</FakeItEasy>
+        <FluentAssertions>6.12.0</FluentAssertions>
+        <FluentValidationDependencyInjectionExtensions>11.8.1</FluentValidationDependencyInjectionExtensions>
+        <MicrosoftNETTestSdk>17.8.0</MicrosoftNETTestSdk>
+        <MicrosoftIdentityModelProtocolsOpenIdConnect>7.5.1</MicrosoftIdentityModelProtocolsOpenIdConnect>
+        <MagickNETQ8AnyCPU>13.8.0</MagickNETQ8AnyCPU>
+        <CoverletCollector>6.0.0</CoverletCollector>
+        <JsonWebToken>1.9.4</JsonWebToken>
+        <Xunit>2.9.0</Xunit>
+        <XunitRunnerVisualstudio>2.8.2</XunitRunnerVisualstudio>
+        <SystemIdentityModelTokensJwt>7.5.1</SystemIdentityModelTokensJwt>
+    </PropertyGroup>
+</Project>
