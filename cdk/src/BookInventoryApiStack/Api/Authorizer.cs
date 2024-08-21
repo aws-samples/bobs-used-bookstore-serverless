@@ -16,10 +16,10 @@ public class Authorizer : Construct
         this.Function = new LambdaFunction(
             this,
             $"{Constants.AUTHORIZER}{props.PostFix}",
-            new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
+            new LambdaFunctionProps("./src/BookInventory/BookInventory.Authorization")
             {
                 
-                Handler = "BookInventory.Api::BookInventory.Api.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer",
+                Handler = "BookInventory.Authorization::BookInventory.Authorization.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer",
                 Environment = new Dictionary<string, string>
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.AUTHORIZER },

@@ -1,17 +1,14 @@
-using Amazon.S3;
-using BookInventory.Api.Validators;
-using BookInventory.Common;
-using BookInventory.Models;
-using FluentValidation;
+using Amazon.CognitoIdentityProvider;
+using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BookInventory.Api;
+namespace BookInventory.Authorization;
 
 [Amazon.Lambda.Annotations.LambdaStartup]
 public class Startup
 {
     /// <summary>
-    /// Services for Lambda functions can be registered in the services dependency injection container in this method.
+    /// Services for Lambda functions can be registered in the services dependency injection container in this method. 
     ///
     /// The services can be injected into the Lambda function through the containing type's constructor or as a
     /// parameter in the Lambda function using the FromService attribute. Services injected for the constructor have
@@ -20,10 +17,7 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSharedServices();
-        services.AddDynamoDBServices();
-        services.AddAWSService<IAmazonS3>();
-        services.AddScoped<IValidator<CreateBookDto>, CreateBookDtoValidator>();
-        services.AddScoped<IValidator<UpdateBookDto>, UpdateBookDtoValidator>();
+        AWSSDKHandler.RegisterXRayForAllServices(); ;
+        services.AddAWSService<IAmazonCognitoIdentityProvider>();
     }
 }

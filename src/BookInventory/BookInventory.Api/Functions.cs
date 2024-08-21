@@ -14,12 +14,9 @@ using BookInventory.Service.Exceptions;
 using FluentValidation;
 using System.Net;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using AWS.Lambda.Powertools.BatchProcessing;
-using BookInventory.Api.Utility;
-using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -36,8 +33,6 @@ namespace BookInventory.Api;
 [JsonSerializable(typeof(Dictionary<string, object>))]
 [JsonSerializable(typeof(SQSEvent))]
 [JsonSerializable(typeof(BatchItemFailuresResponse))]
-[JsonSerializable(typeof(APIGatewayCustomAuthorizerRequest))]
-[JsonSerializable(typeof(APIGatewayCustomAuthorizerResponse))]
 public class Functions
 {
     private readonly IBookInventoryService bookInventoryService;
@@ -46,10 +41,7 @@ public class Functions
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
     private readonly double expiryDuration = 5;//minutes
-    private readonly Dictionary<string, List<string>> apiAuthMapping;
-    private const string REGION = "REGION";
-    private const string COGNITO_USER_POOL_ID = "COGNITO_USER_POOL_ID";
-    private const string COGNITO_USER_POOL_CLIENT_ID = "COGNITO_USER_POOL_CLIENT_ID";
+    
 
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
@@ -57,14 +49,9 @@ public class Functions
         this.createBookValidator = createBookValidator;
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
-        this.bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
-        this.expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
-        this.apiAuthMapping = new Dictionary<string, List<string>>()
-        {
-            {@"^.*?/POST/books$", new List<string> {"Customer"}}, // Add book
-            {@"^.*?/PUT/books/([a-zA-Z0-9\-]+)$", new List<string> {"Customer","Admin"}}, // Update Book
-            {@"^.*?/GET/books/([a-zA-Z0-9\-]+)/?.*$", new List<string> {"Customer"}} // Upload Image 
-        };
+        bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
+        expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
+        
     }
 
     [LambdaFunction]
@@ -176,54 +163,5 @@ public class Functions
 
         var preSignedUrl = await this.s3Client.GetPreSignedURLAsync(request);
         return ApiGatewayResponseBuilder.Build(HttpStatusCode.Created, preSignedUrl);
-    }
-
-    [LambdaFunction()]
-    [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.ApiGatewayRest)]
-    [Metrics(CaptureColdStart = true)]
-    [Tracing(CaptureMode = TracingCaptureMode.ResponseAndError)]
-    public async Task<APIGatewayCustomAuthorizerResponse> BookInventoryAuthorizer(APIGatewayCustomAuthorizerRequest request)
-    {
-        string token = request.AuthorizationToken;
-        string? userPoolId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_ID);
-        string? clientId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_CLIENT_ID);
-        string? region = Environment.GetEnvironmentVariable(REGION);
-        string method = request.MethodArn;
-        try
-        {
-            // 1. Retrieve claim
-            var claimPrincipal = await new CognitoJwtVerifier(userPoolId, clientId, region).ValidateTokenAsync(token);
-            // 2. either claimPrincipal is received (not null) or an exception is thrown in case of invalid token
-            if (claimPrincipal is null)
-            {
-                return ApiUtility.UnauthorizedResponse("Unable to retrieve the claim");
-            }
-            // Get cognito user name
-            string cogntioUserId = claimPrincipal.Claims.First(t => t.Type == "cognito:username").Value;
-            
-            // Get groups from token
-            var groups = claimPrincipal.Claims.Where(t => t.Type == "cognito:groups").Select(x=>x.Value).ToList();
-            Logger.LogInformation($"User Logged in {cogntioUserId} groups {string.Join(",",groups)}");
-
-            // Get matching apis from mapping
-            var apiMapping = this.apiAuthMapping.Where(x => Regex.IsMatch(method,x.Key)).ToList();
-            // Expected user groups to access the api
-            var requiredGroups = apiMapping.Any()? apiMapping.First().Value : new List<string>(); // Every Api has only one entry in the dictionary. Get all matching roles
-            Logger.LogInformation($"User groups allowed for the api {apiMapping.FirstOrDefault().Key} are {string.Join(",",requiredGroups)}");
-            if (groups.Any(x => requiredGroups.Any(y => y.Equals(x, StringComparison.OrdinalIgnoreCase))))
-            {
-                return ApiUtility.AuthorizedResponse(cogntioUserId, request.MethodArn);
-            }
-
-            string unauthorizedMessage =
-                $"User has groups {string.Join(",", groups)}, not meeting api rules";
-            Logger.LogInformation($"User {cogntioUserId} not allowed to access api {apiMapping.FirstOrDefault().Key} - {unauthorizedMessage}");
-            return ApiUtility.UnauthorizedResponse(unauthorizedMessage);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "Error occured in Lambda Custom Authorization");
-            return ApiUtility.UnauthorizedResponse(e.Message);
-        }
     }
 }
