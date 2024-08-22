@@ -40,13 +40,13 @@ public class CognitoJwtVerifier
                 var tokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateAudience = true,
-                    ValidAudiences = new string[] { _clientId }, // list all audiences
+                    ValidAudiences = new[] { _clientId }, // list all audiences
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
                     RequireSignedTokens = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKeys = signingKeys,
-                    RoleClaimType = "cognito:groups"
+                    RoleClaimType = "cognito:groups",
                 };
 
                 SecurityToken validatedToken = new JwtSecurityToken();

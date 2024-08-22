@@ -129,7 +129,7 @@ Follow the steps given below to test BookStore application:
    * "Customer" and "Admin" roles are allowed to access
    * Requires Authorization header with Id token (Do not include any keyword infront of the Id token)
    ````
-   PUT https://{{api_gateway_url}}/books
+   PUT https://{{api_gateway_url}}/books/{id}
    ````   
    * Request body
    ````
@@ -152,7 +152,7 @@ Follow the steps given below to test BookStore application:
    **Search Book**
    * Replace book uid in the url. Authorization header is optional as this endpoint allows no specific role required
      ````
-     GET https://{{api_gateway_url}}/books/{{search_uid}}
+     GET https://{{api_gateway_url}}/books/{id}
      ````
    
    **List Books**

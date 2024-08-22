@@ -1,7 +1,7 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using AWS.Lambda.Powertools.Logging;
 using AWS.Lambda.Powertools.Tracing;
@@ -14,15 +14,15 @@ public class BookInventoryRepository : IBookInventoryRepository
     private readonly IDynamoDBContext context;
     private readonly IAmazonDynamoDB client;
     private const int MAX_MONTHS_TO_CHECK_WITHOUT_DATA = 2;
-    private readonly bool isPostfix = false;
+    private readonly bool isPostfix;
     private readonly string tableName;
 
-    public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client)
+    public BookInventoryRepository(IDynamoDBContext context, IAmazonDynamoDB client, IBookInventoryRepositoryOptions options)
     {
         this.context = context;
         this.client = client;
-        isPostfix = IsPostFix();
-        tableName = Environment.GetEnvironmentVariable("TABLE_NAME");
+        isPostfix = options.IsPostFix;
+        tableName = options.TableName;
         if (isPostfix)
         {
             Logger.LogInformation($"Postfix environment to query postfix table {tableName}");
@@ -66,7 +66,7 @@ public class BookInventoryRepository : IBookInventoryRepository
         Logger.LogInformation($"ExecutedQuery Response for the partition {bookResponse.Metadata.LastGsiPartition}. Next Page: {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
         
         // Construct output list. Update meta data based on the next page key
-        this.ProcessResults(ref bookResponse, queryResponse, pageSize);
+        this.ProcessResults(ref bookResponse, queryResponse);
         Logger.LogInformation($"ProcessResults Response: Count - {bookResponse.Books.Count} MetaData: {JsonSerializer.Serialize(bookResponse.Metadata)} New Cursor: {bookResponse.Cursor} PageSize: {pageSize}");
         
         if (bookResponse.Books.Count == pageSize)
@@ -100,49 +100,31 @@ public class BookInventoryRepository : IBookInventoryRepository
         int page,
         ListResponse bookResponse)
     {
-        QueryResponse queryResponse;
-
-        queryResponse = await this.ExecuteQuery(
+        var queryResponse = await ExecuteQuery(
             bookResponse,
             page);
 
         // Build the list of books.
-        this.ProcessResults(
+        ProcessResults(
             ref bookResponse,
-            queryResponse,
-            page);
+            queryResponse);
 
-        return bookResponse;
+        return bookResponse; 
     }
 
     [Tracing]
-    private void ProcessResults(ref ListResponse bookResponse, QueryResponse queryResponse, int pageSize)
+    private void ProcessResults(ref ListResponse bookResponse, QueryResponse queryResponse)
     {
         Logger.LogInformation($"Processing results, QueryResponse contains {queryResponse.Items.Count} item(s)");
 
-        // Build the list of books.
-        foreach (var item in queryResponse.Items)
-        {
-            bookResponse.Books.Add(
-                new Book
-                {
-                    BookId = item.AsString("BookId"),
-                    Name = item.AsString("Name"),
-                    Author = item.AsString("Author"),
-                    ISBN = item.AsString("ISBN"),
-                    Publisher = item.AsString("Publisher"),
-                    BookType = item.AsString("BookType"),
-                    Genre = item.AsString("Genre"),
-                    Condition = item.AsString("Condition"),
-                    Price = item.AsDecimal("Price"),
-                    Quantity = item.AsInt("Quantity"),
-                    Summary = item.AsString("Summary"),
-                    Year = item.AsInt("Year"),
-                    CoverImageUrl = item.AsString("CoverImageUrl")
-                });
-        }
-        // If the next page is not available, Reset stored key. Otherwise update the key
-        if (queryResponse.LastEvaluatedKey is null || !queryResponse.LastEvaluatedKey.Any())
+        var documents = queryResponse.Items
+            .Select(Document.FromAttributeMap);
+
+        var books = context.FromDocuments<Book>(documents);
+        
+        bookResponse.Books.AddRange(books);
+        
+        if (queryResponse.LastEvaluatedKey is null || queryResponse.LastEvaluatedKey.Count == 0)
         {
             Logger.LogInformation("End of the partition is reached, Reset cursor");
             bookResponse.Metadata.ResetPartitions(1);
@@ -157,13 +139,14 @@ public class BookInventoryRepository : IBookInventoryRepository
     [Tracing]
     private async Task<QueryResponse> ExecuteQuery(ListResponse bookResponse, int pageSize)
     {
-        Logger.LogInformation($"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and page size of {pageSize}");
-        
-        Dictionary<string, AttributeValue> startKey = null;
-        string keyConditionExpression = "#gsi1pk = :gsi1pk";
-        Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" }};
+        Logger.LogInformation(
+            $"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and page size of {pageSize}");
+
+        Dictionary<string, AttributeValue>? startKey = null;
+        const string keyConditionExpression = "#gsi1pk = :gsi1pk";
+        Dictionary<string, string> listAttributeNames = new(1) { { "#gsi1pk", "GSI1PK" } };
         var attributeValues = new Dictionary<string, AttributeValue>(1);
-        
+
         // Query first page. Skip startkey, GSI1SK and PK (BookId) 
         if (string.IsNullOrWhiteSpace(bookResponse.Metadata.LastGsiPartition))
         {
@@ -179,7 +162,7 @@ public class BookInventoryRepository : IBookInventoryRepository
                 { "BookId", new AttributeValue(bookResponse.Metadata.LastGsiKey) } // for Paritition Key
             };
         }
-        
+
         var queryRequest = new QueryRequest
         {
             TableName = tableName, // Always takes table name from environment variable irrespective of postfix
@@ -187,23 +170,13 @@ public class BookInventoryRepository : IBookInventoryRepository
             ExpressionAttributeNames = listAttributeNames,
             ExpressionAttributeValues = attributeValues,
             IndexName = "GSI1",
-            Limit = (pageSize-bookResponse.Books.Count),
+            Limit = (pageSize - bookResponse.Books.Count),
             ExclusiveStartKey = startKey
         };
-        
-        var queryResponse = await this.client.QueryAsync(queryRequest);
-        Logger.LogInformation($"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and {bookResponse.Metadata.LastGsiKey}. Next key page {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
-        return queryResponse;
-    }
-    
-    private bool IsPostFix()
-    {
-        string isPostFixString = Environment.GetEnvironmentVariable("IS_POSTFIX");
-        if (string.IsNullOrEmpty(isPostFixString) || isPostFixString.ToLower() == "false")
-        {
-            return false;
-        }
 
-        return true;
+        var queryResponse = await this.client.QueryAsync(queryRequest);
+        Logger.LogInformation(
+            $"Executing query for listing books, for {bookResponse.Metadata.LastGsiPartition} and {bookResponse.Metadata.LastGsiKey}. Next key page {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
+        return queryResponse;
     }
 }
