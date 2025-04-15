@@ -9,8 +9,8 @@ using HttpMethod = HttpMethod;
 
 public class Api : RestApi
 {
-    public TokenAuthorizer Authorizer { get; private set; }
-    
+    public RequestAuthorizer Authorizer { get; private set; }
+
     public Api(
         Construct scope,
         string id,
@@ -20,18 +20,18 @@ public class Api : RestApi
         props)
     {
     }
-    
+
     public Api WithCognito(Function authorizerFunction)
     {
-        this.Authorizer = new TokenAuthorizer(this, "CognitoTokenAuthorizer", new TokenAuthorizerProps()
+        this.Authorizer = new RequestAuthorizer(this, "CognitoTokenAuthorizer", new RequestAuthorizerProps()
         {
             AuthorizerName = "cognitotokenauthorizer",
-            IdentitySource = "method.request.header.Authorization",
+            IdentitySources = ["method.request.header.Authorization", "context.httpMethod", "context.path"],
             Handler = authorizerFunction
         });
         return this;
     }
-    
+
     public Api WithEndpoint(string path, HttpMethod method, Function function, bool authorizeApi = true)
     {
         IResource? lastResource = null;

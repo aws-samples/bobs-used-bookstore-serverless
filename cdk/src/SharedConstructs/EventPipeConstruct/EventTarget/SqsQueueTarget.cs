@@ -12,7 +12,7 @@ public class SqsQueueTarget : EventTarget
         this.Queue = queue;
         this.TargetParameters = null;
     }
-    
+
     /// <inheritdoc />
     public override string TargetArn => this.Queue.QueueArn;
 

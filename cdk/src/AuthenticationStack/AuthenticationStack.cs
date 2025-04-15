@@ -58,7 +58,8 @@ public class AuthenticationStack : Stack
                     RequireUppercase = false
                 },
                 AccountRecovery = AccountRecovery.EMAIL_ONLY,
-                RemovalPolicy = RemovalPolicy.DESTROY
+                RemovalPolicy = RemovalPolicy.DESTROY,
+
             });
 
         var userPoolClient = userPool.AddClient(
@@ -90,22 +91,37 @@ public class AuthenticationStack : Stack
                         GivenName = true,
                         FamilyName = true,
                         Email = true
-                    }).WithCustomAttributes(["user_id"])
+                    }).WithCustomAttributes(["user_id"]),
+                OAuth = new OAuthSettings
+                {
+                    Scopes = [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
+                    Flows = new OAuthFlows
+                    {
+                        ImplicitCodeGrant = true,
+                        AuthorizationCodeGrant = true
+                    }
+                },
+                GenerateSecret = false,
+                AccessTokenValidity = Duration.Hours(1),
+                IdTokenValidity = Duration.Hours(1),
+                RefreshTokenValidity = Duration.Hours(1)
             });
 
-        var cfnUserPoolAdminGroup = new CfnUserPoolGroup(this, $"BookStoreAdminGroup{authProps.Postfix}", new CfnUserPoolGroupProps {
+        var cfnUserPoolAdminGroup = new CfnUserPoolGroup(this, $"BookStoreAdminGroup{authProps.Postfix}", new CfnUserPoolGroupProps
+        {
             UserPoolId = userPool.UserPoolId,
             Description = "Bookstore Admin group",
             GroupName = "Admin",
             Precedence = 123,
         });
-        var cfnUserPoolCustomerGroup = new CfnUserPoolGroup(this, $"BookStoreCustomerGroup{authProps.Postfix}", new CfnUserPoolGroupProps {
+        var cfnUserPoolCustomerGroup = new CfnUserPoolGroup(this, $"BookStoreCustomerGroup{authProps.Postfix}", new CfnUserPoolGroupProps
+        {
             UserPoolId = userPool.UserPoolId,
             Description = "Bookstore Buyer",
             GroupName = "Customer",
             Precedence = 124,
         });
-        
+
         var userPoolParameter = new StringParameter(
             this,
             $"UserPoolParameter{authProps.Postfix}",
@@ -118,7 +134,7 @@ public class AuthenticationStack : Stack
         var userPoolClientParameter = new StringParameter(
             this,
             $"UserPoolClientParameter{authProps.Postfix}",
-            new StringParameterProps()
+            new StringParameterProps
             {
                 ParameterName = $"/bookstore/authentication/user-pool-client-id{authProps.Postfix}",
                 StringValue = userPoolClient.UserPoolClientId

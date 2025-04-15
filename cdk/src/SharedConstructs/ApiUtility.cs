@@ -24,8 +24,8 @@ public static class ApiUtility
             }
         };
     }
-    
-    public static APIGatewayCustomAuthorizerResponse UnauthorizedResponse(string message) 
+
+    public static APIGatewayCustomAuthorizerResponse UnauthorizedResponse(string message)
     {
         return new APIGatewayCustomAuthorizerResponse
         {

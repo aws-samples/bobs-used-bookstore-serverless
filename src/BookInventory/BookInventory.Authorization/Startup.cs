@@ -1,5 +1,6 @@
-using Amazon.CognitoIdentityProvider;
+using Amazon.VerifiedPermissions;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
+using BookInventory.Authorization.Utility;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookInventory.Authorization;
@@ -17,7 +18,8 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        AWSSDKHandler.RegisterXRayForAllServices(); ;
-        services.AddAWSService<IAmazonCognitoIdentityProvider>();
+        AWSSDKHandler.RegisterXRayForAllServices();
+        services.AddAWSService<IAmazonVerifiedPermissions>();
+        services.AddScoped<ICognitoJwtVerifier, CognitoJwtVerifier>();
     }
 }

@@ -8,7 +8,7 @@ public abstract class EventTarget
     /// Arn of the target
     /// </summary>
     public abstract string TargetArn { get; }
-    
+
     /// <summary>
     /// Parameters of the target
     /// </summary>

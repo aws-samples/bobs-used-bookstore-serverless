@@ -15,7 +15,7 @@ public class ListBooksApi : Construct
         id)
     {
         this.Function = new LambdaFunction(
-            this, 
+            this,
             $"{Constants.LIST_BOOK_API}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.Api")
             {

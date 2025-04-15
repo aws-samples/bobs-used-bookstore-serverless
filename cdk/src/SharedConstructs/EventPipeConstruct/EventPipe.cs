@@ -10,7 +10,7 @@ using SharedConstructs.EventPipeConstruct.EventTarget;
 public class EventPipe : Construct
 {
     private readonly string _id;
-    
+
     private EventSource.EventSource Source { get; set; }
     private EventTarget.EventTarget Target { get; set; }
 
@@ -20,14 +20,14 @@ public class EventPipe : Construct
     {
         this._id = id;
     }
-    
+
     public EventPipe From(EventSource.EventSource source)
     {
         this.Source = source;
 
         return this;
     }
-    
+
     public EventPipe To(EventTarget.EventTarget target)
     {
         this.Target = target;
@@ -52,7 +52,7 @@ public class EventPipe : Construct
                 (this.Target as WorkflowTarget).Workflow.GrantStartSyncExecution(pipeRole);
                 break;
         }
-        
+
         var pipe = new CfnPipe(
             this,
             $"{this._id}-Pipe",

@@ -25,7 +25,7 @@ The BookInventory microservice utilizes various serverless services from AWS, in
 
 
 ## Prerequisites
-To run and debug the application locally you need the following:
+To build the application you need the following:
 * The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 * A modern IDE, for example [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or [JetBrains Rider](https://www.jetbrains.com/rider/)
 

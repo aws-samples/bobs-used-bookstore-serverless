@@ -17,7 +17,8 @@
         <PackageReference Include="Amazon.Lambda.Annotations" Version="$(AmazonLambdaAnnotations)" />
         <PackageReference Include="AWS.Lambda.Powertools.Metrics" Version="$(AWSLambdaPowertoolsMetrics)" />
         <PackageReference Include="AWS.Lambda.Powertools.Logging" Version="$(AWSLambdaPowertoolsLogging)" />
-        <PackageReference Include="AWS.Lambda.Powertools.Tracing" Version="$(AWSLambdaPowertoolsTracing)" />
+        <PackageReference Include="AWS.Lambda.Powertools.Tracing" Version="$(AWSLambdaPowertoolsTracing)" />        
+        <PackageReference Include="AWSSDK.VerifiedPermissions" Version="$(AWSSDKVerifiedPermissions)" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="$(FluentValidationDependencyInjectionExtensions)" />
         <PackageReference Include="JsonWebToken" Version="$(JsonWebToken)" />
         <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="$(MicrosoftIdentityModelProtocolsOpenIdConnect)" />
@@ -31,7 +32,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\..\..\cdk\src\SharedConstructs\SharedConstructs.csproj" />
+    <ItemGroup>      
+      <ProjectReference Include="..\BookInventory.Common\BookInventory.Common.csproj" />
     </ItemGroup>    
 </Project>

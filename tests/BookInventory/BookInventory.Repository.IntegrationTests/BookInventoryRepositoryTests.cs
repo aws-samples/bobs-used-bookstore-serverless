@@ -16,7 +16,7 @@ public abstract class BookInventoryRepositoryTestBase : IClassFixture<DynamoDbFi
     protected BookInventoryRepositoryTestBase(DynamoDbFixture fixture)
     {
         this.fixture = fixture;
-        
+
         CreateDynamoDbTable(fixture.DynamoDbClient);
     }
 
@@ -66,8 +66,8 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
     private BookInventoryRepository CreateBookInventoryRepository()
     {
         return new BookInventoryRepository(
-            fixture.DynamoDbContext, 
-            fixture.DynamoDbClient, 
+            fixture.DynamoDbContext,
+            fixture.DynamoDbClient,
             new BookInventoryRepositoryTestOptions(TableName, true));
     }
 
@@ -80,38 +80,38 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         result.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task GetByIdAsync_BookExists_ShouldReturnBook()
     {
         var book = new BookBuilder()
             .WithBookId("book-1")
             .Build();
-        
+
         var target = CreateBookInventoryRepository();
 
         await target.SaveAsync(book);
 
         var result = await target.GetByIdAsync("book-1");
-        result.Should().BeEquivalentTo(book, 
+        result.Should().BeEquivalentTo(book,
             options => options.Excluding(b => b.LastUpdated));
-    }   
-    
+    }
+
     [Fact]
     public async Task GetByIdAsync_BookExistsWithOtherBooks_ShouldReturnBook()
     {
         var book1 = new BookBuilder()
             .WithBookId("book-1")
-            .Build();  
-        
+            .Build();
+
         var book2 = new BookBuilder()
             .WithBookId("book-2")
-            .Build();  
-        
+            .Build();
+
         var book3 = new BookBuilder()
             .WithBookId("book-3")
             .Build();
-        
+
         var target = CreateBookInventoryRepository();
 
         await target.SaveAsync(book1);
@@ -119,10 +119,10 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
         await target.SaveAsync(book3);
 
         var result = await target.GetByIdAsync("book-2");
-        result.Should().BeEquivalentTo(book2, 
+        result.Should().BeEquivalentTo(book2,
             options => options.Excluding(b => b.LastUpdated));
     }
-    
+
     [Fact]
     public async Task GetByIdAsync_NoBooksInRepository_ShouldReturnNull()
     {
@@ -132,13 +132,13 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         result.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task GetByIdAsync_BookNOtFound_ShouldReturnNull()
     {
         var otherBook = new BookBuilder()
             .WithBookId("book-other")
-            .Build();  
+            .Build();
 
         var target = CreateBookInventoryRepository();
 
@@ -146,7 +146,7 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         result.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task List_NoItemsInDb_ShouldReturnEmptyList()
     {
@@ -156,7 +156,7 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         result.Books.Should().BeEmpty();
     }
-    
+
     [Fact]
     public async Task List_BooksInDb_ShouldReturnAllBooks()
     {
@@ -185,12 +185,12 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         var result = await target.List();
 
-        result.Books.Should().BeEquivalentTo(new[]{book1, book2, book3}, 
+        result.Books.Should().BeEquivalentTo(new[] { book1, book2, book3 },
             options => options
                 .Excluding(b => b.LastUpdated)
                 .Excluding(b => b.LastUpdatedString));
     }
-    
+
     [Fact]
     public async Task List_BooksInDbUsePaginationCursorStart_ShouldReturnFirstPage()
     {
@@ -219,12 +219,12 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
 
         var result = await target.List(2);
 
-        result.Books.Should().BeEquivalentTo(new[]{book1, book2}, 
+        result.Books.Should().BeEquivalentTo(new[] { book1, book2 },
             options => options
                 .Excluding(b => b.LastUpdated)
                 .Excluding(b => b.LastUpdatedString));
     }
-    
+
     [Fact]
     public async Task List_BooksInDbUsePaginationCursorEndOffirstPage_ShouldReturnSecondPage()
     {
@@ -254,7 +254,7 @@ public class BookInventoryRepositoryTests(DynamoDbFixture fixture) : BookInvento
         var result1 = await target.List(2);
         var result2 = await target.List(2, result1.Cursor);
 
-        result2.Books.Should().BeEquivalentTo(new[]{book3}, 
+        result2.Books.Should().BeEquivalentTo(new[] { book3 },
             options => options
                 .Excluding(b => b.LastUpdated)
                 .Excluding(b => b.LastUpdatedString));
