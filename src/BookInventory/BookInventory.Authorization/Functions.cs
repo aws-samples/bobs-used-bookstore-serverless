@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amazon.Lambda.Core;
@@ -11,7 +10,6 @@ using AWS.Lambda.Powertools.Metrics;
 using AWS.Lambda.Powertools.Tracing;
 using BookInventory.Authorization.Utility;
 using BookInventory.Common;
-using Microsoft.AspNetCore.WebUtilities;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -28,8 +26,9 @@ public class Functions
     private const string COGNITO_USER_POOL_CLIENT_ID = "COGNITO_USER_POOL_CLIENT_ID";
     private const string AWS_REGION = "AWS_REGION";
     private const string POLICY_STORE_ID = "POLICY_STORE_ID";
-    private readonly IAmazonVerifiedPermissions _verifiedPermissions;
-    private readonly ICognitoJwtVerifier _jwtVerifier;
+    private readonly IAmazonVerifiedPermissions verifiedPermissions;
+    private readonly ICognitoJwtVerifier jwtVerifier;
+    private string? policyStoreId;
 
     /// <summary>
     /// Default constructor.
@@ -43,8 +42,9 @@ public class Functions
     /// </remarks>
     public Functions(IAmazonVerifiedPermissions verifiedPermissions, ICognitoJwtVerifier jwtVerifier)
     {
-        _verifiedPermissions = verifiedPermissions;
-        _jwtVerifier = jwtVerifier;
+        this.verifiedPermissions = verifiedPermissions;
+        this.jwtVerifier = jwtVerifier;
+        policyStoreId = Environment.GetEnvironmentVariable(POLICY_STORE_ID);
     }
 
     [LambdaFunction()]
@@ -54,34 +54,20 @@ public class Functions
     public async Task<APIGatewayCustomAuthorizerResponse> BookInventoryAuthorizer(APIGatewayCustomAuthorizerRequest request)
     {
         string token = request.Headers["Authorization"];
-        string? userPoolId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_ID);
-        string? clientId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_CLIENT_ID);
-        string? region = Environment.GetEnvironmentVariable(AWS_REGION);
-        string? policyStoreId = Environment.GetEnvironmentVariable(POLICY_STORE_ID);
-        ClaimsPrincipal claimPrincipal;
+        string cognitoUserName = String.Empty;
         try
         {
-            // Validate Token (AVP does validate token as well, so this step can be skipped 
-            // 1. Retrieve claim
-            claimPrincipal = await _jwtVerifier.ValidateTokenAsync(token, userPoolId, clientId, region);
-
-            // 2. either claimPrincipal is received (not null) or an exception is thrown in case of invalid token
-            if (claimPrincipal is null)
-            {
-                Logger.LogError($"Error occured in Lambda Custom Authorization - Invalid token - {JsonSerializer.Serialize(request)}");
-                return ApiGatewayResponseBuilder.UnauthorizedResponse("Unable to retrieve the claim");
-            }
+            // Extract userName from the claim (AVP does validate token as well, if explicit token validation is needed use method  this.ValidateAndGetUserName
+            cognitoUserName = jwtVerifier.GetUsernameFromToken(token);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"Error occured in Lambda Custom Authorization - Invalid token - {JsonSerializer.Serialize(request)}");
+            Logger.LogError(e, $"Error occured in Lambda Custom Authorization - Invalid token");
             return ApiGatewayResponseBuilder.UnauthorizedResponse(e.Message);
         }
         try
         {
             // AVP - Validate token and policy
-            // Get cognito user name
-            string cognitoUserId = claimPrincipal.Claims.First(t => t.Type == "username").Value;
             string appNamespace = "BookInventoryApi";
             string resourceType = $"{appNamespace}::Application";
             string resourceId = appNamespace;
@@ -108,23 +94,23 @@ public class Functions
                     ContextMap = GetContextMap(request)
                 }
             };
-            Logger.LogInformation($"authRequest: {JsonSerializer.Serialize(authRequest)}");
+            Logger.LogInformation($"Authorization Request for action: {actionId}, resource: {resourceId}, policy store: {policyStoreId}, context: {JsonSerializer.Serialize(authRequest.Context)}");
             
             // Call Verified Permissions
-            var authResponse = await _verifiedPermissions.IsAuthorizedWithTokenAsync(authRequest);
+            var authResponse = await verifiedPermissions.IsAuthorizedWithTokenAsync(authRequest);
 
-            Logger.LogInformation($"Authorization decision for user {cognitoUserId}: {authResponse.Decision} for action {actionId}");
+            Logger.LogInformation($"Authorization decision for user {cognitoUserName}: {authResponse.Decision} for action {actionId}");
 
             if (authResponse.Decision == Decision.ALLOW)
             {
-                return ApiGatewayResponseBuilder.AuthorizedResponse(cognitoUserId, request.MethodArn);
+                return ApiGatewayResponseBuilder.AuthorizedResponse(authResponse.Principal.EntityId, request.MethodArn);
             }
 
             return ApiGatewayResponseBuilder.UnauthorizedResponse("User not authorized to access this resource");
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"Error occured in Lambda Custom Authorization - {JsonSerializer.Serialize(request)}");
+            Logger.LogError(e, $"Error occured in Lambda Custom Authorization");
             return ApiGatewayResponseBuilder.UnauthorizedResponse(e.Message);
         }
     }
@@ -185,5 +171,46 @@ public class Functions
         {
             ["contextMap"] = new AttributeValue { Record = contextMap }
         };
+    }
+
+    /// <summary>
+    /// Use this method to validate the token explicitly
+    /// </summary>
+    /// <param name="token">Token to validate</param>
+    /// <returns>Indicator to check if the token is valid and userName if exists for valid token</returns>
+    private async Task<(bool isValidToken, string userName)> ValidateAndGetUserName(string token)
+    {
+        try
+        {
+            string? userPoolId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_ID);
+            string? clientId = Environment.GetEnvironmentVariable(COGNITO_USER_POOL_CLIENT_ID);
+            string? region = Environment.GetEnvironmentVariable(AWS_REGION);
+
+            var claimPrincipal = await jwtVerifier.ValidateTokenAsync(token, userPoolId, clientId, region);
+
+            // 2. either claimPrincipal is received (not null) or an exception is thrown in case of invalid token
+            if (claimPrincipal is null)
+            {
+                Logger.LogError("Error occured in Lambda Custom Authorization - Invalid token");
+                return (false, string.Empty);
+            }
+
+            var userName = claimPrincipal.Claims.FirstOrDefault(c =>
+                c.Type == "preferred_username" ||
+                c.Type == "email" ||
+                c.Type == "sub")?.Value;
+            if (string.IsNullOrEmpty(userName))
+            {
+                Logger.LogError("Username not found in token claims");
+                return (false, string.Empty);
+            }
+
+            return (true, userName);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error validating token");
+            return (false, string.Empty);
+        }
     }
 }
