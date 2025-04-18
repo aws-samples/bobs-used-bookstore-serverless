@@ -29,11 +29,11 @@ public record ListResponse
             Logger.LogError($"Failure parsing input cursor. Cursor: {cursor} Error Message: {exception.Message}");
             this.Metadata = new QueryMetadata(); // If cursor is altered, search will start from the beginning. Update this logic as per the use case.
         }
-        
+
         Logger.LogInformation("Input metadata:");
         Logger.LogInformation(this.Metadata);
     }
-    
+
     public List<Book> Books { get; set; } = new();
 
     // This cursor based approach is taken from an article by Serverless Hero Yan Cui, on implementing pagination. 
@@ -41,11 +41,11 @@ public record ListResponse
     {
         get
         {
-            return string.IsNullOrWhiteSpace(Metadata.LastGsiPartition)? String.Empty : Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Metadata)));
+            return string.IsNullOrWhiteSpace(Metadata.LastGsiPartition) ? String.Empty : Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Metadata)));
         }
     }
 
-    internal QueryMetadata Metadata  { get; set; } = new();
+    internal QueryMetadata Metadata { get; set; } = new();
 }
 
 public record QueryMetadata()

@@ -23,7 +23,7 @@ public class Functions
     private readonly IAmazonS3 amazonS3Client;
     private const int BookCoverImageWidth = 400;
     private const int BookCoverImageHeight = 600;
-    
+
     /// <summary>
     /// Default constructor.
     /// </summary>
@@ -58,7 +58,7 @@ public class Functions
             ObjectKey = imageValidationRequest.ObjectKey
         };
     }
-    
+
     /// <summary>
     /// Image resize and save in destination bucket
     /// </summary>
@@ -106,9 +106,9 @@ public class Functions
             IsPublishedInDestination = isImageSuccessfullyPublished
         };
     }
-    
-    
-    
+
+
+
     [Logging(LogEvent = true, CorrelationIdPath = CorrelationIdPaths.EventBridge)]
     [Metrics(CaptureColdStart = true)]
     [Tracing(CaptureMode = TracingCaptureMode.Error)]

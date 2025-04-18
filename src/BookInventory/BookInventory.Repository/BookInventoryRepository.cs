@@ -32,9 +32,9 @@ public class BookInventoryRepository : IBookInventoryRepository
     [Tracing]
     public async Task<Book?> GetByIdAsync(string bookId)
     {
-        Logger.LogInformation($"Postfix environment {(isPostfix?"true" :"false")} Table Name to override {tableName}" );
-        return await context.LoadAsync<Book>(bookId, 
-            isPostfix ? 
+        Logger.LogInformation($"Postfix environment {(isPostfix ? "true" : "false")} Table Name to override {tableName}");
+        return await context.LoadAsync<Book>(bookId,
+            isPostfix ?
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = tableName
@@ -46,7 +46,7 @@ public class BookInventoryRepository : IBookInventoryRepository
     public async Task SaveAsync(Book book)
     {
         await context.SaveAsync(book,
-            isPostfix ? 
+            isPostfix ?
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = tableName
@@ -59,22 +59,22 @@ public class BookInventoryRepository : IBookInventoryRepository
     {
         // Extract where to start information from the cursor
         ListResponse bookResponse = new ListResponse(cursor);
-        
+
         // Execute the initial query.
         Logger.LogInformation($"ExecuteQuery for the partition {bookResponse.Metadata.LastDate.ToString("yyyyMM")}");
         var queryResponse = await this.ExecuteQuery(bookResponse, pageSize);
         Logger.LogInformation($"ExecutedQuery Response for the partition {bookResponse.Metadata.LastGsiPartition}. Next Page: {JsonSerializer.Serialize(queryResponse.LastEvaluatedKey)}");
-        
+
         // Construct output list. Update meta data based on the next page key
         this.ProcessResults(ref bookResponse, queryResponse);
         Logger.LogInformation($"ProcessResults Response: Count - {bookResponse.Books.Count} MetaData: {JsonSerializer.Serialize(bookResponse.Metadata)} New Cursor: {bookResponse.Cursor} PageSize: {pageSize}");
-        
+
         if (bookResponse.Books.Count == pageSize)
         {
             Logger.LogInformation("Page size or end of partition is reached, returning from List Api");
             return bookResponse;
         }
-        
+
         // For more data, update Key to look for previous partitions 
         int noDataInPreviousMonth = 0;
         while (bookResponse.Books.Count < pageSize && noDataInPreviousMonth < MAX_MONTHS_TO_CHECK_WITHOUT_DATA) // Check 2 past partitions, if no data, end the search to avoid infinite loop
@@ -109,7 +109,7 @@ public class BookInventoryRepository : IBookInventoryRepository
             ref bookResponse,
             queryResponse);
 
-        return bookResponse; 
+        return bookResponse;
     }
 
     [Tracing]
@@ -121,9 +121,9 @@ public class BookInventoryRepository : IBookInventoryRepository
             .Select(Document.FromAttributeMap);
 
         var books = context.FromDocuments<Book>(documents);
-        
+
         bookResponse.Books.AddRange(books);
-        
+
         if (queryResponse.LastEvaluatedKey is null || queryResponse.LastEvaluatedKey.Count == 0)
         {
             Logger.LogInformation("End of the partition is reached, Reset cursor");

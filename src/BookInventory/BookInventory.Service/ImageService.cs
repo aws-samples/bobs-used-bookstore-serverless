@@ -12,17 +12,17 @@ public class ImageService : IImageService
     private readonly IAmazonRekognition rekognitionClient;
     private readonly IAmazonS3 amazonS3Client;
 
-    private readonly string[] BannedCategories = 
+    private readonly string[] BannedCategories =
     {
-        "Explicit Nudity", 
-        "Suggestive", 
-        "Violence", 
-        "Visually Disturbing", 
-        "Rude Gestures", 
-        "Drugs", 
-        "Tobacco", 
-        "Alcohol", 
-        "Gambling", 
+        "Explicit Nudity",
+        "Suggestive",
+        "Violence",
+        "Visually Disturbing",
+        "Rude Gestures",
+        "Drugs",
+        "Tobacco",
+        "Alcohol",
+        "Gambling",
         "Hate Symbols"
     };
 
@@ -50,7 +50,7 @@ public class ImageService : IImageService
 
         return !result.ModerationLabels.Any(x => BannedCategories.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
     }
-    
+
     public async Task MoveImageToPublish(string bucket, string image)
     {
         string destinationBucket = Environment.GetEnvironmentVariable("PUBLISH_IMAGE_BUCKET");

@@ -16,8 +16,6 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
-using BookInventory.Api.Utility;
-using SharedConstructs;
 using Metrics = AWS.Lambda.Powertools.Metrics.Metrics;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -42,7 +40,7 @@ public class Functions
     private readonly IAmazonS3 s3Client;
     private readonly string bucketName;
     private readonly double expiryDuration = 5;//minutes
-    
+
 
     public Functions(IBookInventoryService bookInventoryService, IValidator<CreateBookDto> createBookValidator, IValidator<UpdateBookDto> updateBookValidator, IAmazonS3 s3Client)
     {
@@ -51,8 +49,7 @@ public class Functions
         this.updateBookValidator = updateBookValidator;
         this.s3Client = s3Client;
         bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME")!;
-        expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION"))? 0: double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
-        
+        expiryDuration = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("EXPIRY_DURATION")) ? 0 : double.Parse(Environment.GetEnvironmentVariable("EXPIRY_DURATION")!);
     }
 
     [LambdaFunction]
@@ -73,7 +70,7 @@ public class Functions
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex,$"Error occured while searching books for criteria {cursor}");
+            Logger.LogError(ex, $"Error occured while searching books for criteria {cursor}");
             return ApiGatewayResponseBuilder.Build(HttpStatusCode.InternalServerError, $"Error occured while searching books for criteria {cursor}");
         }
     }

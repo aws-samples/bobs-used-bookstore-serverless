@@ -22,8 +22,7 @@
         <PackageReference Include="JsonWebToken" Version="$(JsonWebToken)" />
         <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="$(MicrosoftIdentityModelProtocolsOpenIdConnect)" />        
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\..\..\cdk\src\SharedConstructs\SharedConstructs.csproj" />
+    <ItemGroup>      
       <ProjectReference Include="..\BookInventory.Common\BookInventory.Common.csproj" />
       <ProjectReference Include="..\BookInventory.Models\BookInventory.Models.csproj" />
     </ItemGroup>

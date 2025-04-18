@@ -22,10 +22,11 @@ The BookInventory microservice utilizes various serverless services from AWS, in
 - **Amazon S3**
     - **Publish Image bucket** is used to store all the validated and resized images that can be used in the frontend application. After the images are published to this bucket, the original images are typically deleted from the source location. This helps optimize storage and reduce costs. CloudFront is used to expose the published images from the S3 bucket to the frontend application.
 - **Amazon DynamoDB** table is used to store BookInventory microservice data.
+- **Amazon Verified Permissions** configure authorization policies helps to isolate authorization from application code. 
 
 
 ## Prerequisites
-To run and debug the application locally you need the following:
+To build the application you need the following:
 * The [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 * A modern IDE, for example [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or [JetBrains Rider](https://www.jetbrains.com/rider/)
 
@@ -83,7 +84,7 @@ Follow the steps given below to test BookStore application:
      * Login to aws console. Select Cognito Service and select the user pool
      * Select the user created under the user pool
      * Go to "Group memberships". Add/Remove to the group
-   * Get Id token (Api Gateway Lambda authorizer fetches role information from Id token)
+   * Get Access token (Api Gateway sends access token to Lambda authorizer that internally uses AVP for authorization)
    ```
    aws cognito-idp admin-initiate-auth --cli-input-json file://auth.json
    ```
@@ -103,7 +104,7 @@ Follow the steps given below to test BookStore application:
    **Add Book**
    * It is POST method, 
    * "Customer" is allowed to access
-   * Requires Authorization header with Id token (Do not include any keyword infront of the Id token)
+   * Requires Authorization header with Access token (No need of Bearer keyword for token)
    ````
    POST https://{{api_gateway_url}}/books
    ````   
@@ -127,7 +128,7 @@ Follow the steps given below to test BookStore application:
    **Update Book**
    * It is PUT method
    * "Customer" and "Admin" roles are allowed to access
-   * Requires Authorization header with Id token (Do not include any keyword infront of the Id token)
+   * Requires Authorization header with Access token (No need of Bearer keyword for token)
    ````
    PUT https://{{api_gateway_url}}/books/{id}
    ````   
@@ -168,7 +169,7 @@ Follow the steps given below to test BookStore application:
    **Pre-signed url to upload cover page image to S3 bucket**
    * Add Book id and file name to upload
    * "Customer" role is allowed to access
-   * Requires Authorization header with Id token (Do not include any keyword infront of the Id token)
+   * Requires Authorization header with Access token (No need of Bearer keyword for token)
    ````
    GET https://{{api_gateway_url}}/books/{id}/{fileName}
    ````

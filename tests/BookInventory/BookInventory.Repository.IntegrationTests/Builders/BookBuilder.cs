@@ -18,7 +18,7 @@ public class BookBuilder
     public decimal Price { get; set; }
     public int Quantity { get; set; }
     public string CreatedBy { get; set; }
-    
+
     public BookBuilder()
     {
         BookId = Guid.NewGuid().ToString();
@@ -36,19 +36,19 @@ public class BookBuilder
         CreatedBy = "Test User";
         Quantity = 10;
     }
-    
+
     public Book Build()
     {
         var book = new Book(
             Name, Author, ISBN, Publisher, BookType, Genre, Condition, Price, Quantity, Summary, Year, CoverImageUrl)
-            {
-                BookId = BookId,
-                CreatedBy = CreatedBy
-            };
+        {
+            BookId = BookId,
+            CreatedBy = CreatedBy
+        };
 
         return book;
     }
-    
+
     public BookBuilder WithBookId(string bookId)
     {
         BookId = bookId;

@@ -32,12 +32,12 @@ public class DynamoDbFixture : IDisposable
                 ServiceURL = serviceUrl,
             });
 
-       DynamoDbContext = new DynamoDBContext(DynamoDbClient, new DynamoDBContextConfig
+        DynamoDbContext = new DynamoDBContext(DynamoDbClient, new DynamoDBContextConfig
         {
             DisableFetchingTableMetadata = true
         });
     }
-    
+
     public void Dispose()
     {
         dynamoDbContainer.DisposeAsync().GetAwaiter().GetResult();

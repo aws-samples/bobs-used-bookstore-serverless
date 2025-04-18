@@ -57,7 +57,7 @@ public class FunctionsTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public async Task GetBook_WhenRequestIsInvalid_ShouldRespondBadRequest(string id)
+    public async Task GetBook_WhenRequestIsInvalid_ShouldRespondBadRequest(string? id)
     {
         // Act
         var response = await this.sut.GetBook(id);
@@ -104,7 +104,7 @@ public class FunctionsTests
             Summary = "Sample book"
         };
         A.CallTo(() => this.bookInventoryService.AddBookAsync(book)).Returns(bookId);
-        
+
         // Act
         var response = await this.sut.AddBook(book);
 

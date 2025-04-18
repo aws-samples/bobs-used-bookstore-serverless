@@ -18,16 +18,16 @@ public class Authorizer : Construct
             $"{Constants.AUTHORIZER}{props.PostFix}",
             new LambdaFunctionProps("./src/BookInventory/BookInventory.Authorization")
             {
-                
+
                 Handler = "BookInventory.Authorization::BookInventory.Authorization.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer",
                 Environment = new Dictionary<string, string>
                 {
                     { "POWERTOOLS_SERVICE_NAME", Constants.AUTHORIZER },
                     { "POWERTOOLS_METRICS_NAMESPACE", Constants.AUTHORIZER },
                     { "POWERTOOLS_LOGGER_LOG_EVENT", "true" },
-                    { "REGION",  Stack.Of(this).Region},
                     { "COGNITO_USER_POOL_ID", props.UserPoolId },
-                    { "COGNITO_USER_POOL_CLIENT_ID", props.UserPoolClientId}
+                    { "COGNITO_USER_POOL_CLIENT_ID", props.UserPoolClientId},
+                    { "POLICY_STORE_ID", props.AvpPolicyStoreId }
                 }
             }).Function;
     }

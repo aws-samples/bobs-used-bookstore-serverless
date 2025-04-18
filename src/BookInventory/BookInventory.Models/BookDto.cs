@@ -22,7 +22,7 @@
             this.Summary = book.Summary;
             this.Year = book.Year;
         }
-        
+
         public string Author { get; set; }
         public string BookId { get; set; }
         public string BookType { get; set; }

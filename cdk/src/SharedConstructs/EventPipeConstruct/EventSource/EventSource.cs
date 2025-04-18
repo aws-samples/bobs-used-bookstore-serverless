@@ -8,7 +8,7 @@ public abstract class EventSource
     /// Arn of the source
     /// </summary>
     public abstract string SourceArn { get; }
-    
+
     /// <summary>
     /// Source parameters
     /// </summary>

@@ -4,7 +4,7 @@ using SharedConstructs;
 
 namespace BookInventoryApiStack.ImageValidation;
 
-public class ResizeImage  : Construct
+public class ResizeImage : Construct
 {
     public Function Function { get; }
 

@@ -18,7 +18,7 @@ public class SqsQueueSource : EventSource
             }
         };
     }
-    
+
     /// <inheritdoc />
     public override string SourceArn => this.Queue.QueueArn;
 

@@ -19,12 +19,12 @@ public class DynamoDbSource : EventSource
             }
         };
     }
-    
+
     /// <summary>
     /// Sns Arn
     /// </summary>
     public override string SourceArn => this.Table.TableArn;
-    
+
     /// <summary>
     /// Source parameters
     /// </summary>

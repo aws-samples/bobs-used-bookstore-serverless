@@ -119,8 +119,8 @@ public class BookInventoryServiceTests
 
         // Assert
         A.CallTo(() => this.bookInventoryRepository.SaveAsync(
-            A<Book>.That.Matches(x => 
-            //x.BookId == bookId
+            A<Book>.That.Matches(x =>
+             //x.BookId == bookId
              x.Name == updateBook.Name
             && x.Author == updateBook.Author
             && x.ISBN == updateBook.ISBN

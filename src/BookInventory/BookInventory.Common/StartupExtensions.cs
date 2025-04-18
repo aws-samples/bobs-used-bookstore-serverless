@@ -12,10 +12,10 @@ public record SharedServiceOptions(bool SkipAppConfiguration = false, bool SkipR
 
 public static class StartupExtensions
 {
-   public static IServiceCollection AddSharedServices(this IServiceCollection services, SharedServiceOptions? options = null)
+    public static IServiceCollection AddSharedServices(this IServiceCollection services, SharedServiceOptions? options = null)
     {
         AWSSDKHandler.RegisterXRayForAllServices(); ;
-        
+
         if (options is null)
         {
             options = new SharedServiceOptions();
@@ -41,7 +41,7 @@ public static class StartupExtensions
         var config = new ConfigurationBuilder()
             .AddEnvironmentVariables()
             .Build();
-        
+
         services.AddSingleton<IConfiguration>(config);
 
         return services;

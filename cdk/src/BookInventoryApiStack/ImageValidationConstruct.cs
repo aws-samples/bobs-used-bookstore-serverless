@@ -51,9 +51,9 @@ internal class ImageValidationConstruct : Construct
                     MaxAge = 300
                 }
             ],
-            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
+            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix) ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });
-        
+
         // CloudFront Distribution to use images in published bucket
         var oai = new OriginAccessIdentity(this, $"BookInventory-OAI{props.PostFix}");
         bookInventoryPublishBucket.GrantRead(oai);
@@ -88,7 +88,7 @@ internal class ImageValidationConstruct : Construct
 
         var bookInventoryServiceStackProps = new BookInventoryServiceStackProps(props.PostFix);
         bookInventoryServiceStackProps.PublishBucketName = bookInventoryPublishBucket.BucketName;
-        
+
         var validateImageLambda = new ValidateImage(
             this,
             $"{Constants.VALIDATE_IMAGE}-Step{props.PostFix}",
@@ -105,7 +105,7 @@ internal class ImageValidationConstruct : Construct
             .Function;
         props.ImageBucket.GrantRead(resizeImageLambda.Role!);
         bookInventoryPublishBucket.GrantReadWrite(resizeImageLambda.Role!);
-        
+
         var validateImageLambdaInvoke = new LambdaInvoke(this, $"{Constants.VALIDATE_IMAGE}{props.PostFix}", new LambdaInvokeProps()
         {
             LambdaFunction = validateImageLambda,
@@ -114,16 +114,16 @@ internal class ImageValidationConstruct : Construct
                 new Dictionary<string, object>
                 {
                     {
-                        "bucketName.$","$.detail.bucket.name" 
+                        "bucketName.$","$.detail.bucket.name"
                     },
                     {
-                        "objectKey.$","$.detail.object.key" 
+                        "objectKey.$","$.detail.object.key"
                     }
                 }),
             InputPath = "$",
             ResultPath = "$.imageValidationResponse"
         });
-        
+
         var imageResizeLambdaInvoke = new LambdaInvoke(this, $"{Constants.RESIZE_IMAGE}{props.PostFix}", new LambdaInvokeProps()
         {
             LambdaFunction = resizeImageLambda,
@@ -132,38 +132,38 @@ internal class ImageValidationConstruct : Construct
                 new Dictionary<string, object>
                 {
                     {
-                        "bucketName.$","$.detail.bucket.name" 
+                        "bucketName.$","$.detail.bucket.name"
                     },
                     {
-                        "objectKey.$","$.detail.object.key" 
+                        "objectKey.$","$.detail.object.key"
                     }
                 }),
             InputPath = "$",
             ResultPath = "$.imageResizeResponse"
         });
-        
+
         var successStep = new Succeed(this, $"Image-validation-workflow-Successful{props.PostFix}");
         var failureStep = new Fail(this, $"Image-validation-workflow-Fails{props.PostFix}");
         var chain = Chain
             .Start(
                 new Choice(this, $"Image-Size-Check{props.PostFix}", new ChoiceProps
-                    {
-                        InputPath = "$"
-                    })
+                {
+                    InputPath = "$"
+                })
                     .When(Condition.NumberLessThanEquals("$.detail.object.size", 0), successStep)
                     .Otherwise(validateImageLambdaInvoke
                         .Next(
                             new Choice(this, $"Image-Safe-Check{props.PostFix}", new ChoiceProps
-                                {
-                                    InputPath = "$"
-                                })
+                            {
+                                InputPath = "$"
+                            })
                                 .When(Condition.BooleanEquals("$.imageValidationResponse.Payload.isImageSafe", false),
                                     failureStep)
                                 .Otherwise(imageResizeLambdaInvoke
                                     .Next(new Choice(this, $"Image-Resize-Check{props.PostFix}", new ChoiceProps
-                                        {
-                                            InputPath = "$"
-                                        }).When(
+                                    {
+                                        InputPath = "$"
+                                    }).When(
                                             Condition.BooleanEquals(
                                                 "$.imageResizeResponse.Payload.isPublishedInDestination", false),
                                             failureStep)
@@ -182,15 +182,15 @@ internal class ImageValidationConstruct : Construct
                                         }).Next(successStep))
                                     )
                                 ))));
-        
+
         var imageValidationWorkflow = new StateMachine(this, $"ImageValidationStateMachine{props.PostFix}", new StateMachineProps()
         {
             DefinitionBody = DefinitionBody.FromChainable(chain),
             StateMachineName = $"BookInventory-ImageValidation{props.PostFix}",
             TracingEnabled = true,
-            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix)? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
+            RemovalPolicy = string.IsNullOrWhiteSpace(props.PostFix) ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY // Destroy in postfix environment
         });
-        
+
         // Create Event Rule in Default - Event Bus (Only Default Bus can receive events from AWS Services) 
         var eventRule = new Rule(this, $"BookInventoryImageUpload-Rule{props.PostFix}", new RuleProps()
         {
@@ -201,7 +201,7 @@ internal class ImageValidationConstruct : Construct
             {
                 Source = ["aws.s3"],
                 DetailType = ["Object Created"],
-                Detail =  new Dictionary<string, object>()
+                Detail = new Dictionary<string, object>()
                 {
                     {
                         "bucket", new Dictionary<string, object>()
