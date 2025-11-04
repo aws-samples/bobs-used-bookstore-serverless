@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Aspire_Authorizer": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./BookInventory.Authorization.deps.json --runtimeconfig ./BookInventory.Authorization.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.11.0/amazon.lambda.testtool/0.11.0/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll BookInventory.Authorization::BookInventory.Authorization.Functions_BookInventoryAuthorizer_Generated::BookInventoryAuthorizer",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    }
+  }
+}

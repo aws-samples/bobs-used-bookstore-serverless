@@ -175,6 +175,83 @@ Follow the steps given below to test BookStore application:
    ````
    
 3. Upload .png/.jpg image to S3 using pre-signed url. After validation, it will be moved to published image bucket. It can be accessed through cloudFront
+
+## Local Testing with Aspire
+
+For local development and testing, you can use .NET Aspire to run Lambda functions locally while connecting to real AWS services.
+
+### Prerequisites for Local Testing
+- [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview)
+- AWS CLI configured with credentials
+- DynamoDB table and other dependant AWS resources are provisioned in AWS
+- Update DynamoDB table name and other environment variables for lamba function testing in BobsBookStore.AppHost/AppHost.cs. Capture all environment variabled that are required for the lambda function  
+
+### Setup Instructions
+
+1. **Refresh AWS Credentials**   
+2. **Start Local Testing**
+   ```bash
+   dotnet run --project BobsBookStore.AppHost/BobsBookStore.AppHost.csproj --configuration Debug --launch-profile http
+   ```
+
+4. **Access Aspire Dashboard**
+   - Open the dashboard URL shown in the console output
+   - View and test all Lambda functions through the dashboard ![img_1.png](img_1.png)
+   - Monitor logs and metrics in real-time. Console section for each Lambda function, provides logs from the function to debug
+   - Launch the lambda function test tool from the dashboard ![img_2.png](img_2.png)
+   - Choose applicable input type for Lambda function to test
+   - In this sample application, Lambda functions are integrated with API gateway. So choose "API Gateway AWS Proxy" 
+
+### Sample input format to test Lambda Functions
+- **ListBooks** -  
+   ````
+  {
+      "body": null,
+      "resource": "/books",
+      "path": "/books",
+      "httpMethod": "GET",
+      "queryStringParameters": {
+        "pageSize": "10"    
+      },  
+      "pathParameters": null,
+      "stageVariables": null,
+      "headers": {
+        "Accept": "application/json",
+        "Host": "222j6ua9y6.execute-api.us-east-1.amazonaws.com",
+        "User-Agent": "Custom User Agent String",
+        "X-Forwarded-For": "127.0.0.1",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https"
+      },
+      "requestContext": {
+        "accountId": "123456789012",
+        "resourceId": "123456",
+        "stage": "prod",
+        "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+        "identity": {
+          "cognitoIdentityPoolId": null,
+          "accountId": null,
+          "cognitoIdentityId": null,
+          "caller": null,
+          "apiKey": null,
+          "sourceIp": "127.0.0.1",
+          "cognitoAuthenticationType": null,
+          "cognitoAuthenticationProvider": null,
+          "userArn": null,
+          "userAgent": "Custom User Agent String",
+          "user": null
+        },
+        "resourcePath": "/books",
+        "httpMethod": "GET",
+        "apiId": "222j6ua9y6"
+      }
+    }
+   ````
+- **Test other Lambda Functions** - Update the sample input with required body, path, httpMethod, queryStringParameters, pathParameters and resourcePath. Authorization Lambda function requires token in "Authorization" key in request headers 
+
+### Testing Notes
+- All Lambda functions run locally but connect to real AWS DynamoDB and services
+- Use the Aspire dashboard for comprehensive testing and monitoring
    
 ## Deleting the resources
 

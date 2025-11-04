@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Repository.In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory.Authorization", "src\BookInventory\BookInventory.Authorization\BookInventory.Authorization.csproj", "{89EB24BC-2560-47EB-9D35-C65C0B267832}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BobsBookStore.AppHost", "BobsBookStore.AppHost\BobsBookStore.AppHost.csproj", "{4DD4D382-0BAF-4400-8AA4-D9219A13405B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,5 +102,9 @@ Global
 		{89EB24BC-2560-47EB-9D35-C65C0B267832}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89EB24BC-2560-47EB-9D35-C65C0B267832}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89EB24BC-2560-47EB-9D35-C65C0B267832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DD4D382-0BAF-4400-8AA4-D9219A13405B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DD4D382-0BAF-4400-8AA4-D9219A13405B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DD4D382-0BAF-4400-8AA4-D9219A13405B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD4D382-0BAF-4400-8AA4-D9219A13405B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Sdk Name="Aspire.AppHost.Sdk" Version="9.3.1"/>
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>61fb6150-9547-41e7-8871-c3ef099f3a40</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1"/>
+        <PackageReference Include="Aspire.Hosting.AWS" Version="9.3.0" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.406.17" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\BookInventory\BookInventory.Api\BookInventory.Api.csproj" />
+      <ProjectReference Include="..\src\BookInventory\BookInventory.Authorization\BookInventory.Authorization.csproj" />
+    </ItemGroup>
+
+</Project>
