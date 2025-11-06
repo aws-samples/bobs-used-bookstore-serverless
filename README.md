@@ -9,7 +9,7 @@ In this dotnet modernization sample, microservices are identified as the first s
 
 The BookInventory microservice utilizes various serverless services from AWS, including AWS Lambda, Amazon API Gateway, Amazon DynamoDB, Amazon S3 buckets, and Step Functions. Amazon Cognito is integrated with the API Gateway using a Custom Lambda authorizer to verify if the requester has the necessary roles to access the endpoint.
 
-![img.png](img.png)
+![ApplicationArchitecture.png](ApplicationArchitecture.png)
 
 - **AWS Lambda** - Lambda functions are built with [Lambda Annotation Framework](https://aws.amazon.com/blogs/developer/net-lambda-annotations-framework/) and [Lambda power tools](https://docs.powertools.aws.dev/lambda/dotnet/). Implemented Lambda functions demonstrates patterns to use CloudWatch for logging, XRay for Tracing and Custom metrics. Lambda function interacts with Amazon DynamoDB for storing data.
     - **ListBook and SearchBook** APIs can be used by Admin, Customer and by anonymous users.
@@ -196,9 +196,10 @@ For local development and testing, you can use .NET Aspire to run Lambda functio
 
 4. **Access Aspire Dashboard**
    - Open the dashboard URL shown in the console output
-   - View and test all Lambda functions through the dashboard ![img_1.png](img_1.png)
+   - View and test all Lambda functions through the dashboard ![AspireDashboard.png](AspireDashboard.png)
    - Monitor logs and metrics in real-time. Console section for each Lambda function, provides logs from the function to debug
-   - Launch the lambda function test tool from the dashboard ![img_2.png](img_2.png)
+   - In the IDE, attach BookInventory processes for debugging. Keep breakpoint wherever required
+   - Launch the lambda function test tool from the dashboard ![LambdaTestTool.png](LambdaTestTool.png)
    - Choose applicable input type for Lambda function to test
    - In this sample application, Lambda functions are integrated with API gateway. So choose "API Gateway AWS Proxy" 
 
