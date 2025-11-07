@@ -1,0 +1,28 @@
+{
+  "profiles": {
+    "Aspire_ListBooks": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./BookInventory.Api.deps.json --runtimeconfig ./BookInventory.Api.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.11.0/amazon.lambda.testtool/0.11.0/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll BookInventory.Api::BookInventory.Api.Functions_ListBooks_Generated::ListBooks",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_GetBook": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./BookInventory.Api.deps.json --runtimeconfig ./BookInventory.Api.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.11.0/amazon.lambda.testtool/0.11.0/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll BookInventory.Api::BookInventory.Api.Functions_GetBook_Generated::GetBook",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_AddBook": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./BookInventory.Api.deps.json --runtimeconfig ./BookInventory.Api.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.11.0/amazon.lambda.testtool/0.11.0/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll BookInventory.Api::BookInventory.Api.Functions_AddBook_Generated::AddBook",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    },
+    "Aspire_UpdateBook": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./BookInventory.Api.deps.json --runtimeconfig ./BookInventory.Api.runtimeconfig.json $(HOME)/.dotnet/tools/.store/amazon.lambda.testtool/0.11.0/amazon.lambda.testtool/0.11.0/content/Amazon.Lambda.RuntimeSupport/net8.0/Amazon.Lambda.RuntimeSupport.dll BookInventory.Api::BookInventory.Api.Functions_UpdateBook_Generated::UpdateBook",
+      "workingDirectory": "./bin/$(Configuration)/net8.0"
+    }
+  }
+}
