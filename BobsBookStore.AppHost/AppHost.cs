@@ -29,6 +29,13 @@ var updateBookFunction = builder.AddAWSLambdaFunction<Projects.BookInventory_Api
     .WithEnvironment("POWERTOOLS_SERVICE_NAME", "BookInventory")
     .WithEnvironment("POWERTOOLS_METRICS_NAMESPACE", "BookInventory");
 
+// Presigned URL 
+var preSignedUrlFunction = builder.AddAWSLambdaFunction<Projects.BookInventory_Api>(name: "PreSignedUrl",
+        lambdaHandler: "BookInventory.Api::BookInventory.Api.Functions_GetCoverPageUpload_Generated::GetCoverPageUpload")
+    .WithEnvironment("TABLE_NAME", "BookInventory")
+    .WithEnvironment("POWERTOOLS_SERVICE_NAME", "BookInventory")
+    .WithEnvironment("POWERTOOLS_METRICS_NAMESPACE", "BookInventory");
+
 // Authorizer Lambda
 var authorizerFunction = builder.AddAWSLambdaFunction<Projects.BookInventory_Authorization>(name: "Authorizer",
     lambdaHandler:
